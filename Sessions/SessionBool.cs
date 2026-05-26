@@ -1,0 +1,109 @@
+#region Copyright
+
+// Game-Data-Forge Solution
+// Written by CONTART Jean-François & BOULOGNE Quentin
+// DMBServerHelper.csproj SessionBool.cs create at 2026/04/07 21:04:27
+// ©2024-2026 idéMobi SARL FRANCE
+
+#endregion
+
+#region
+
+using Microsoft.AspNetCore.Http;
+
+#endregion
+
+namespace DMBServerHelper
+{
+    /// <summary>
+    ///     Represents a boolean session variable definition.
+    /// </summary>
+    public class SessionBool : SessionDefinition
+    {
+        #region Static methods
+
+        /// <summary>
+        ///     Returns the session definition for the specified name.
+        /// </summary>
+        /// <param name="name">The name of the session definition.</param>
+        /// <returns>The session definition with the specified name, or null if not found.</returns>
+        public static SessionBool? GetSessionDefinition(string name)
+        {
+            SessionBool? result = null;
+            if (SessionGlobal.KDictionary.ContainsKey(name))
+            {
+                result = (SessionBool)SessionGlobal.KDictionary[name];
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Instance constructors and destructors
+
+        /// <summary>
+        ///     Represents a boolean session variable definition.
+        /// </summary>
+        public SessionBool(
+            string name,
+            string title,
+            string description,
+            SessionDefinitionGroup group,
+            bool defaultValue,
+            bool deletable = false,
+            bool manualEditable = false
+        )
+        {
+            Kind = SessionDefinitionKind.BoolKind;
+            Name = SpaceCleaner(name);
+            Title = title;
+            Explication = description;
+            Group = group;
+            DefaultValue = defaultValue.ToString();
+            Deletable = deletable;
+            ManualEditable = manualEditable;
+            if (SessionGlobal.KDictionary.ContainsKey(Name))
+            {
+                SessionGlobal.KDictionary[Name] = this;
+            }
+            else
+            {
+                SessionGlobal.KDictionary.TryAdd(Name, this);
+            }
+        }
+
+        #endregion
+
+        #region Instance methods
+
+        /// <summary>
+        ///     Gets the value of the session variable.
+        /// </summary>
+        /// <param name="httpContext">The HttpContext object to access the session.</param>
+        /// <returns>The boolean value of the session variable.</returns>
+        public bool GetValue(HttpContext? httpContext)
+        {
+            bool result = bool.Parse(DefaultValue);
+            string? value = _GetValue(httpContext);
+            if (string.IsNullOrEmpty(value) == false)
+            {
+                bool.TryParse(value, out result);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     Sets the value of the session to the specified boolean value.
+        /// </summary>
+        /// <param name="httpContext">The HttpContext object representing the current HTTP request.</param>
+        /// <param name="value">The boolean value to set.</param>
+        public void SetValue(HttpContext? httpContext, bool value)
+        {
+            _SetValue(httpContext, value.ToString());
+        }
+
+        #endregion
+    }
+}

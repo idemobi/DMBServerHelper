@@ -1,0 +1,196 @@
+#region Copyright
+
+// Game-Data-Forge Solution
+// Written by CONTART Jean-François & BOULOGNE Quentin
+// DMBServerHelper.csproj CookieEnum.cs create at 2026/04/07 21:04:27
+// ©2024-2026 idéMobi SARL FRANCE
+
+#endregion
+
+#region
+
+using System.Globalization;
+using Microsoft.AspNetCore.Http;
+
+#endregion
+
+namespace DMBServerHelper
+{
+    /// <summary>
+    ///     Represents a cookie definition for an enumeration type value.
+    /// </summary>
+    /// <typeparam name="T">The enumeration type</typeparam>
+    public class CookieEnum<T> : CookieDefinition where T : Enum
+    {
+        #region Static methods
+
+        /// <summary>
+        ///     Retrieves the cookie definition for a given name.
+        /// </summary>
+        /// <param name="name">The name of the cookie definition.</param>
+        /// <returns>The cookie definition if found, null otherwise.</returns>
+        public static CookieEnum<T>? GetCookieDefinition(string name)
+        {
+            CookieEnum<T>? result = null;
+            if (CookieGlobal.KDictionary.ContainsKey(name))
+            {
+                result = (CookieEnum<T>)CookieGlobal.KDictionary[name];
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Instance fields and properties
+
+        /// <summary>
+        ///     Represents a cookie definition for an enumeration type.
+        /// </summary>
+        /// <typeparam name="T">The enumeration type.</typeparam>
+        private Type _EnumType;
+
+        #endregion
+
+        #region Instance constructors and destructors
+
+        /// <summary>
+        ///     Represents a cookie with an enumerated value.
+        /// </summary>
+        public CookieEnum(
+            string name,
+            string title,
+            string description,
+            CookieDefinitionGroup group,
+            T defaultValue,
+            bool deletable = true,
+            bool manualEditable = true,
+            int duration = 365,
+            bool autoRenew = false,
+            bool secure = true,
+            SameSiteMode limitSite = SameSiteMode.None
+        )
+        {
+            _EnumType = typeof(T);
+            Kind = CookieDefinitionKind.EnumKind;
+            Name = SpaceCleaner(name);
+            Title = title;
+            Explication = description;
+            Group = group;
+            Duration = duration;
+            DefaultValue = defaultValue.ToString();
+            LimitSite = limitSite;
+            Secure = secure;
+            AutoRenew = autoRenew;
+            Deletable = deletable;
+            ManualEditable = manualEditable;
+            if (group == CookieDefinitionGroup.Functional || group == CookieDefinitionGroup.Consent)
+            {
+                Deletable = false;
+                ManualEditable = false;
+            }
+
+            if (CookieGlobal.KDictionary.ContainsKey(Name))
+            {
+                CookieGlobal.KDictionary[Name] = this;
+            }
+            else
+            {
+                CookieGlobal.KDictionary.TryAdd(Name, this);
+            }
+        }
+
+        #endregion
+
+        #region Instance methods
+
+        /// <summary>
+        ///     Generates a string representation of the cookie data based on the given value.
+        /// </summary>
+        /// <param name="value">The value to set for the cookie.</param>
+        /// <returns>A formatted string representing the cookie data.</returns>
+        public string GenerateCookieDataString(T value)
+        {
+            return _GenerateCookieDataString(value.ToString());
+        }
+
+        /// <summary>
+        ///     Generates an "onclick" JavaScript code that sets the value of the specified cookie.
+        /// </summary>
+        /// <param name="value">The value to set for the cookie.</param>
+        /// <returns>The generated JavaScript code.</returns>
+        public string GenerateOnClick(T value)
+        {
+            return _GenerateOnClick(value.ToString());
+        }
+
+        /// <summary>
+        ///     Retrieves the value of the specified cookie.
+        /// </summary>
+        /// <typeparam name="T">The enumeration type for the cookie value.</typeparam>
+        /// <param name="httpContext">The HttpContext object.</param>
+        /// <returns>The value of the cookie as an enumeration.</returns>
+        public T GetValue(HttpContext? httpContext)
+        {
+            T result = (T)Enum.Parse(typeof(T), DefaultValue);
+            string? value = _GetValue(httpContext);
+            if (string.IsNullOrEmpty(value) == false)
+            {
+                result = (T)Enum.Parse(typeof(T), value);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     Generates the raw HTML form for manually editing the enum cookie.
+        /// </summary>
+        /// <param name="httpContext">The HttpContext object.</param>
+        /// <returns>The raw HTML form for the enum cookie definition.</returns>
+        public override string RawForm(HttpContext? httpContext)
+        {
+            string resultJavascript = "document.cookie = '" + Name + "='+this.value+'; SameSite=" + LimitSite.ToString() + "; Path=/; expires=" + DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT";
+            if (Secure == true)
+            {
+                resultJavascript = resultJavascript + "; Secure";
+            }
+
+            resultJavascript = resultJavascript + "';";
+
+
+            string result = "<!-- " + nameof(CookieEnum<T>) + " RawForm-->";
+            if (ManualEditable)
+            {
+                T value = GetValue(httpContext);
+                result = result + "<select class=\"btn-primary form-select form-select-lg\" onchange=\"" + resultJavascript + ";window.location.reload();\"> ";
+                foreach (T enumValue in Enum.GetValues(typeof(T)))
+                {
+                    if (value.ToString() == enumValue.ToString())
+                    {
+                        result = result + "<option value=\"" + enumValue.ToString() + "\" selected>" + enumValue.ToString() + "</option>";
+                    }
+                    else
+                    {
+                        result = result + "<option value=\"" + enumValue.ToString() + "\">" + enumValue.ToString() + "</option>";
+                    }
+                }
+
+                result = result + "</select>";
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     Sets the value of the cookie.
+        /// </summary>
+        /// <param name="httpContext">The HttpContext used to set the cookie value.</param>
+        /// <param name="value">The value to set.</param>
+        public void SetValue(HttpContext? httpContext, T value)
+        {
+            _SetValue(httpContext, value.ToString());
+        }
+
+        #endregion
+    }
+}

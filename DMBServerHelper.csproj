@@ -1,0 +1,161 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+    <PropertyGroup>
+        <RootNamespace>DMBServerHelper</RootNamespace>
+        <Title>DMBServerHelper</Title>
+        <PackageTags>idemobi Server Helper</PackageTags>
+        <Description>DMBServerHelper</Description>
+        <PackageReleaseNotes>note</PackageReleaseNotes>
+        <PackageIcon>DMBServerHelper.png</PackageIcon>
+        <AssemblyOriginatorKeyFile>DMBServerHelper.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <EnableDefaultRazorGenerateItems>true</EnableDefaultRazorGenerateItems>
+        <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+        <IncludeRazorContentInPack>false</IncludeRazorContentInPack>
+        <EmbedRazorGenerateSources>false</EmbedRazorGenerateSources>
+        <LangVersion>default</LangVersion>
+        <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+        <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+        <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+        <RunAnalyzers>true</RunAnalyzers>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <SignAssembly>true</SignAssembly>
+        <PublicSign>true</PublicSign>
+        <Configurations>Debug;Release;NuGet</Configurations>
+        <Platforms>AnyCPU</Platforms>
+        <BuildDate>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildDate>
+        <Version>0.9.0</Version>
+        <FileVersion>0.9.0.0</FileVersion>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <Company>idéMobi</Company>
+        <Authors>Jean-François CONTART and Quentin BOULOGNE</Authors>
+        <Copyright>Copyright © $(Company) $([System.DateTime]::UtcNow.ToString("yyyy"))</Copyright>
+        <NeutralLanguage>en</NeutralLanguage>
+        <PackageProjectUrl>https://dev.azure.com/Game-Data-Forge/Game-Data-Forge</PackageProjectUrl>
+        <PackageLicenseUrl>https://dev.azure.com/Game-Data-Forge/Game-Data-Forge/_git/Game-Data-Forge?path=/LICENCE.md</PackageLicenseUrl>
+        <RepositoryUrl>https://Game-Data-Forge@dev.azure.com/Game-Data-Forge/Game-Data-Forge/_git/Game-Data-Forge</RepositoryUrl>
+        <RepositoryType>AzureDevOps</RepositoryType>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <GenerateAssemblyMetadataAttribute>true</GenerateAssemblyMetadataAttribute>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DefineConstants>RELEASE</DefineConstants>
+        <DefineConstants/>
+        <DocumentationFile>bin\Release\net10.0\DMBServerHelper.xml</DocumentationFile>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DefineConstants>DEBUG</DefineConstants>
+        <DocumentationFile>bin\Debug\net10.0\DMBServerHelper.xml</DocumentationFile>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'NuGet' ">
+        <DefineConstants>NUGET</DefineConstants>
+        <Optimize>true</Optimize>
+        <DocumentationFile>bin\NuGet\net10.0\DMBServerHelper.xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    <ItemGroup Label="Import package">
+        <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.5.3" />
+        <PackageReference Include="Azure.Identity" Version="1.21.0" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.8" />
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+    </ItemGroup>
+    <ItemGroup Label="Files in package">
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="DMBServerHelper.png" Pack="true" PackagePath="\"/>
+        <None Remove="**/*.meta"/>
+        <Compile Update="Resources\DataAnnotationLocalization.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>DataAnnotationLocalization.resx</DependentUpon>
+        </Compile>
+        <Compile Update="Resources\InternalLocalization.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>InternalLocalization.resx</DependentUpon>
+        </Compile>
+        <Compile Update="Resources\DMBServerHelperInternalLocalization.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>DMBServerHelperInternalLocalization.resx</DependentUpon>
+        </Compile>
+        <Compile Update="Resources\DMBServerHelperDataAnnotationLocalization.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>DMBServerHelperDataAnnotationLocalization.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
+    <ItemGroup Condition=" '$(Configuration)' == 'Debug' " Label="Razor Generator">
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.8" />
+        <Content Update="Views\*">
+            <Generator>RazorGenerator</Generator>
+        </Content>
+    </ItemGroup>
+    <ItemGroup Label="EmbeddedResource">
+        <Content Remove="wwwroot\**\*"/>
+        <EmbeddedResource Include="wwwroot\**\*" />
+        <EmbeddedResource Update="Resources\InternalLocalization.en-US.resx">
+            <DependentUpon>InternalLocalization.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\InternalLocalization.fr-FR.resx">
+            <DependentUpon>InternalLocalization.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\DataAnnotationLocalization.en-US.resx">
+            <DependentUpon>DataAnnotationLocalization.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\DataAnnotationLocalization.fr-FR.resx">
+            <DependentUpon>DataAnnotationLocalization.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\InternalLocalization.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>DMBServerHelperInternalLocalization.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\DataAnnotationLocalization.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>DMBServerHelperDataAnnotationLocalization.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\DMBServerHelperDataAnnotationLocalization.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>DMBServerHelperDataAnnotationLocalization.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\DMBServerHelperInternalLocalization.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>DMBServerHelperInternalLocalization.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\DMBServerHelperInternalLocalization.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>DMBServerHelperInternalLocalization.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\DMBServerHelperDataAnnotationLocalization.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>DMBServerHelperDataAnnotationLocalization.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+    <ItemGroup Label="Localization">
+        <Compile Update="Resources\DMBServerHelperDataAnnotationLocalization.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>DMBServerHelperDataAnnotationLocalization.resx</DependentUpon>
+        </Compile>
+        <EmbeddedResource Update="Resources\DMBServerHelperDataAnnotationLocalization.resx">
+            <Generator>PublicResXFileCodeGenerator</Generator>
+            <LastGenOutput>DMBServerHelperDataAnnotationLocalization.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <Compile Update="Resources\DMBServerHelperInternalLocalization.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>DMBServerHelperInternalLocalization.resx</DependentUpon>
+        </Compile>
+        <EmbeddedResource Update="Resources\DMBServerHelperInternalLocalization.resx">
+            <Generator>PublicResXFileCodeGenerator</Generator>
+            <LastGenOutput>DMBServerHelperInternalLocalization.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="NuGetMe.sh" />
+    </ItemGroup>
+</Project>
