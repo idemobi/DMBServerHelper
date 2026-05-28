@@ -47,7 +47,6 @@ namespace DMBServerHelper
         /// <summary>
         ///     Represents a cookie definition for an enumeration type.
         /// </summary>
-        /// <typeparam name="T">The enumeration type.</typeparam>
         private Type _EnumType;
 
         #endregion
@@ -57,6 +56,21 @@ namespace DMBServerHelper
         /// <summary>
         ///     Represents a cookie with an enumerated value.
         /// </summary>
+        /// <param name="name">The cookie name. Whitespace is removed before registration.</param>
+        /// <param name="title">The human-readable cookie title.</param>
+        /// <param name="description">The human-readable cookie explanation.</param>
+        /// <param name="group">The cookie purpose group.</param>
+        /// <param name="defaultValue">The default enum value used when the cookie is absent.</param>
+        /// <param name="deletable">A value indicating whether the cookie may be deleted by bulk deletion helpers.</param>
+        /// <param name="manualEditable">A value indicating whether raw form rendering may expose a manual editor.</param>
+        /// <param name="duration">The duration value assigned to <see cref="CookieDefinition.Duration"/>.</param>
+        /// <param name="autoRenew">A value indicating whether reads should renew the cookie.</param>
+        /// <param name="secure">A value indicating whether the cookie should be marked secure.</param>
+        /// <param name="limitSite">The SameSite policy used when writing the cookie.</param>
+        /// <remarks>
+        ///     Functional and consent cookies are forced to be non-deletable and non-manually editable.
+        ///     The definition is registered in <see cref="CookieGlobal.KDictionary"/> under the sanitized name.
+        /// </remarks>
         public CookieEnum(
             string name,
             string title,
@@ -127,7 +141,6 @@ namespace DMBServerHelper
         /// <summary>
         ///     Retrieves the value of the specified cookie.
         /// </summary>
-        /// <typeparam name="T">The enumeration type for the cookie value.</typeparam>
         /// <param name="httpContext">The HttpContext object.</param>
         /// <returns>The value of the cookie as an enumeration.</returns>
         public T GetValue(HttpContext? httpContext)

@@ -87,6 +87,13 @@ namespace DMBServerHelper
         /// <summary>
         ///     Represents a composite domain object used for handling and parsing domain-related information.
         /// </summary>
+        /// <param name="input">
+        ///     The domain, host name, or URL to analyze. Values without an HTTP scheme are parsed as HTTP URLs.
+        /// </param>
+        /// <remarks>
+        ///     The constructor recognizes <c>localhost</c>, preserves a non-default local port, separates root
+        ///     domains from subdomains, and composes <see cref="HttpsWebsite"/> as an HTTPS URL.
+        /// </remarks>
         public DomainComposite(string input)
         {
             if (string.IsNullOrWhiteSpace(input) == false)

@@ -47,6 +47,17 @@ namespace DMBServerHelper
         /// <summary>
         ///     Represents a session definition that serializes a generic type.
         /// </summary>
+        /// <param name="name">The session key. Whitespace is removed before registration.</param>
+        /// <param name="title">The human-readable session title.</param>
+        /// <param name="description">The human-readable session explanation.</param>
+        /// <param name="group">The session purpose group.</param>
+        /// <param name="defaultValue">The default object serialized to JSON when the session value is absent.</param>
+        /// <param name="deletable">A value indicating whether the session entry may be deleted by bulk deletion helpers.</param>
+        /// <param name="manualEditable">A value indicating whether diagnostics may expose a manual editor.</param>
+        /// <remarks>
+        ///     The default value is serialized with <see cref="JsonSerializer"/> and the definition is registered in
+        ///     <see cref="SessionGlobal.KDictionary"/> under the sanitized name.
+        /// </remarks>
         public SessionSerializable(
             string name,
             string title,

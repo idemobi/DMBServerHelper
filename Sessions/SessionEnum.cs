@@ -44,9 +44,8 @@ namespace DMBServerHelper
         #region Instance fields and properties
 
         /// <summary>
-        ///     Represents a session definition for an Enum type value.
+        ///     Stores the enum type handled by this session definition.
         /// </summary>
-        /// <typeparam name="T">The Enum type.</typeparam>
         public Type EnumType;
 
         #endregion
@@ -56,7 +55,16 @@ namespace DMBServerHelper
         /// <summary>
         ///     A class representing a session definition for an enum value.
         /// </summary>
-        /// <typeparam name="T">The enum type.</typeparam>
+        /// <param name="name">The session key. Whitespace is removed before registration.</param>
+        /// <param name="title">The human-readable session title.</param>
+        /// <param name="description">The human-readable session explanation.</param>
+        /// <param name="group">The session purpose group.</param>
+        /// <param name="defaultValue">The default enum value used when the session value is absent.</param>
+        /// <param name="deletable">A value indicating whether the session entry may be deleted by bulk deletion helpers.</param>
+        /// <param name="manualEditable">A value indicating whether diagnostics may expose a manual editor.</param>
+        /// <remarks>
+        ///     The definition is registered in <see cref="SessionGlobal.KDictionary"/> under the sanitized name.
+        /// </remarks>
         public SessionEnum(
             string name,
             string title,

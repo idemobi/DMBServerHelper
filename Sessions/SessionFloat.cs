@@ -55,6 +55,16 @@ namespace DMBServerHelper
         /// <summary>
         ///     A session definition for float values.
         /// </summary>
+        /// <param name="name">The session key. Whitespace is removed before registration.</param>
+        /// <param name="title">The human-readable session title.</param>
+        /// <param name="description">The human-readable session explanation.</param>
+        /// <param name="group">The session purpose group.</param>
+        /// <param name="defaultValue">The default floating-point value used when the session value is absent or invalid.</param>
+        /// <param name="deletable">A value indicating whether the session entry may be deleted by bulk deletion helpers.</param>
+        /// <param name="manualEditable">A value indicating whether diagnostics may expose a manual editor.</param>
+        /// <remarks>
+        ///     The definition is registered in <see cref="SessionGlobal.KDictionary"/> under the sanitized name.
+        /// </remarks>
         public SessionFloat(
             string name,
             string title,

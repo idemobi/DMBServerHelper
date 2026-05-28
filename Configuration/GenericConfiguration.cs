@@ -79,6 +79,16 @@ namespace DMBServerHelper
             }
         }
 
+        /// <summary>
+        ///     Gets the current ASP.NET Core environment name used to select environment-specific configuration files.
+        /// </summary>
+        /// <returns>
+        ///     The value of the <c>ASPNETCORE_ENVIRONMENT</c> environment variable, or an empty string when it is not set.
+        /// </returns>
+        /// <remarks>
+        ///     The returned value is appended to configuration file names such as
+        ///     <c>{ConfigurationType}.{Environment}.json</c> by <see cref="AddConfigInConfigurationBuilder"/>.
+        /// </remarks>
         protected static string GetEnvironmentVariable()
         {
             string? env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");

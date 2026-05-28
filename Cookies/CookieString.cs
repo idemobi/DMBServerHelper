@@ -45,6 +45,21 @@ namespace DMBServerHelper
         /// <summary>
         ///     Represents a string cookie definition.
         /// </summary>
+        /// <param name="name">The cookie name. Whitespace is removed before registration.</param>
+        /// <param name="title">The human-readable cookie title.</param>
+        /// <param name="description">The human-readable cookie explanation.</param>
+        /// <param name="group">The cookie purpose group.</param>
+        /// <param name="defaultValue">The default string value used when the cookie is absent.</param>
+        /// <param name="deletable">A value indicating whether the cookie may be deleted by bulk deletion helpers.</param>
+        /// <param name="manualEditable">A value indicating whether raw form rendering may expose a manual editor.</param>
+        /// <param name="duration">The duration value assigned to <see cref="CookieDefinition.Duration"/>.</param>
+        /// <param name="autoRenew">A value indicating whether reads should renew the cookie.</param>
+        /// <param name="secure">A value indicating whether the cookie should be marked secure.</param>
+        /// <param name="limitSite">The SameSite policy used when writing the cookie.</param>
+        /// <remarks>
+        ///     Functional and consent cookies are forced to be non-deletable and non-manually editable.
+        ///     The definition is registered in <see cref="CookieGlobal.KDictionary"/> under the sanitized name.
+        /// </remarks>
         public CookieString(
             string name,
             string title,
@@ -168,6 +183,7 @@ namespace DMBServerHelper
         /// </summary>
         /// <param name="httpContext">The HttpContext to associate the cookie with.</param>
         /// <param name="value">The value to be set in the cookie. If empty or null, an empty string will be set.</param>
+        /// <param name="seconds">The number of seconds from now until the cookie expires.</param>
         public void SetValue(HttpContext? httpContext, string? value, double seconds)
         {
             if (string.IsNullOrEmpty(value))
