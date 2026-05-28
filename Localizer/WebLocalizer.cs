@@ -43,23 +43,51 @@ namespace DMBServerHelper
         public static Type ClassToUse = typeof(CombinedStringLocalizer);
 
         /// <summary>
-        ///     Provides access to a shared instance of <see cref="ICombinedStringLocalizer" />
-        ///     intended for localizing data annotation-related strings.
+        ///     Gets or sets the shared localizer used for data annotation messages.
         /// </summary>
         /// <remarks>
-        ///     This static property is used throughout the system for retrieving localized strings
-        ///     that correspond to data annotation attributes or related messages.
-        ///     It enables consistent localization of validation messages and UI labels.
+        ///     This property is the non-obsolete configuration point used by <see cref="GetDataAnnotation(string)"/>
+        ///     and <see cref="GetDataAnnotation(string, object[])"/>.
         /// </remarks>
-        [Obsolete($"Direct access is obsolete, use {nameof(GetDataAnnotation)}")]
-        public static ICombinedStringLocalizer DataAnnotation = new CombinedStringLocalizer();
+        public static ICombinedStringLocalizer DataAnnotationLocalizer { get; set; } = new CombinedStringLocalizer();
 
         /// <summary>
-        ///     A static instance of <see cref="ICombinedStringLocalizer" /> used for managing localized string resources.
-        ///     This variable is utilized across various components for accessing or manipulating string localizations.
+        ///     Gets or sets the shared localizer used for internal package messages.
         /// </summary>
-        [Obsolete($"Direct access is obsolete, use {nameof(GetInternal)}")]
-        public static ICombinedStringLocalizer Internal = new CombinedStringLocalizer();
+        /// <remarks>
+        ///     This property is the non-obsolete configuration point used by <see cref="GetInternal(string)"/>
+        ///     and <see cref="GetInternal(string, object[])"/>.
+        /// </remarks>
+        public static ICombinedStringLocalizer InternalLocalizer { get; set; } = new CombinedStringLocalizer();
+
+        /// <summary>
+        ///     Gets or sets the shared data annotation localizer.
+        /// </summary>
+        /// <remarks>
+        ///     This member is kept for source compatibility. New code should use
+        ///     <see cref="DataAnnotationLocalizer"/> for configuration and <see cref="GetDataAnnotation(string)"/>
+        ///     for lookups.
+        /// </remarks>
+        [Obsolete($"Direct access is obsolete, use {nameof(DataAnnotationLocalizer)} or {nameof(GetDataAnnotation)}")]
+        public static ICombinedStringLocalizer DataAnnotation
+        {
+            get => DataAnnotationLocalizer;
+            set => DataAnnotationLocalizer = value;
+        }
+
+        /// <summary>
+        ///     Gets or sets the shared internal package localizer.
+        /// </summary>
+        /// <remarks>
+        ///     This member is kept for source compatibility. New code should use
+        ///     <see cref="InternalLocalizer"/> for configuration and <see cref="GetInternal(string)"/> for lookups.
+        /// </remarks>
+        [Obsolete($"Direct access is obsolete, use {nameof(InternalLocalizer)} or {nameof(GetInternal)}")]
+        public static ICombinedStringLocalizer Internal
+        {
+            get => InternalLocalizer;
+            set => InternalLocalizer = value;
+        }
 
         #endregion
 
@@ -73,7 +101,10 @@ namespace DMBServerHelper
         /// <returns>
         ///     The localized string returned by the data annotation localizer.
         /// </returns>
-        public static LocalizedString GetDataAnnotation(string key) => DataAnnotation[key];
+        public static LocalizedString GetDataAnnotation(string key)
+        {
+            return DataAnnotationLocalizer[key];
+        }
         /// <summary>
         ///     Resolves a formatted data annotation localized string by key.
         /// </summary>
@@ -86,7 +117,10 @@ namespace DMBServerHelper
         /// <returns>
         ///     The formatted localized string returned by the data annotation localizer.
         /// </returns>
-        public static LocalizedString GetDataAnnotation(string key, params object[] args) => DataAnnotation[key, args];
+        public static LocalizedString GetDataAnnotation(string key, params object[] args)
+        {
+            return DataAnnotationLocalizer[key, args];
+        }
         /// <summary>
         ///     Resolves an internal package localized string by key.
         /// </summary>
@@ -96,7 +130,10 @@ namespace DMBServerHelper
         /// <returns>
         ///     The localized string returned by the internal localizer.
         /// </returns>
-        public static LocalizedString GetInternal(string key) => Internal[key];
+        public static LocalizedString GetInternal(string key)
+        {
+            return InternalLocalizer[key];
+        }
         /// <summary>
         ///     Resolves a formatted internal package localized string by key.
         /// </summary>
@@ -109,7 +146,10 @@ namespace DMBServerHelper
         /// <returns>
         ///     The formatted localized string returned by the internal localizer.
         /// </returns>
-        public static LocalizedString GetInternal(string key, params object[] args) => Internal[key, args];
+        public static LocalizedString GetInternal(string key, params object[] args)
+        {
+            return InternalLocalizer[key, args];
+        }
 
         /// <summary>
         ///     Gets the combined localizer associated with a resource marker type.

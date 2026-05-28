@@ -58,7 +58,7 @@ namespace DMBServerHelper
         /// </returns>
         public override string GetErrorMessage(ModelValidationContextBase validationContext)
         {
-            return Attribute.FormatErrorMessage(validationContext.ModelMetadata.DisplayName);
+            return Attribute.FormatErrorMessage(validationContext.ModelMetadata.DisplayName ?? string.Empty);
         }
 
         #endregion

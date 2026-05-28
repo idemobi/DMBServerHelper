@@ -103,7 +103,7 @@ namespace DMBServerHelper
         }
 
         /// <summary>
-        ///     A reference to the current instance of the class or struct where the <see cref="this" /> keyword is used.
+        ///     A reference to the current instance of the class or struct where the <see langword="this"/> keyword is used.
         ///     Provides access to the members of the current instance within its containing scope.
         /// </summary>
         public LocalizedString this[string? name, params object[] arguments]

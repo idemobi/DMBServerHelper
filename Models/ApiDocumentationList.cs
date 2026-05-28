@@ -52,7 +52,7 @@ namespace DMBServerHelper
         /// </param>
         public static void AddApiType(Type type)
         {
-            AddApiAssembly(Assembly.GetAssembly(type));
+            AddApiAssembly(type.Assembly);
         }
         /// <summary>
         ///     Gets the assemblies registered for API documentation generation.

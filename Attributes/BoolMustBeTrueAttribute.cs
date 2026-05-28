@@ -20,7 +20,7 @@ namespace DMBServerHelper
     /// </summary>
     /// <remarks>
     ///     The attribute can be applied to properties, fields, and method arguments. Error messages are resolved
-    ///     through <see cref="WebLocalizer.GetDataAnnotation"/>.
+    ///     through <see cref="WebLocalizer.GetDataAnnotation(string, object[])"/>.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
     public class BoolMustBeTrueAttribute : ValidationAttribute
@@ -68,7 +68,7 @@ namespace DMBServerHelper
         ///     <see langword="true"/> when <paramref name="value"/> is a boolean equal to <see langword="true"/>;
         ///     otherwise, <see langword="false"/>.
         /// </returns>
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
             if (value is bool booleanValue)
             {

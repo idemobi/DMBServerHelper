@@ -112,9 +112,9 @@ namespace DMBServerHelper
         ///     When this value starts with <c>https://</c>, <see cref="AfterConfiguration"/> configures
         ///     ASP.NET Core data protection to persist keys to a blob named from the analyzed domain.
         /// </remarks>
-        public string DataProtectionBlobUrl { set; get; }
+        public string DataProtectionBlobUrl { set; get; } = string.Empty;
 
-        [JsonIgnore] private DomainComposite DomainAnalyzed { set; get; }
+        [JsonIgnore] private DomainComposite DomainAnalyzed { set; get; } = new DomainComposite(string.Empty);
 
         /// <summary>
         ///     Gets or sets the configured domain name or URL used for domain analysis and URL composition.

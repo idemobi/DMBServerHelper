@@ -61,7 +61,7 @@ namespace DMBServerHelper
         /// <returns>
         /// <c>true</c>, if the value is a boolean and equals false; otherwise, <c>false</c>.
         /// </returns>
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
             if (value is bool booleanValue)
             {
