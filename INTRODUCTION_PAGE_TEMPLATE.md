@@ -336,7 +336,7 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
                     {
                         @:{{NEXT_STEP_DESC}}
                     }
-                    @Html.Button(ActionItemFactory.AspRoute("{{NEXT_STEP_LABEL}}", "{{CONTROLLER}}", "{{NEXT_STEP_ACTION}}", IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
+                    @Html.Button(ActionItemFactory.AspRoute("{{CONTROLLER}}", "{{NEXT_STEP_ACTION}}").SetTitle("{{NEXT_STEP_LABEL}}").SetIcon(IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
                 }
             }
         }
@@ -461,7 +461,7 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
                         }
                         @using (Html.BlockBuilder().AddClass("mt-3").Begin())
                         {
-                            @Html.Button(ActionItemFactory.AspRoute("{{CATALOG_LABEL}}", "{{CATALOG_CONTROLLER}}", "{{CATALOG_ACTION}}", IconStruct.Bootstrap("{{CATALOG_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
+                            @Html.Button(ActionItemFactory.AspRoute("{{CATALOG_CONTROLLER}}", "{{CATALOG_ACTION}}").SetTitle("{{CATALOG_LABEL}}").SetIcon(IconStruct.Bootstrap("{{CATALOG_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
                         }
                     }
                 }
@@ -472,7 +472,7 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
                     {
                         @:{{NEXT_STEP_DESC}}
                     }
-                    @Html.Button(ActionItemFactory.AspRoute("{{NEXT_STEP_LABEL}}", "{{CONTROLLER}}", "{{NEXT_STEP_ACTION}}", IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
+                    @Html.Button(ActionItemFactory.AspRoute("{{CONTROLLER}}", "{{NEXT_STEP_ACTION}}").SetTitle("{{NEXT_STEP_LABEL}}").SetIcon(IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
                 }
             }
         }
@@ -599,7 +599,7 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
                     {
                         @:{{NEXT_STEP_DESC}}
                     }
-                    @Html.Button(ActionItemFactory.AspRoute("{{NEXT_STEP_LABEL}}", "{{CONTROLLER}}", "{{NEXT_STEP_ACTION}}", IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
+                    @Html.Button(ActionItemFactory.AspRoute("{{CONTROLLER}}", "{{NEXT_STEP_ACTION}}").SetTitle("{{NEXT_STEP_LABEL}}").SetIcon(IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
                 }
             }
         }
@@ -708,7 +708,7 @@ numéroté en `position-absolute`. La dernière étape utilise `bg-success` et l
                     {
                         @:{{NEXT_STEP_DESC}}
                     }
-                    @Html.Button(ActionItemFactory.AspRoute("{{NEXT_STEP_LABEL}}", "{{NEXT_STEP_CONTROLLER}}", "{{NEXT_STEP_ACTION}}", IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
+                    @Html.Button(ActionItemFactory.AspRoute("{{NEXT_STEP_CONTROLLER}}", "{{NEXT_STEP_ACTION}}").SetTitle("{{NEXT_STEP_LABEL}}").SetIcon(IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
                 }
             }
         }

@@ -160,4 +160,7 @@
     <ItemGroup>
         <Compile Remove="NuGetMe.sh" />
     </ItemGroup>
+    <ItemGroup Label="Project file exclusions">
+        <None Remove=".gitignore" />
+    </ItemGroup>
 </Project>
