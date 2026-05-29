@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj IServerConfig.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -22,12 +20,14 @@ namespace DMBServerHelper
     public interface IServerConfig
     {
         #region Instance fields and properties
+
         /// <summary>
         ///     Gets or sets a value indicating whether a missing-configuration example has already been printed.
         /// </summary>
 
         [System.Text.Json.Serialization.JsonIgnore]
         public bool ExamplePrinted { set; get; }
+
         /// <summary>
         ///     Gets or sets a value indicating whether the configuration lifecycle has already completed.
         /// </summary>
@@ -38,6 +38,7 @@ namespace DMBServerHelper
         #endregion
 
         #region Instance methods
+
         /// <summary>
         ///     Runs after optional configuration sources have been loaded and bound.
         /// </summary>
@@ -51,13 +52,15 @@ namespace DMBServerHelper
         ///     The resolved configuration root supplied by the configuration lifecycle.
         /// </param>
         public void AfterConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot);
+
         /// <summary>
         ///     Indicates whether this configuration should register its assembly for API documentation.
         /// </summary>
         /// <returns>
-        ///     <see langword="true"/> when the assembly should be registered; otherwise, <see langword="false"/>.
+        ///     <see langword="true" /> when the assembly should be registered; otherwise, <see langword="false" />.
         /// </returns>
         public bool ApiDescription();
+
         /// <summary>
         ///     Runs before optional configuration sources are loaded and bound.
         /// </summary>
@@ -71,27 +74,31 @@ namespace DMBServerHelper
         ///     The resolved configuration root supplied by the configuration lifecycle.
         /// </param>
         public void BeforeConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot);
+
         /// <summary>
         ///     Indicates whether configuration files should be watched for reload-on-change.
         /// </summary>
         /// <returns>
-        ///     <see langword="true"/> when JSON files should be reloaded after changes; otherwise, <see langword="false"/>.
+        ///     <see langword="true" /> when JSON files should be reloaded after changes; otherwise, <see langword="false" />.
         /// </returns>
         public bool ConfigHotReload();
+
         /// <summary>
         ///     Indicates whether configuration files are optional.
         /// </summary>
         /// <returns>
-        ///     <see langword="true"/> when missing JSON files are allowed; otherwise, <see langword="false"/>.
+        ///     <see langword="true" /> when missing JSON files are allowed; otherwise, <see langword="false" />.
         /// </returns>
         public bool ConfigIsOptional();
+
         /// <summary>
         ///     Indicates whether this configuration should be loaded from files or app settings.
         /// </summary>
         /// <returns>
-        ///     <see langword="true"/> when the lifecycle should bind configuration; otherwise, <see langword="false"/>.
+        ///     <see langword="true" /> when the lifecycle should bind configuration; otherwise, <see langword="false" />.
         /// </returns>
         public bool NeedsConfigFileOrAppSettings();
+
         /// <summary>
         ///     Populates representative example values used by missing-configuration output.
         /// </summary>

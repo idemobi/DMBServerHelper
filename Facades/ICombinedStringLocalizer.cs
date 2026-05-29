@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj ICombinedStringLocalizer.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -19,12 +17,13 @@ namespace DMBServerHelper
     ///     Defines a localizer that can aggregate multiple named localization resources.
     /// </summary>
     /// <remarks>
-    ///     Implementations resolve localized strings through the <see cref="IStringLocalizer"/> contract
+    ///     Implementations resolve localized strings through the <see cref="IStringLocalizer" /> contract
     ///     while allowing additional resources to be injected at runtime.
     /// </remarks>
     public interface ICombinedStringLocalizer : IStringLocalizer
     {
         #region Instance methods
+
         /// <summary>
         ///     Adds a named string localizer to the aggregate lookup collection.
         /// </summary>

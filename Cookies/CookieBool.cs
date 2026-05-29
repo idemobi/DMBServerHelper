@@ -1,9 +1,7 @@
 ﻿#region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj CookieBool.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -22,11 +20,12 @@ namespace DMBServerHelper
     public class CookieBool : CookieDefinition
     {
         #region Static methods
+
         /// <summary>
         ///     Gets a registered boolean cookie definition by name.
         /// </summary>
         /// <param name="name">The sanitized cookie definition name.</param>
-        /// <returns>The registered definition, or <see langword="null"/> when no matching boolean cookie exists.</returns>
+        /// <returns>The registered definition, or <see langword="null" /> when no matching boolean cookie exists.</returns>
         public static CookieBool? GetCookieDefinition(string name)
         {
             CookieBool? result = null;
@@ -41,8 +40,9 @@ namespace DMBServerHelper
         #endregion
 
         #region Instance constructors and destructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="CookieBool"/> class.
+        ///     Initializes a new instance of the <see cref="CookieBool" /> class.
         /// </summary>
         /// <param name="name">The cookie name. Whitespace is removed before registration.</param>
         /// <param name="title">The human-readable cookie title.</param>
@@ -57,7 +57,7 @@ namespace DMBServerHelper
         /// <param name="limitSite">The SameSite policy used when writing the cookie.</param>
         /// <remarks>
         ///     Functional and consent cookies are forced to be non-deletable and non-manually editable.
-        ///     The definition is registered in <see cref="CookieGlobal.KDictionary"/> under the sanitized name.
+        ///     The definition is registered in <see cref="CookieGlobal.KDictionary" /> under the sanitized name.
         /// </remarks>
         public CookieBool(
             string name,
@@ -180,6 +180,7 @@ namespace DMBServerHelper
         {
             _SetValue(httpContext, value.ToString());
         }
+
         /// <summary>
         ///     Sets the cookie value with a custom lifetime.
         /// </summary>

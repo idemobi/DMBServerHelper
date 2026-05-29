@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj SessionSerializable.cs create at 2026/04/12 12:04:31
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -55,8 +53,8 @@ namespace DMBServerHelper
         /// <param name="deletable">A value indicating whether the session entry may be deleted by bulk deletion helpers.</param>
         /// <param name="manualEditable">A value indicating whether diagnostics may expose a manual editor.</param>
         /// <remarks>
-        ///     The default value is serialized with <see cref="JsonSerializer"/> and the definition is registered in
-        ///     <see cref="SessionGlobal.KDictionary"/> under the sanitized name.
+        ///     The default value is serialized with <see cref="JsonSerializer" /> and the definition is registered in
+        ///     <see cref="SessionGlobal.KDictionary" /> under the sanitized name.
         /// </remarks>
         public SessionSerializable(
             string name,

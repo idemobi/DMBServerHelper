@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj SessionDefinition.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -21,7 +19,7 @@ namespace DMBServerHelper
     /// </summary>
     /// <remarks>
     ///     Derived session definitions sanitize the configured name, register themselves in
-    ///     <see cref="SessionGlobal.KDictionary"/>, and use this base class to read and write serialized
+    ///     <see cref="SessionGlobal.KDictionary" />, and use this base class to read and write serialized
     ///     values through ASP.NET Core session state.
     /// </remarks>
     public abstract class SessionDefinition
@@ -33,6 +31,7 @@ namespace DMBServerHelper
         #endregion
 
         #region Static methods
+
         /// <summary>
         ///     Removes all whitespace characters from a session definition name.
         /// </summary>
@@ -122,10 +121,10 @@ namespace DMBServerHelper
         ///     Writes a serialized value into the current HTTP session.
         /// </summary>
         /// <param name="httpContext">
-        ///     The current HTTP context, or <see langword="null"/> to skip writing.
+        ///     The current HTTP context, or <see langword="null" /> to skip writing.
         /// </param>
         /// <param name="value">
-        ///     The serialized value to store under <see cref="Name"/>.
+        ///     The serialized value to store under <see cref="Name" />.
         /// </param>
         protected void _SetValue(HttpContext? httpContext, string value)
         {

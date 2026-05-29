@@ -1,9 +1,7 @@
 ﻿#region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj CookieDefinition.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -29,6 +27,7 @@ namespace DMBServerHelper
         #endregion
 
         #region Static methods
+
         /// <summary>
         ///     Removes all whitespace characters from a cookie definition name.
         /// </summary>
@@ -203,7 +202,7 @@ namespace DMBServerHelper
         ///     Sets the cookie value with a custom lifetime.
         /// </summary>
         /// <param name="httpContext">
-        ///     The current HTTP context, or <see langword="null"/> to skip writing.
+        ///     The current HTTP context, or <see langword="null" /> to skip writing.
         /// </param>
         /// <param name="value">
         ///     The serialized cookie value to write.

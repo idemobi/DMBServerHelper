@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj ServerHelperConfiguration.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -58,6 +56,7 @@ namespace DMBServerHelper
         ///     Indicates whether the current build was produced as a NuGet package.
         /// </summary>
         public const bool IsNuGetBuild = false;
+
         /// <summary>
         ///     Describes the current build mode.
         /// </summary>
@@ -76,7 +75,7 @@ namespace DMBServerHelper
         ///     Indicates whether the current build was compiled with the <c>DEBUG</c> symbol.
         /// </summary>
         /// <returns>
-        ///     <see langword="true"/> in debug builds; otherwise, <see langword="false"/>.
+        ///     <see langword="true" /> in debug builds; otherwise, <see langword="false" />.
         /// </returns>
         public static bool IsDebug()
         {
@@ -90,10 +89,12 @@ namespace DMBServerHelper
         #endregion
 
         #region Instance fields and properties
+
         /// <summary>
         ///     Gets or sets a value indicating whether generated URLs may include the configured launch token.
         /// </summary>
         public bool AddLaunchToken { set; get; } = true;
+
         /// <summary>
         ///     Gets or sets the default culture name used by server-side helpers.
         /// </summary>
@@ -101,15 +102,17 @@ namespace DMBServerHelper
         ///     The default value is <c>en-US</c>.
         /// </value>
         public string BaseLanguage { set; get; } = "en-US";
+
         /// <summary>
         ///     Gets or sets the prefix added by consumers to shared cookie names.
         /// </summary>
         public string CookiePrefix { get; set; } = string.Empty;
+
         /// <summary>
         ///     Gets or sets the Azure Blob Storage container URL used to persist data protection keys.
         /// </summary>
         /// <remarks>
-        ///     When this value starts with <c>https://</c>, <see cref="AfterConfiguration"/> configures
+        ///     When this value starts with <c>https://</c>, <see cref="AfterConfiguration" /> configures
         ///     ASP.NET Core data protection to persist keys to a blob named from the analyzed domain.
         /// </remarks>
         public string DataProtectionBlobUrl { set; get; } = string.Empty;
@@ -129,8 +132,7 @@ namespace DMBServerHelper
         /// <summary>
         ///     Stores the session cookie name used by web consumers.
         /// </summary>
-        [NonSerialized]
-        public string SessionCookieName = "NODNS";
+        [NonSerialized] public string SessionCookieName = "NODNS";
 
         /// <summary>
         ///     Gets or sets the list of supported culture names.
@@ -144,6 +146,7 @@ namespace DMBServerHelper
         #endregion
 
         #region Instance methods
+
         /// <summary>
         ///     Registers the shared static file middleware for an ASP.NET Core application.
         /// </summary>
@@ -158,6 +161,7 @@ namespace DMBServerHelper
                 app.UseStaticFiles();
             }
         }
+
         /// <summary>
         ///     Normalizes server configuration values and registers optional data protection persistence.
         /// </summary>
@@ -172,8 +176,8 @@ namespace DMBServerHelper
         /// </param>
         /// <remarks>
         ///     The method removes empty supported language values, de-duplicates language names
-        ///     case-insensitively, analyzes <see cref="DomainName"/>, and configures data protection key
-        ///     persistence when <see cref="DataProtectionBlobUrl"/> is an HTTPS URL.
+        ///     case-insensitively, analyzes <see cref="DomainName" />, and configures data protection key
+        ///     persistence when <see cref="DataProtectionBlobUrl" /> is an HTTPS URL.
         /// </remarks>
         public override void AfterConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot)
         {
@@ -199,16 +203,18 @@ namespace DMBServerHelper
                         new DefaultAzureCredential());
             }
         }
+
         /// <summary>
         ///     Indicates whether this configuration contributes API documentation assemblies.
         /// </summary>
         /// <returns>
-        ///     Always <see langword="false"/> because this core configuration does not register its assembly automatically.
+        ///     Always <see langword="false" /> because this core configuration does not register its assembly automatically.
         /// </returns>
         public override bool ApiDescription()
         {
             return false;
         }
+
         /// <summary>
         ///     Runs before server helper configuration is loaded.
         /// </summary>
@@ -227,6 +233,7 @@ namespace DMBServerHelper
         public override void BeforeConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot)
         {
         }
+
         /// <summary>
         ///     Composes an HTTPS URL for an MVC controller action.
         /// </summary>
@@ -243,6 +250,7 @@ namespace DMBServerHelper
         {
             return DomainAnalyzed.HttpsWebsite + "/" + controllerName + "/" + actionName;
         }
+
         /// <summary>
         ///     Composes an HTTPS URL for an MVC controller action with path parameters.
         /// </summary>
@@ -262,6 +270,7 @@ namespace DMBServerHelper
         {
             return DomainAnalyzed.HttpsWebsite + "/" + controllerName + "/" + actionName + "/" + string.Join("/", parameters);
         }
+
         /// <summary>
         ///     Composes an HTTPS URL for an MVC controller action with query string parameters.
         /// </summary>
@@ -287,6 +296,7 @@ namespace DMBServerHelper
 
             return DomainAnalyzed.HttpsWebsite + "/" + controllerName + "/" + actionName + "?" + string.Join("&", parameters);
         }
+
         /// <summary>
         ///     Composes an HTTPS URL for an MVC controller root.
         /// </summary>
@@ -300,6 +310,7 @@ namespace DMBServerHelper
         {
             return DomainAnalyzed.HttpsWebsite + "/" + controllerName;
         }
+
         /// <summary>
         ///     Composes an HTTPS URL for an arbitrary application path.
         /// </summary>
@@ -313,26 +324,29 @@ namespace DMBServerHelper
         {
             return DomainAnalyzed.HttpsWebsite + "/" + path;
         }
+
         /// <summary>
         ///     Gets the analyzed canonical HTTPS website URL.
         /// </summary>
         /// <returns>
-        ///     The HTTPS URL produced by <see cref="DomainComposite"/> during <see cref="AfterConfiguration"/>.
+        ///     The HTTPS URL produced by <see cref="DomainComposite" /> during <see cref="AfterConfiguration" />.
         /// </returns>
         public string GetHttpsUrl()
         {
             return DomainAnalyzed.HttpsWebsite;
         }
+
         /// <summary>
         ///     Indicates whether this configuration should be loaded from JSON files or app settings.
         /// </summary>
         /// <returns>
-        ///     Always <see langword="true"/> because the server helper relies on external configuration.
+        ///     Always <see langword="true" /> because the server helper relies on external configuration.
         /// </returns>
         public override bool NeedsConfigFileOrAppSettings()
         {
             return true;
         }
+
         /// <summary>
         ///     Populates example configuration values.
         /// </summary>

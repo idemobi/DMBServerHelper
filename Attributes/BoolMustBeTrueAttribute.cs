@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj BoolMustBeTrueAttribute.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -16,11 +14,11 @@ using System.ComponentModel.DataAnnotations;
 namespace DMBServerHelper
 {
     /// <summary>
-    ///     Specifies that a boolean value must be <see langword="true"/>.
+    ///     Specifies that a boolean value must be <see langword="true" />.
     /// </summary>
     /// <remarks>
     ///     The attribute can be applied to properties, fields, and method arguments. Error messages are resolved
-    ///     through <see cref="WebLocalizer.GetDataAnnotation(string, object[])"/>.
+    ///     through <see cref="WebLocalizer.GetDataAnnotation(string, object[])" />.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
     public class BoolMustBeTrueAttribute : ValidationAttribute
@@ -28,7 +26,7 @@ namespace DMBServerHelper
         #region Instance constructors and destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BoolMustBeTrueAttribute"/> class.
+        ///     Initializes a new instance of the <see cref="BoolMustBeTrueAttribute" /> class.
         /// </summary>
         public BoolMustBeTrueAttribute()
             : base("The {0} field must be true.")
@@ -38,6 +36,7 @@ namespace DMBServerHelper
         #endregion
 
         #region Instance methods
+
         /// <summary>
         ///     Formats and localizes the validation error message.
         /// </summary>
@@ -58,15 +57,16 @@ namespace DMBServerHelper
 
             return WebLocalizer.GetDataAnnotation(message, name);
         }
+
         /// <summary>
-        ///     Validates whether the provided value is explicitly <see langword="true"/>.
+        ///     Validates whether the provided value is explicitly <see langword="true" />.
         /// </summary>
         /// <param name="value">
         ///     The value to validate.
         /// </param>
         /// <returns>
-        ///     <see langword="true"/> when <paramref name="value"/> is a boolean equal to <see langword="true"/>;
-        ///     otherwise, <see langword="false"/>.
+        ///     <see langword="true" /> when <paramref name="value" /> is a boolean equal to <see langword="true" />;
+        ///     otherwise, <see langword="false" />.
         /// </returns>
         public override bool IsValid(object? value)
         {

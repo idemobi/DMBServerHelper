@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj WebLocalizer.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -20,7 +18,7 @@ namespace DMBServerHelper
     /// </summary>
     /// <remarks>
     ///     The helper exposes dedicated localizers for data annotation messages and internal package
-    ///     text, and can create per-resource combined localizers through <see cref="GetLocalizer{T}"/>.
+    ///     text, and can create per-resource combined localizers through <see cref="GetLocalizer{T}" />.
     /// </remarks>
     public static class WebLocalizer
     {
@@ -43,29 +41,11 @@ namespace DMBServerHelper
         public static Type ClassToUse = typeof(CombinedStringLocalizer);
 
         /// <summary>
-        ///     Gets or sets the shared localizer used for data annotation messages.
-        /// </summary>
-        /// <remarks>
-        ///     This property is the non-obsolete configuration point used by <see cref="GetDataAnnotation(string)"/>
-        ///     and <see cref="GetDataAnnotation(string, object[])"/>.
-        /// </remarks>
-        public static ICombinedStringLocalizer DataAnnotationLocalizer { get; set; } = new CombinedStringLocalizer();
-
-        /// <summary>
-        ///     Gets or sets the shared localizer used for internal package messages.
-        /// </summary>
-        /// <remarks>
-        ///     This property is the non-obsolete configuration point used by <see cref="GetInternal(string)"/>
-        ///     and <see cref="GetInternal(string, object[])"/>.
-        /// </remarks>
-        public static ICombinedStringLocalizer InternalLocalizer { get; set; } = new CombinedStringLocalizer();
-
-        /// <summary>
         ///     Gets or sets the shared data annotation localizer.
         /// </summary>
         /// <remarks>
         ///     This member is kept for source compatibility. New code should use
-        ///     <see cref="DataAnnotationLocalizer"/> for configuration and <see cref="GetDataAnnotation(string)"/>
+        ///     <see cref="DataAnnotationLocalizer" /> for configuration and <see cref="GetDataAnnotation(string)" />
         ///     for lookups.
         /// </remarks>
         [Obsolete($"Direct access is obsolete, use {nameof(DataAnnotationLocalizer)} or {nameof(GetDataAnnotation)}")]
@@ -76,11 +56,20 @@ namespace DMBServerHelper
         }
 
         /// <summary>
+        ///     Gets or sets the shared localizer used for data annotation messages.
+        /// </summary>
+        /// <remarks>
+        ///     This property is the non-obsolete configuration point used by <see cref="GetDataAnnotation(string)" />
+        ///     and <see cref="GetDataAnnotation(string, object[])" />.
+        /// </remarks>
+        public static ICombinedStringLocalizer DataAnnotationLocalizer { get; set; } = new CombinedStringLocalizer();
+
+        /// <summary>
         ///     Gets or sets the shared internal package localizer.
         /// </summary>
         /// <remarks>
         ///     This member is kept for source compatibility. New code should use
-        ///     <see cref="InternalLocalizer"/> for configuration and <see cref="GetInternal(string)"/> for lookups.
+        ///     <see cref="InternalLocalizer" /> for configuration and <see cref="GetInternal(string)" /> for lookups.
         /// </remarks>
         [Obsolete($"Direct access is obsolete, use {nameof(InternalLocalizer)} or {nameof(GetInternal)}")]
         public static ICombinedStringLocalizer Internal
@@ -89,9 +78,19 @@ namespace DMBServerHelper
             set => InternalLocalizer = value;
         }
 
+        /// <summary>
+        ///     Gets or sets the shared localizer used for internal package messages.
+        /// </summary>
+        /// <remarks>
+        ///     This property is the non-obsolete configuration point used by <see cref="GetInternal(string)" />
+        ///     and <see cref="GetInternal(string, object[])" />.
+        /// </remarks>
+        public static ICombinedStringLocalizer InternalLocalizer { get; set; } = new CombinedStringLocalizer();
+
         #endregion
 
         #region Static methods
+
         /// <summary>
         ///     Resolves a data annotation localized string by key.
         /// </summary>
@@ -105,6 +104,7 @@ namespace DMBServerHelper
         {
             return DataAnnotationLocalizer[key];
         }
+
         /// <summary>
         ///     Resolves a formatted data annotation localized string by key.
         /// </summary>
@@ -121,6 +121,7 @@ namespace DMBServerHelper
         {
             return DataAnnotationLocalizer[key, args];
         }
+
         /// <summary>
         ///     Resolves an internal package localized string by key.
         /// </summary>
@@ -134,6 +135,7 @@ namespace DMBServerHelper
         {
             return InternalLocalizer[key];
         }
+
         /// <summary>
         ///     Resolves a formatted internal package localized string by key.
         /// </summary>
@@ -158,10 +160,10 @@ namespace DMBServerHelper
         ///     The resource marker type.
         /// </typeparam>
         /// <returns>
-        ///     A cached <see cref="ICombinedStringLocalizer"/> for <typeparamref name="T"/>.
+        ///     A cached <see cref="ICombinedStringLocalizer" /> for <typeparamref name="T" />.
         /// </returns>
         /// <remarks>
-        ///     The first call creates an instance of <see cref="ClassToUse"/>. Later calls reuse the same
+        ///     The first call creates an instance of <see cref="ClassToUse" />. Later calls reuse the same
         ///     localizer for the same marker type.
         /// </remarks>
         public static ICombinedStringLocalizer GetLocalizer<T>() where T : class

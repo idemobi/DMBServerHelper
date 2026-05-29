@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj DomainComposite.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -92,7 +90,7 @@ namespace DMBServerHelper
         /// </param>
         /// <remarks>
         ///     The constructor recognizes <c>localhost</c>, preserves a non-default local port, separates root
-        ///     domains from subdomains, and composes <see cref="HttpsWebsite"/> as an HTTPS URL.
+        ///     domains from subdomains, and composes <see cref="HttpsWebsite" /> as an HTTPS URL.
         /// </remarks>
         public DomainComposite(string input)
         {

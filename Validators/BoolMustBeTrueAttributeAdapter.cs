@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj BoolMustBeTrueAttributeAdapter.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -18,13 +16,14 @@ using Microsoft.Extensions.Localization;
 namespace DMBServerHelper
 {
     /// <summary>
-    ///     Provides ASP.NET Core MVC client validation metadata for <see cref="BoolMustBeTrueAttribute"/>.
+    ///     Provides ASP.NET Core MVC client validation metadata for <see cref="BoolMustBeTrueAttribute" />.
     /// </summary>
     public class BoolMustBeTrueAttributeAdapter : AttributeAdapterBase<BoolMustBeTrueAttribute>
     {
         #region Instance constructors and destructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="BoolMustBeTrueAttributeAdapter"/> class.
+        ///     Initializes a new instance of the <see cref="BoolMustBeTrueAttributeAdapter" /> class.
         /// </summary>
         /// <param name="attribute">The validation attribute being adapted.</param>
         /// <param name="stringLocalizer">The optional string localizer supplied by MVC.</param>
@@ -36,6 +35,7 @@ namespace DMBServerHelper
         #endregion
 
         #region Instance methods
+
         /// <summary>
         ///     Adds client validation metadata for the true-required rule.
         /// </summary>
@@ -47,6 +47,7 @@ namespace DMBServerHelper
             // MergeAttribute(context.Attributes, "data-val", "true");
             MergeAttribute(context.Attributes, "data-val-BoolMustBeTrue", GetErrorMessage(context));
         }
+
         /// <summary>
         ///     Gets the localized error message for client validation metadata.
         /// </summary>

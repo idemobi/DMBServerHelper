@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj ApiDocumentationList.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -31,6 +29,7 @@ namespace DMBServerHelper
         #endregion
 
         #region Static methods
+
         /// <summary>
         ///     Registers an assembly for API documentation generation.
         /// </summary>
@@ -44,6 +43,7 @@ namespace DMBServerHelper
                 ApiAssemblies.Add(assembly);
             }
         }
+
         /// <summary>
         ///     Registers the assembly that defines the specified type.
         /// </summary>
@@ -54,6 +54,7 @@ namespace DMBServerHelper
         {
             AddApiAssembly(type.Assembly);
         }
+
         /// <summary>
         ///     Gets the assemblies registered for API documentation generation.
         /// </summary>

@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj BoolMustBeFalseAttribute.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -16,8 +14,8 @@ using System.ComponentModel.DataAnnotations;
 namespace DMBServerHelper
 {
     /// <summary>
-    /// Specifies that a boolean value must be false. This validation attribute ensures that the associated
-    /// property, field, or parameter is explicitly set to false. If the value is not false, the validation fails.
+    ///     Specifies that a boolean value must be false. This validation attribute ensures that the associated
+    ///     property, field, or parameter is explicitly set to false. If the value is not false, the validation fails.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
     public class BoolMustBeFalseAttribute : ValidationAttribute
@@ -25,7 +23,7 @@ namespace DMBServerHelper
         #region Instance constructors and destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BoolMustBeFalseAttribute"/> class.
+        ///     Initializes a new instance of the <see cref="BoolMustBeFalseAttribute" /> class.
         /// </summary>
         public BoolMustBeFalseAttribute()
             : base("The {0} field must be false.")
@@ -37,8 +35,8 @@ namespace DMBServerHelper
         #region Instance methods
 
         /// <summary>
-        /// Formats the error message for the validation attribute by replacing placeholders
-        /// with the given name and localizing the message if applicable.
+        ///     Formats the error message for the validation attribute by replacing placeholders
+        ///     with the given name and localizing the message if applicable.
         /// </summary>
         /// <param name="name">The name to include in the formatted error message.</param>
         /// <returns>The formatted error message string.</returns>
@@ -55,11 +53,11 @@ namespace DMBServerHelper
         }
 
         /// <summary>
-        /// Validates whether the provided value is explicitly set to false.
+        ///     Validates whether the provided value is explicitly set to false.
         /// </summary>
         /// <param name="value">The value to validate, expected to be a boolean.</param>
         /// <returns>
-        /// <c>true</c>, if the value is a boolean and equals false; otherwise, <c>false</c>.
+        ///     <c>true</c>, if the value is a boolean and equals false; otherwise, <c>false</c>.
         /// </returns>
         public override bool IsValid(object? value)
         {

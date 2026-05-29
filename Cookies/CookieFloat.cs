@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj CookieFloat.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -84,13 +82,13 @@ namespace DMBServerHelper
         /// <param name="defaultValue">The default floating-point value used when the cookie is absent or invalid.</param>
         /// <param name="deletable">A value indicating whether the cookie may be deleted by bulk deletion helpers.</param>
         /// <param name="manualEditable">A value indicating whether raw form rendering may expose a manual editor.</param>
-        /// <param name="duration">The duration value assigned to <see cref="CookieDefinition.Duration"/>.</param>
+        /// <param name="duration">The duration value assigned to <see cref="CookieDefinition.Duration" />.</param>
         /// <param name="autoRenew">A value indicating whether reads should renew the cookie.</param>
         /// <param name="secure">A value indicating whether the cookie should be marked secure.</param>
         /// <param name="limitSite">The SameSite policy used when writing the cookie.</param>
         /// <remarks>
         ///     Functional and consent cookies are forced to be non-deletable and non-manually editable.
-        ///     The definition is registered in <see cref="CookieGlobal.KDictionary"/> under the sanitized name.
+        ///     The definition is registered in <see cref="CookieGlobal.KDictionary" /> under the sanitized name.
         /// </remarks>
         public CookieFloat(
             string name,

@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj CustomValidationAttributeAdapterProvider.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -21,7 +19,7 @@ namespace DMBServerHelper
     ///     Selects custom ASP.NET Core MVC validation adapters for DMBServerHelper validation attributes.
     /// </summary>
     /// <remarks>
-    ///     Unknown validation attributes are delegated to the default <see cref="ValidationAttributeAdapterProvider"/>.
+    ///     Unknown validation attributes are delegated to the default <see cref="ValidationAttributeAdapterProvider" />.
     /// </remarks>
     public class CustomValidationAttributeAdapterProvider : IValidationAttributeAdapterProvider
     {
@@ -34,6 +32,7 @@ namespace DMBServerHelper
         #region Instance methods
 
         #region From interface IValidationAttributeAdapterProvider
+
         /// <summary>
         ///     Gets a validation adapter for a validation attribute.
         /// </summary>
@@ -44,7 +43,7 @@ namespace DMBServerHelper
         ///     The optional string localizer supplied by MVC.
         /// </param>
         /// <returns>
-        ///     A custom adapter for <see cref="BoolMustBeFalseAttribute"/> or <see cref="BoolMustBeTrueAttribute"/>,
+        ///     A custom adapter for <see cref="BoolMustBeFalseAttribute" /> or <see cref="BoolMustBeTrueAttribute" />,
         ///     or the default adapter for other attributes.
         /// </returns>
         public IAttributeAdapter? GetAttributeAdapter(ValidationAttribute attribute, IStringLocalizer? stringLocalizer)

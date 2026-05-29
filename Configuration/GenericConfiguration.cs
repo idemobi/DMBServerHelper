@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj GenericConfiguration.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -26,13 +24,14 @@ namespace DMBServerHelper
     /// </typeparam>
     /// <remarks>
     ///     The lifecycle loads optional JSON configuration files, binds the configuration section named
-    ///     after <typeparamref name="T"/>, invokes pre- and post-configuration hooks, and prevents duplicate
-    ///     loading through <see cref="IServerConfig.Loaded"/>.
+    ///     after <typeparamref name="T" />, invokes pre- and post-configuration hooks, and prevents duplicate
+    ///     loading through <see cref="IServerConfig.Loaded" />.
     /// </remarks>
     [Serializable]
     public abstract class GenericConfiguration<T> : IServerConfig where T : IServerConfig, new()
     {
         #region Static fields and properties
+
         /// <summary>
         ///     Stores the loaded configuration instance for the concrete configuration type.
         /// </summary>
@@ -41,6 +40,7 @@ namespace DMBServerHelper
         #endregion
 
         #region Static methods
+
         /// <summary>
         ///     Adds the default and environment-specific JSON files for the concrete configuration type.
         /// </summary>
@@ -50,7 +50,7 @@ namespace DMBServerHelper
         /// <remarks>
         ///     The method looks for files named <c>{ConfigurationType}.json</c> and
         ///     <c>{ConfigurationType}.{ASPNETCORE_ENVIRONMENT}.json</c>. Optional and hot-reload behavior
-        ///     comes from <see cref="ConfigIsOptional"/> and <see cref="ConfigHotReload"/>.
+        ///     comes from <see cref="ConfigIsOptional" /> and <see cref="ConfigHotReload" />.
         /// </remarks>
         public static void AddConfigInConfigurationBuilder(IConfigurationBuilder config)
         {
@@ -87,7 +87,7 @@ namespace DMBServerHelper
         /// </returns>
         /// <remarks>
         ///     The returned value is appended to configuration file names such as
-        ///     <c>{ConfigurationType}.{Environment}.json</c> by <see cref="AddConfigInConfigurationBuilder"/>.
+        ///     <c>{ConfigurationType}.{Environment}.json</c> by <see cref="AddConfigInConfigurationBuilder" />.
         /// </remarks>
         protected static string GetEnvironmentVariable()
         {
@@ -99,6 +99,7 @@ namespace DMBServerHelper
 
             return env;
         }
+
         /// <summary>
         ///     Loads the common configuration lifecycle from a web application builder.
         /// </summary>
@@ -109,6 +110,7 @@ namespace DMBServerHelper
         {
             LoadCommonConfig(builder, builder.Configuration, builder.Configuration);
         }
+
         /// <summary>
         ///     Loads the common configuration lifecycle from explicit host and configuration objects.
         /// </summary>
@@ -122,9 +124,9 @@ namespace DMBServerHelper
         ///     The configuration root used to bind the concrete configuration section.
         /// </param>
         /// <remarks>
-        ///     The method returns immediately when <see cref="IServerConfig.Loaded"/> is already set. When
-        ///     <see cref="ApiDescription"/> is enabled, the concrete configuration assembly is registered in
-        ///     <see cref="ApiDocumentationList"/>.
+        ///     The method returns immediately when <see cref="IServerConfig.Loaded" /> is already set. When
+        ///     <see cref="ApiDescription" /> is enabled, the concrete configuration assembly is registered in
+        ///     <see cref="ApiDocumentationList" />.
         /// </remarks>
         public static void LoadCommonConfig(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot)
         {
@@ -149,6 +151,7 @@ namespace DMBServerHelper
             Config.AfterConfiguration(appBuilder, configBuilder, configRoot);
             Config.Loaded = true;
         }
+
         /// <summary>
         ///     Binds the concrete configuration section from a configuration root.
         /// </summary>
@@ -172,6 +175,7 @@ namespace DMBServerHelper
                 PrintExample();
             }
         }
+
         /// <summary>
         ///     Prints a one-time missing-configuration notice for the concrete configuration type.
         /// </summary>
@@ -179,8 +183,8 @@ namespace DMBServerHelper
         ///     A value indicating whether the notice should explicitly state that no configuration file was found.
         /// </param>
         /// <remarks>
-        ///     The method sets <see cref="IServerConfig.ExamplePrinted"/> to avoid repeated console output and
-        ///     calls <see cref="RandomFake"/> on a new example instance so derived configurations can prepare
+        ///     The method sets <see cref="IServerConfig.ExamplePrinted" /> to avoid repeated console output and
+        ///     calls <see cref="RandomFake" /> on a new example instance so derived configurations can prepare
         ///     representative values.
         /// </remarks>
         public static void PrintExample(bool notFound = false)
@@ -231,6 +235,7 @@ namespace DMBServerHelper
         #region Instance methods
 
         #region From interface IServerConfig
+
         /// <summary>
         ///     Runs after optional file loading and configuration binding have completed.
         /// </summary>
@@ -244,14 +249,16 @@ namespace DMBServerHelper
         ///     The configuration root supplied by the loading lifecycle.
         /// </param>
         public abstract void AfterConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot);
+
         /// <summary>
         ///     Indicates whether the concrete configuration assembly should be registered for API documentation.
         /// </summary>
         /// <returns>
-        ///     <see langword="true"/> when <see cref="ApiDocumentationList"/> should include the concrete assembly;
-        ///     otherwise, <see langword="false"/>.
+        ///     <see langword="true" /> when <see cref="ApiDocumentationList" /> should include the concrete assembly;
+        ///     otherwise, <see langword="false" />.
         /// </returns>
         public abstract bool ApiDescription();
+
         /// <summary>
         ///     Runs before optional file loading and configuration binding.
         /// </summary>
@@ -265,38 +272,42 @@ namespace DMBServerHelper
         ///     The configuration root supplied by the loading lifecycle.
         /// </param>
         public abstract void BeforeConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot);
+
         /// <summary>
         ///     Indicates whether JSON configuration files should be loaded with reload-on-change enabled.
         /// </summary>
         /// <returns>
-        ///     <see langword="false"/> by default.
+        ///     <see langword="false" /> by default.
         /// </returns>
         public virtual bool ConfigHotReload()
         {
             return false;
         }
+
         /// <summary>
         ///     Indicates whether JSON configuration files are optional.
         /// </summary>
         /// <returns>
-        ///     <see langword="true"/> by default.
+        ///     <see langword="true" /> by default.
         /// </returns>
         public virtual bool ConfigIsOptional()
         {
             return true;
         }
+
         /// <summary>
         ///     Indicates whether the configuration should be loaded from JSON files or app settings.
         /// </summary>
         /// <returns>
-        ///     <see langword="true"/> when the lifecycle should add and bind configuration sources.
+        ///     <see langword="true" /> when the lifecycle should add and bind configuration sources.
         /// </returns>
         public abstract bool NeedsConfigFileOrAppSettings();
+
         /// <summary>
         ///     Populates the configuration with representative example values.
         /// </summary>
         /// <remarks>
-        ///     This method is used by <see cref="PrintExample"/> when configuration is missing.
+        ///     This method is used by <see cref="PrintExample" /> when configuration is missing.
         /// </remarks>
         public abstract void RandomFake();
 

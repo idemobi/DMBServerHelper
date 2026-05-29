@@ -1,9 +1,7 @@
 #region Copyright
 
-// Game-Data-Forge Solution
-// Written by CONTART Jean-François & BOULOGNE Quentin
-// DMBServerHelper.csproj SessionLong.cs create at 2026/04/07 21:04:27
-// ©2024-2026 idéMobi SARL FRANCE
+// ©2002-2026 idéMobi
+// www.idemobi.com
 
 #endregion
 
@@ -27,7 +25,7 @@ namespace DMBServerHelper
         ///     Gets a registered long integer session definition by name.
         /// </summary>
         /// <param name="name">The name of the session definition.</param>
-        /// <returns>The registered definition, or <see langword="null"/> when no matching definition exists.</returns>
+        /// <returns>The registered definition, or <see langword="null" /> when no matching definition exists.</returns>
         public static SessionLong? GetSessionDefinition(string name)
         {
             SessionLong? result = null;
