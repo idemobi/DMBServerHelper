@@ -35,9 +35,9 @@
         <Authors>Jean-François CONTART, Quentin BOULOGNE, Camille GOLLIOT</Authors>
         <Copyright>Copyright © $(Company) $([System.DateTime]::UtcNow.ToString("yyyy"))</Copyright>
         <NeutralLanguage>en</NeutralLanguage>
-        <PackageProjectUrl>https://dev.azure.com/Game-Data-Forge/Game-Data-Forge</PackageProjectUrl>
+        <PackageProjectUrl>https://dev.azure.com/ideMobi/DMBServerHelper/_git/DMBServerHelper</PackageProjectUrl>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-        <RepositoryUrl>https://Game-Data-Forge@dev.azure.com/Game-Data-Forge/Game-Data-Forge/_git/Game-Data-Forge</RepositoryUrl>
+        <RepositoryUrl>git@ssh.dev.azure.com:v3/ideMobi/DMBServerHelper/DMBServerHelper</RepositoryUrl>
         <RepositoryType>AzureDevOps</RepositoryType>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <GenerateAssemblyMetadataAttribute>true</GenerateAssemblyMetadataAttribute>
@@ -92,7 +92,6 @@
         </Compile>
     </ItemGroup>
     <ItemGroup Condition=" '$(Configuration)' == 'Debug' " Label="Razor Generator">
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.8" />
         <Content Update="Views\*">
             <Generator>RazorGenerator</Generator>
         </Content>
