@@ -2,7 +2,7 @@
     <PropertyGroup>
         <RootNamespace>DMBServerHelper</RootNamespace>
         <Title>DMBServerHelper</Title>
-        <PackageTags>idemobi Server Helper</PackageTags>
+        <PackageTags>idemobi DMB PageBuilder Server Infrastructure Configuration Localization Cookies Sessions Validation</PackageTags>
         <Description>Server-side helper package for cookies, sessions, localization, validation, attributes, and shared infrastructure.</Description>
         <PackageReleaseNotes>note</PackageReleaseNotes>
         <PackageIcon>DMBServerHelper.png</PackageIcon>
