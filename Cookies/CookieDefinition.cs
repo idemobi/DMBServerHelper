@@ -8,6 +8,7 @@
 #region
 
 using System.Globalization;
+using System.Net;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
@@ -152,8 +153,12 @@ namespace DMBServerHelper
             string rReturn = EncodeCookieValue(Name) + "=" + EncodeCookieValue(value) + ";" +
                              " expires=" + DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT;" +
                              " path=/;" +
-                             " samesite=" + LimitSite.ToString()
-                             + "; Secure";
+                             " samesite=" + LimitSite.ToString();
+            if (Secure)
+            {
+                rReturn += "; Secure";
+            }
+
             return rReturn;
         }
 
@@ -354,7 +359,8 @@ namespace DMBServerHelper
                 string? value = _GetValue(httpContext);
                 if (value != null)
                 {
-                    return "<span>" + Regex.Replace(value, ".{12}", "$0</span>&hairsp;<span>") + "</span>";
+                    string encodedValue = WebUtility.HtmlEncode(value);
+                    return "<span>" + Regex.Replace(encodedValue, ".{12}", "$0</span>&hairsp;<span>") + "</span>";
                 }
                 else
                 {
