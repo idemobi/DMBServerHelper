@@ -1,4 +1,4 @@
-# Page Template — Introduction / Getting Started / Architecture / Rendering Pipeline
+﻿# Page Template — Introduction / Getting Started / Architecture / Rendering Pipeline
 
 ## Purpose
 
@@ -20,10 +20,10 @@ Toutes les balises HTML sont interdites dans les vues. Utiliser exclusivement le
 | `<p>`                  | `Html.PB_P()`                                                                  |
 | `<h1>` … `<h6>`        | `Html.TitleBuilder().SetTitle("...", TitleLevel.One)` … `.Six`                 |
 | `<span>`, `<i>`        | `Html.PB_Span()`                                                               |
-| `<strong>`             | `Html.PB_Span().AddClass("fw-bold")`                                           |
-| `<em>`                 | `Html.PB_Span().AddClass("fst-italic")`                                        |
-| `<code>`               | `Html.PB_Span().AddClass("font-monospace bg-body-secondary rounded px-1")`     |
-| `<ul>` / `<li>`        | `BlockBuilder` imbriqués avec les classes Bootstrap équivalentes               |
+| `<strong>`             | `Html.PB_Span().AsBold()`                                                      |
+| `<em>`                 | `Html.PB_Span().AsItalic()`                                                    |
+| `<code>`               | `Html.PB_Span().AsMonospace()`                                                 |
+| `<ul>` / `<li>`        | `BlockBuilder` imbriqués avec les helpers Bootstrap équivalents                |
 
 ### 2. Règle RZ1006 — blocs `@:` toujours multi-lignes
 
@@ -32,10 +32,10 @@ Un bloc sur une seule ligne provoque l'erreur RZ1006 (Razor ferme le `using` tro
 
 ```razor
 @* ❌ INTERDIT — provoque RZ1006 *@
-@using (Html.PB_Span().AddClass("fw-bold").Begin()) { @:Texte }
+@using (Html.PB_Span().AsBold().Begin()) { @:Texte }
 
 @* ✅ CORRECT *@
-@using (Html.PB_Span().AddClass("fw-bold").Begin())
+@using (Html.PB_Span().AsBold().Begin())
 {
     @:Texte
 }
@@ -62,9 +62,24 @@ utiliser `BlockBuilder().AddClass("d-flex ...")` à la place.
 Ne jamais utiliser `bg-dark`, `bg-light`, `bg-white`, `text-dark`, `text-white`.
 Utiliser `bg-body`, `bg-body-secondary`, `bg-body-tertiary`, `text-muted`, `text-body`.
 
-### 5. Sidebar sticky
-La sidebar utilise `BlockBuilder().AddClass("sticky-top").SetStyle("top", "130px")`.
-Ne jamais écrire `style="top: 130px"` inline dans du HTML brut.
+### 5. Helpers CSS — utiliser les méthodes sémantiques plutôt que les classes brutes
+
+| Classe Bootstrap brute                        | Helper à utiliser                         |
+|-----------------------------------------------|-------------------------------------------|
+| `AddClass("text-center")`                     | `AsTextCenter()`                          |
+| `AddClass("lead")`                            | `AsLead()`                                |
+| `AddClass("fw-bold")`                         | `AsBold()`                                |
+| `AddClass("fst-italic")`                      | `AsItalic()`                              |
+| `AddClass("font-monospace")`                  | `AsMonospace()`                           |
+| `AddClass("font-monospace small")`            | `AsMonospaceSmall()`                      |
+| `AddClass("text-muted small mb-0")`           | `AsSmallMuted().AsNoMargin()`             |
+| `AddClass("fw-semibold")`                     | `AsSemiBold()`                            |
+| `AddClass("mb-0")`                            | `AsNoMargin()`                            |
+| `AddClass("text-muted")`                      | `AsMuted()`                               |
+| `AddClass("h4")`                              | `AsH4()`                                  |
+| `AddClass("alert-heading")`                   | `AsAlertHeading()`                        |
+| `AddClass("text-primary")`                    | `AsTextPrimary()`                         |
+| `AddClass("text-success")`                    | `AsTextSuccess()`                         |
 
 ---
 
@@ -101,50 +116,68 @@ Controller         : labs_idemobi_com/Controllers/{{CONTROLLER}}Controller.cs
 
 ## Placeholders
 
-| Placeholder              | Exemple                                                              |
-|--------------------------|----------------------------------------------------------------------|
-| `{{NAMESPACE}}`          | `DMBEffectBuilder`                                                   |
-| `{{CONTROLLER}}`         | `EffectBuilder`                                                      |
-| `{{PACKAGE_NAME}}`       | `EffectBuilder`                                                      |
-| `{{TAGLINE}}`            | `Giving life to your components with simple Fluent API extensions.`  |
-| `{{DESCRIPTION}}`        | Une ou deux phrases sur le rôle du package.                          |
-| `{{PILLARS_HEADING}}`    | `Three Pillars of Effects`                                           |
-| `{{PILLARS_INTRO}}`      | Courte phrase introduisant les trois domaines.                       |
-| `{{ICON_N}}`             | Classe Bootstrap Icons, ex. `bi-image`                               |
-| `{{PILLAR_N_TITLE}}`     | `Image Effects`                                                      |
-| `{{PILLAR_N_DESC}}`      | Courte phrase se terminant par le nom du builder concerné.           |
-| `{{PILLAR_N_CODE}}`      | `.PulseEffect()`                                                     |
-| `{{PHILOSOPHY_TITLE}}`   | `Core Philosophy`                                                    |
-| `{{PHILOSOPHY_TEXT}}`    | Une ou deux phrases sur l'intention de design.                       |
-| `{{BENEFIT_N_LABEL}}`    | `No CSS Overhead`                                                    |
-| `{{BENEFIT_N_DESC}}`     | Une phrase.                                                          |
-| `{{PREVIEW_HINT}}`       | Courte phrase décrivant l'aperçu interactif.                         |
-| `{{PREVIEW_COMPONENT}}`  | Snippet Razor rendant un composant live (ex. `ImageRender(...)`).    |
-| `{{PREVIEW_CODE}}`       | One-liner affiché sous l'aperçu dans la balise monospace.            |
-| `{{STEP_N_TITLE}}`       | `Install the NuGet Package`                                          |
-| `{{STEP_N_DESC}}`        | Paragraphe avant le bloc de code.                                    |
-| `{{STEP_N_CODE}}`        | Contenu du code block.                                               |
-| `{{STEP_N_LANG}}`        | `CodeLanguage.Bash` ou `CodeLanguage.CSharp`                         |
-| `{{STEP_N_CODE_TITLE}}`  | Titre affiché au-dessus du code block.                               |
-| `{{QUICKREF_ITEM_N}}`    | `.GrayscaleHoverEffect()`                                            |
-| `{{ARCH_N_TITLE}}`       | `Component Separation`                                               |
-| `{{ARCH_N_CODE}}`        | Contenu du code block illustrant le concept.                         |
-| `{{ARCH_N_LANG}}`        | `CodeLanguage.CSharp` ou `CodeLanguage.Css`                          |
-| `{{TECH_KEY_N}}`         | `Backend`                                                            |
-| `{{TECH_VAL_N}}`         | `.NET 10 / ASP.NET Core`                                             |
-| `{{PIPE_N_TITLE}}`       | `Fluent API Call`                                                    |
-| `{{PIPE_N_BODY}}`        | Paragraphe expliquant cette étape du pipeline.                       |
-| `{{PIPE_N_CODE}}`        | Contenu du code block de l'étape.                                    |
-| `{{PIPE_N_LANG}}`        | `CodeLanguage.CSharp`                                                |
-| `{{PERF_TITLE}}`         | `Optimized for Speed`                                                |
-| `{{PERF_DESC}}`          | Courte phrase sur les performances.                                  |
-| `{{NEXT_STEP_LABEL}}`    | `Getting Started`                                                    |
-| `{{NEXT_STEP_CONTROLLER}}`| `EffectBuilder`                                                     |
-| `{{NEXT_STEP_ACTION}}`   | `GettingStarted`                                                     |
-| `{{NEXT_STEP_ICON}}`     | `bi-play-fill`                                                       |
-| `{{NEXT_STEP_DESC}}`     | Une phrase décrivant la page suivante.                               |
-
-Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` / `text-warning`.
+| Placeholder                  | Exemple                                                              |
+|------------------------------|----------------------------------------------------------------------|
+| `{{NAMESPACE}}`              | `DMBEffectBuilder`                                                   |
+| `{{CONTROLLER}}`             | `EffectBuilder`                                                      |
+| `{{PACKAGE_NAME}}`           | `EffectBuilder`                                                      |
+| `{{TAGLINE}}`                | `Giving life to your components with simple Fluent API extensions.`  |
+| `{{DESCRIPTION}}`            | Une ou deux phrases sur le rôle du package.                          |
+| `{{HERO_BTN_1_TITLE}}`       | `Get Started`                                                        |
+| `{{HERO_BTN_1_ACTION}}`      | `GettingStarted`                                                     |
+| `{{HERO_BTN_1_ICON}}`        | `bi-play-fill`                                                       |
+| `{{HERO_BTN_2_TITLE}}`       | `Browse Effects`                                                     |
+| `{{HERO_BTN_2_CONTROLLER}}`  | `ImageEffect`                                                        |
+| `{{HERO_BTN_2_ACTION}}`      | `Index`                                                              |
+| `{{HERO_BTN_2_ICON}}`        | `bi-grid`                                                            |
+| `{{PILLAR_N_ICON}}`          | `bi-code-slash`                                                      |
+| `{{PILLAR_N_COLOR}}`         | `text-primary` / `text-warning` / `text-success`                     |
+| `{{PILLAR_N_TITLE}}`         | `Fluent C# API`                                                      |
+| `{{PILLAR_N_DESC}}`          | Courte phrase se terminant par le nom du builder concerné.           |
+| `{{FAMILIES_HEADING}}`       | `Three Effect Families`                                              |
+| `{{FAMILIES_INTRO}}`         | Courte phrase introduisant les familles.                             |
+| `{{FAMILY_N_PREVIEW}}`       | Snippet Razor rendant un composant live.                             |
+| `{{FAMILY_N_ICON}}`          | `bi-image`                                                           |
+| `{{FAMILY_N_COLOR}}`         | `text-primary` / `text-success` / `text-warning`                     |
+| `{{FAMILY_N_TITLE}}`         | `Image Effects`                                                      |
+| `{{FAMILY_N_DESC}}`          | Courte phrase décrivant la famille.                                  |
+| `{{FAMILY_N_CODE}}`          | `.GrayscaleHoverEffect()`                                            |
+| `{{PHILOSOPHY_TITLE}}`       | `Design for intent, not implementation`                              |
+| `{{PHILOSOPHY_TEXT}}`        | Une ou deux phrases sur l'intention de design.                       |
+| `{{NEXT_STEP_TITLE}}`        | `Next Step`                                                          |
+| `{{NEXT_STEP_DESC}}`         | Une phrase décrivant la page suivante.                               |
+| `{{NEXT_STEP_LABEL}}`        | `Getting Started`                                                    |
+| `{{NEXT_STEP_ACTION}}`       | `GettingStarted`                                                     |
+| `{{NEXT_STEP_ICON}}`         | `bi-play-fill`                                                       |
+| `{{STEP_N_TITLE}}`           | `Install the NuGet Package`                                          |
+| `{{STEP_N_DESC}}`            | Paragraphe avant le bloc de code.                                    |
+| `{{STEP_N_CODE}}`            | Contenu du code block.                                               |
+| `{{STEP_N_LANG}}`            | `CodeLanguage.Bash` ou `CodeLanguage.CSharp`                         |
+| `{{STEP_N_CODE_TITLE}}`      | Titre affiché au-dessus du code block.                               |
+| `{{QUICKREF_TITLE}}`         | `Common Effects`                                                     |
+| `{{QUICKREF_ITEM_N}}`        | `.GrayscaleHoverEffect()`                                            |
+| `{{CATALOG_CONTROLLER}}`     | `ImageEffect`                                                        |
+| `{{CATALOG_ACTION}}`         | `Index`                                                              |
+| `{{CATALOG_LABEL}}`          | `See Full Catalog`                                                   |
+| `{{CATALOG_ICON}}`           | `bi-collection`                                                      |
+| `{{ARCH_N_TITLE}}`           | `Component Separation`                                               |
+| `{{ARCH_N_BODY}}`            | Paragraphe expliquant le concept.                                    |
+| `{{ARCH_N_CODE}}`            | Contenu du code block illustrant le concept.                         |
+| `{{ARCH_N_LANG}}`            | `CodeLanguage.CSharp` ou `CodeLanguage.Css`                          |
+| `{{ARCH_N_CODE_TITLE}}`      | Titre du code block.                                                 |
+| `{{TECH_KEY_N}}`             | `Backend`                                                            |
+| `{{TECH_VAL_N}}`             | `.NET 10 / ASP.NET Core`                                             |
+| `{{PIPE_N_TITLE}}`           | `Fluent API Call`                                                    |
+| `{{PIPE_N_BODY}}`            | Paragraphe expliquant cette étape du pipeline.                       |
+| `{{PIPE_N_CODE}}`            | Contenu du code block de l'étape.                                    |
+| `{{PIPE_N_LANG}}`            | `CodeLanguage.CSharp`                                                |
+| `{{CHAIN_TITLE}}`            | `Chaining Multiple Effects`                                          |
+| `{{CHAIN_DESC}}`             | Courte phrase sur le chaînage.                                       |
+| `{{CHAIN_CODE}}`             | Exemple de chaînage.                                                 |
+| `{{CHAIN_LANG}}`             | `CodeLanguage.CSharp`                                                |
+| `{{CHAIN_CODE_TITLE}}`       | Titre du code block.                                                 |
+| `{{PERF_TITLE}}`             | `Optimized for Speed`                                                |
+| `{{PERF_DESC}}`              | Courte phrase sur les performances.                                  |
 
 ---
 
@@ -159,180 +192,263 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
     Layout = "_Layout";
 }
 
-@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).Begin())
+@* ── Hero ── *@
+@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).BootstrapBackgroundEffect(VariantStyle.Normal).Begin())
 {
     @using (Html.FlexBlockBuilder().SetAlignItemsCenter().SetJustifyContentCenter().Begin())
     {
-        @using (Html.BlockBuilder().AddClass("text-center").Begin())
+        @using (Html.BlockBuilder().AsTextCenter().Begin())
         {
             @Html.TitleBuilder().SetTitle("Introduction — {{PACKAGE_NAME}}", TitleLevel.One).Render()
-            @using (Html.PB_P().AddClass("lead").Begin())
+            @using (Html.PB_P().AsLead().Begin())
             {
                 @:{{TAGLINE}}
+            }
+            @using (Html.FlexBlockBuilder().SetJustifyContentCenter().WithGap(Old_Gap.Gap2).Begin())
+            {
+                @Html.Button(ActionItemFactory.AspRoute("{{CONTROLLER}}", "{{HERO_BTN_1_ACTION}}").SetTitle("{{HERO_BTN_1_TITLE}}").SetIcon(IconStruct.Bootstrap("{{HERO_BTN_1_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
+                @Html.Button(ActionItemFactory.AspRoute("{{HERO_BTN_2_CONTROLLER}}", "{{HERO_BTN_2_ACTION}}").SetTitle("{{HERO_BTN_2_TITLE}}").SetIcon(IconStruct.Bootstrap("{{HERO_BTN_2_ICON}}")).SetVariant(VariantStyle.Secondary).SetOutlined()).Render()
             }
         }
     }
 }
 
-@using (Html.ContainerBuilder().SetPadding(SpacingSide.Y, SpacingSize.Five).Begin())
+@* ── 3 piliers visuels ── *@
+@using (Html.BlockBuilder().AsSectionContentTop().Begin())
 {
-    @using (Html.RowBuilder().Begin())
+    @using (Html.RowBuilder().AsPillarGrid().Begin())
     {
-        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col8, ResponsiveBreakpoint.Md).Begin())
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
         {
-            @Html.TitleBuilder().SetTitle("What is {{PACKAGE_NAME}}?", TitleLevel.Two).AddClass("mb-4").Render()
+            @using (Html.BlockBuilder().AsSidebarCard().Begin())
+            {
+                @using (Html.BlockBuilder().AsPaddedBlock().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi {{PILLAR_1_ICON}} fs-2 text-primary d-block mb-2").Begin()) { }
+                    @using (Html.PB_Span().AsSemiBold().Begin())
+                    {
+                        @:{{PILLAR_1_TITLE}}
+                    }
+                    @using (Html.PB_P().AsSmallMuted().AsNoMargin().Begin())
+                    {
+                        @:{{PILLAR_1_DESC}}
+                    }
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
+        {
+            @using (Html.BlockBuilder().AsSidebarCard().Begin())
+            {
+                @using (Html.BlockBuilder().AsPaddedBlock().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi {{PILLAR_2_ICON}} fs-2 text-warning d-block mb-2").Begin()) { }
+                    @using (Html.PB_Span().AsSemiBold().Begin())
+                    {
+                        @:{{PILLAR_2_TITLE}}
+                    }
+                    @using (Html.PB_P().AsSmallMuted().AsNoMargin().Begin())
+                    {
+                        @:{{PILLAR_2_DESC}}
+                    }
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
+        {
+            @using (Html.BlockBuilder().AsSidebarCard().Begin())
+            {
+                @using (Html.BlockBuilder().AsPaddedBlock().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi {{PILLAR_3_ICON}} fs-2 text-success d-block mb-2").Begin()) { }
+                    @using (Html.PB_Span().AsSemiBold().Begin())
+                    {
+                        @:{{PILLAR_3_TITLE}}
+                    }
+                    @using (Html.PB_P().AsSmallMuted().AsNoMargin().Begin())
+                    {
+                        @:{{PILLAR_3_DESC}}
+                    }
+                }
+            }
+        }
+    }
+}
+
+@* ── What is + aperçu live ── *@
+@using (Html.BlockBuilder().AsSectionContent().Begin())
+{
+    @using (Html.RowBuilder().SetGapY(Gap.G5).SetAlignItems(AlignItems.Center).Begin())
+    {
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col7, ResponsiveBreakpoint.Lg).Begin())
+        {
+            @Html.TitleBuilder().SetTitle("What is {{PACKAGE_NAME}}?", TitleLevel.Two).AsSectionHeading().Render()
             @using (Html.PB_P().Begin())
             {
                 @:{{DESCRIPTION}}
             }
-
-            @Html.TitleBuilder().SetTitle("{{PILLARS_HEADING}}", TitleLevel.Three).AddClass("mt-5").Render()
-            @using (Html.PB_P().Begin())
-            {
-                @:{{PILLARS_INTRO}}
-            }
-
-            @using (Html.RowBuilder().SetGap(Gap.G4).AddClass("mt-2").Begin())
-            {
-                @using (Html.ColBuilder().SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
-                {
-                    @using (Html.BlockBuilder().AddClass("p-3 border rounded-4 h-100 shadow-sm").Begin())
-                    {
-                        @using (Html.PB_Span().AddClass("bi {{ICON_1}} fs-1 text-primary mb-3 d-block").Begin()) { }
-                        @Html.TitleBuilder().SetTitle("{{PILLAR_1_TITLE}}", TitleLevel.Five).Render()
-                        @using (Html.PB_P().AddClass("small text-muted").Begin())
-                        {
-                            @:{{PILLAR_1_DESC}}
-                        }
-                        @using (Html.PB_Span().AddClass("font-monospace small").Begin())
-                        {
-                            @:{{PILLAR_1_CODE}}
-                        }
-                    }
-                }
-                @using (Html.ColBuilder().SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
-                {
-                    @using (Html.BlockBuilder().AddClass("p-3 border rounded-4 h-100 shadow-sm").Begin())
-                    {
-                        @using (Html.PB_Span().AddClass("bi {{ICON_2}} fs-1 text-success mb-3 d-block").Begin()) { }
-                        @Html.TitleBuilder().SetTitle("{{PILLAR_2_TITLE}}", TitleLevel.Five).Render()
-                        @using (Html.PB_P().AddClass("small text-muted").Begin())
-                        {
-                            @:{{PILLAR_2_DESC}}
-                        }
-                        @using (Html.PB_Span().AddClass("font-monospace small").Begin())
-                        {
-                            @:{{PILLAR_2_CODE}}
-                        }
-                    }
-                }
-                @using (Html.ColBuilder().SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
-                {
-                    @using (Html.BlockBuilder().AddClass("p-3 border rounded-4 h-100 shadow-sm").Begin())
-                    {
-                        @using (Html.PB_Span().AddClass("bi {{ICON_3}} fs-1 text-warning mb-3 d-block").Begin()) { }
-                        @Html.TitleBuilder().SetTitle("{{PILLAR_3_TITLE}}", TitleLevel.Five).Render()
-                        @using (Html.PB_P().AddClass("small text-muted").Begin())
-                        {
-                            @:{{PILLAR_3_DESC}}
-                        }
-                        @using (Html.PB_Span().AddClass("font-monospace small").Begin())
-                        {
-                            @:{{PILLAR_3_CODE}}
-                        }
-                    }
-                }
-            }
-
-            @using (Html.BlockBuilder().AddClass("alert alert-info border-0 shadow-sm rounded-4 p-4 my-4").Begin())
-            {
-                @using (Html.BlockBuilder().AddClass("d-flex").Begin())
-                {
-                    @using (Html.BlockBuilder().AddClass("me-3").Begin())
-                    {
-                        @using (Html.PB_Span().AddClass("bi bi-lightbulb-fill fs-2 text-info").Begin()) { }
-                    }
-                    @using (Html.BlockBuilder().Begin())
-                    {
-                        @Html.TitleBuilder().SetTitle("{{PHILOSOPHY_TITLE}}", TitleLevel.Four).AddClass("alert-heading").Render()
-                        @using (Html.PB_P().AddClass("mb-0").Begin())
-                        {
-                            @:{{PHILOSOPHY_TEXT}}
-                        }
-                    }
-                }
-            }
-
-            @Html.TitleBuilder().SetTitle("Key Benefits", TitleLevel.Three).AddClass("mt-5").Render()
-
-            @using (Html.BlockBuilder().AddClass("mb-3 d-flex align-items-start").Begin())
+            @using (Html.BlockBuilder().AsBenefitRow().Begin())
             {
                 @using (Html.PB_Span().AddClass("bi bi-check-circle-fill text-success me-3 mt-1").Begin()) { }
                 @using (Html.BlockBuilder().Begin())
                 {
-                    @using (Html.PB_Span().AddClass("fw-bold").Begin())
-                    {
-                        @:{{BENEFIT_1_LABEL}}:
-                    }
-                    @: {{BENEFIT_1_DESC}}
+                    @:{{BENEFIT_1_DESC}}
                 }
             }
-            @using (Html.BlockBuilder().AddClass("mb-3 d-flex align-items-start").Begin())
+            @using (Html.BlockBuilder().AsBenefitRow().Begin())
             {
                 @using (Html.PB_Span().AddClass("bi bi-check-circle-fill text-success me-3 mt-1").Begin()) { }
                 @using (Html.BlockBuilder().Begin())
                 {
-                    @using (Html.PB_Span().AddClass("fw-bold").Begin())
-                    {
-                        @:{{BENEFIT_2_LABEL}}:
-                    }
-                    @: {{BENEFIT_2_DESC}}
+                    @:{{BENEFIT_2_DESC}}
                 }
             }
-            @using (Html.BlockBuilder().AddClass("mb-3 d-flex align-items-start").Begin())
+            @using (Html.BlockBuilder().AsBenefitRow().Begin())
             {
                 @using (Html.PB_Span().AddClass("bi bi-check-circle-fill text-success me-3 mt-1").Begin()) { }
                 @using (Html.BlockBuilder().Begin())
                 {
-                    @using (Html.PB_Span().AddClass("fw-bold").Begin())
-                    {
-                        @:{{BENEFIT_3_LABEL}}:
-                    }
-                    @: {{BENEFIT_3_DESC}}
+                    @:{{BENEFIT_3_DESC}}
                 }
             }
         }
-
-        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col5, ResponsiveBreakpoint.Lg).Begin())
         {
-            @using (Html.BlockBuilder().AddClass("sticky-top").SetStyle("top", "130px").Begin())
+            @using (Html.BlockBuilder().AsSidebarCard().Begin())
             {
-                @using (Html.BlockBuilder().AddClass("border-0 shadow-sm rounded-4 overflow-hidden").Begin())
+                @using (Html.BlockBuilder().AsPreviewWrapper().Begin())
                 {
-                    @using (Html.BlockBuilder().AddClass("p-4").Begin())
+                    {{PREVIEW_COMPONENT}}
+                }
+                @using (Html.BlockBuilder().AsPaddedBlock().Begin())
+                {
+                    @(Html.CodeBlock(@"{{PREVIEW_CODE}}", CodeLanguage.CSharp))
+                    @using (Html.PB_P().AsSmallMuted().AsNoMargin().Begin())
                     {
-                        @Html.TitleBuilder().SetTitle("Quick Preview", TitleLevel.Four).Render()
-                        @using (Html.PB_P().AddClass("text-muted small").Begin())
-                        {
-                            @:{{PREVIEW_HINT}}
-                        }
-                        @using (Html.BlockBuilder().AddClass("rounded-3 overflow-hidden").Begin())
-                        {
-                            {{PREVIEW_COMPONENT}}
-                        }
-                        @using (Html.BlockBuilder().AddClass("mt-3").Begin())
-                        {
-                            @using (Html.PB_Span().AddClass("bg-body-secondary p-2 rounded d-block small font-monospace overflow-x-auto").Begin())
-                            {
-                                @:{{PREVIEW_CODE}}
-                            }
-                        }
+                        @:{{PREVIEW_HINT}}
                     }
                 }
-                @using (Html.BlockBuilder().AddClass("mt-4 p-4 bg-body-secondary rounded-4 shadow-sm").Begin())
+            }
+        }
+    }
+}
+
+@* ── Trois familles ── *@
+@using (Html.BlockBuilder().AsSectionContent().Begin())
+{
+    @using (Html.BlockBuilder().AsTextCenter().Begin())
+    {
+        @Html.TitleBuilder().SetTitle("{{FAMILIES_HEADING}}", TitleLevel.Two).AsSectionHeading().Render()
+        @using (Html.PB_P().AsMuted().Begin())
+        {
+            @:{{FAMILIES_INTRO}}
+        }
+    }
+    @using (Html.RowBuilder().AsPillarGrid().Begin())
+    {
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
+        {
+            @using (Html.BlockBuilder().AsPillarCard().Begin())
+            {
+                @using (Html.BlockBuilder().AsPreviewWrapper().Begin())
                 {
-                    @Html.TitleBuilder().SetTitle("Next Step", TitleLevel.Five).Render()
-                    @using (Html.PB_P().AddClass("small text-muted").Begin())
+                    {{FAMILY_1_PREVIEW}}
+                }
+                @using (Html.BlockBuilder().AsTopMargin().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi {{FAMILY_1_ICON}} {{FAMILY_1_COLOR}} me-1").Begin()) { }
+                    @Html.TitleBuilder().SetTitle("{{FAMILY_1_TITLE}}", TitleLevel.Five).AsCompact().Render()
+                }
+                @using (Html.PB_P().AsSmallMuted().Begin())
+                {
+                    @:{{FAMILY_1_DESC}}
+                }
+                @using (Html.PB_Span().AsMonospaceSmall().Begin())
+                {
+                    @:{{FAMILY_1_CODE}}
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
+        {
+            @using (Html.BlockBuilder().AsPillarCard().Begin())
+            {
+                @using (Html.BlockBuilder().AsPreviewWrapper().Begin())
+                {
+                    {{FAMILY_2_PREVIEW}}
+                }
+                @using (Html.BlockBuilder().AsTopMargin().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi {{FAMILY_2_ICON}} {{FAMILY_2_COLOR}} me-1").Begin()) { }
+                    @Html.TitleBuilder().SetTitle("{{FAMILY_2_TITLE}}", TitleLevel.Five).AsCompact().Render()
+                }
+                @using (Html.PB_P().AsSmallMuted().Begin())
+                {
+                    @:{{FAMILY_2_DESC}}
+                }
+                @using (Html.PB_Span().AsMonospaceSmall().Begin())
+                {
+                    @:{{FAMILY_2_CODE}}
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
+        {
+            @using (Html.BlockBuilder().AsPillarCard().Begin())
+            {
+                @using (Html.BlockBuilder().AsPreviewWrapper().Begin())
+                {
+                    {{FAMILY_3_PREVIEW}}
+                }
+                @using (Html.BlockBuilder().AsTopMargin().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi {{FAMILY_3_ICON}} {{FAMILY_3_COLOR}} me-1").Begin()) { }
+                    @Html.TitleBuilder().SetTitle("{{FAMILY_3_TITLE}}", TitleLevel.Five).AsCompact().Render()
+                }
+                @using (Html.PB_P().AsSmallMuted().Begin())
+                {
+                    @:{{FAMILY_3_DESC}}
+                }
+                @using (Html.PB_Span().AsMonospaceSmall().Begin())
+                {
+                    @:{{FAMILY_3_CODE}}
+                }
+            }
+        }
+    }
+}
+
+@* ── Philosophy + Next Step ── *@
+@using (Html.BlockBuilder().AsSectionContent().Begin())
+{
+    @using (Html.FlexBlockBuilder().WithGap(Old_Gap.Gap3).SetAlignItemsStretch().Begin())
+    {
+        @using (Html.BlockBuilder().AsInfoCallout().SetStyle("margin", "0").SetStyle("flex", "2").Begin())
+        {
+            @using (Html.FlexBlockBuilder().Begin())
+            {
+                @using (Html.BlockBuilder().AsCalloutIcon().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi bi-lightbulb-fill fs-2 text-info").Begin()) { }
+                }
+                @using (Html.BlockBuilder().Begin())
+                {
+                    @Html.TitleBuilder().SetTitle("{{PHILOSOPHY_TITLE}}", TitleLevel.Four).AsAlertHeading().Render()
+                    @using (Html.PB_P().AsNoMargin().Begin())
+                    {
+                        @:{{PHILOSOPHY_TEXT}}
+                    }
+                }
+            }
+        }
+        @using (Html.BlockBuilder().AsSidebarCard().SetStyle("flex", "1").Begin())
+        {
+            @using (Html.BlockBuilder().AsPaddedBlock().SetStyle("height", "100%").Begin())
+            {
+                @using (Html.FlexBlockBuilder().SetFlexColumn().SetAlignItemsStart().SetJustifyContentCenter().SetStyle("height", "100%").Begin())
+                {
+                    @Html.TitleBuilder().SetTitle("{{NEXT_STEP_TITLE}}", TitleLevel.Five).Render()
+                    @using (Html.PB_P().AsSmallMuted().Begin())
                     {
                         @:{{NEXT_STEP_DESC}}
                     }
@@ -357,14 +473,15 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
     Layout = "_Layout";
 }
 
-@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).Begin())
+@* ── Hero ── *@
+@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).BootstrapBackgroundEffect(VariantStyle.Normal).Begin())
 {
     @using (Html.FlexBlockBuilder().SetAlignItemsCenter().SetJustifyContentCenter().Begin())
     {
-        @using (Html.BlockBuilder().AddClass("text-center").Begin())
+        @using (Html.BlockBuilder().AsTextCenter().Begin())
         {
             @Html.TitleBuilder().SetTitle("Getting Started — {{PACKAGE_NAME}}", TitleLevel.One).Render()
-            @using (Html.PB_P().AddClass("lead").Begin())
+            @using (Html.PB_P().AsLead().Begin())
             {
                 @:{{TAGLINE}}
             }
@@ -376,9 +493,10 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
 {
     @using (Html.RowBuilder().Begin())
     {
-        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col8, ResponsiveBreakpoint.Md).Begin())
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).Begin())
         {
-            @Html.TitleBuilder().SetTitle("1. {{STEP_1_TITLE}}", TitleLevel.Two).AddClass("mb-4").Render()
+            @* ── Step 1 ── *@
+            @Html.TitleBuilder().SetTitle("1. {{STEP_1_TITLE}}", TitleLevel.Two).AsSectionHeading().Render()
             @using (Html.PB_P().Begin())
             {
                 @:{{STEP_1_DESC}}
@@ -387,7 +505,8 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
                 .SetTitle("{{STEP_1_CODE_TITLE}}")
                 .SetCopyButton())
 
-            @Html.TitleBuilder().SetTitle("2. {{STEP_2_TITLE}}", TitleLevel.Two).AddClass("mb-4 mt-5").Render()
+            @* ── Step 2 ── *@
+            @Html.TitleBuilder().SetTitle("2. {{STEP_2_TITLE}}", TitleLevel.Two).AsSubSectionHeading().Render()
             @using (Html.PB_P().Begin())
             {
                 @:{{STEP_2_DESC}}
@@ -396,16 +515,34 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
                 .SetTitle("{{STEP_2_CODE_TITLE}}")
                 .SetCopyButton())
 
-            @Html.TitleBuilder().SetTitle("3. {{STEP_3_TITLE}}", TitleLevel.Two).AddClass("mb-4 mt-5").Render()
+            @* ── Step 3 ── *@
+            @Html.TitleBuilder().SetTitle("3. {{STEP_3_TITLE}}", TitleLevel.Two).AsSubSectionHeading().Render()
             @using (Html.PB_P().Begin())
             {
                 @:{{STEP_3_DESC}}
             }
-            @(Html.CodeBlock(@"{{STEP_3_CODE}}", {{STEP_3_LANG}})
-                .SetTitle("{{STEP_3_CODE_TITLE}}")
-                .SetCopyButton())
+            @using (Html.RowBuilder().AsEffectGrid().Begin())
+            {
+                @using (Html.ColBuilder().SetCol(ColSize.Col6, ResponsiveBreakpoint.Md).Begin())
+                {
+                    @using (Html.BlockBuilder().AsEffectTeaserCard().Begin())
+                    {
+                        @Html.TitleBuilder().SetTitle("{{TEASER_1_TITLE}}", TitleLevel.Six).AsTextPrimary().Render()
+                        @(Html.CodeBlock(@"{{TEASER_1_CODE}}", CodeLanguage.CSharp))
+                    }
+                }
+                @using (Html.ColBuilder().SetCol(ColSize.Col6, ResponsiveBreakpoint.Md).Begin())
+                {
+                    @using (Html.BlockBuilder().AsEffectTeaserCard().Begin())
+                    {
+                        @Html.TitleBuilder().SetTitle("{{TEASER_2_TITLE}}", TitleLevel.Six).AsTextSuccess().Render()
+                        @(Html.CodeBlock(@"{{TEASER_2_CODE}}", CodeLanguage.CSharp))
+                    }
+                }
+            }
 
-            @Html.TitleBuilder().SetTitle("4. {{STEP_4_TITLE}}", TitleLevel.Two).AddClass("mb-4 mt-5").Render()
+            @* ── Step 4 ── *@
+            @Html.TitleBuilder().SetTitle("4. {{STEP_4_TITLE}}", TitleLevel.Two).AsSubSectionHeading().Render()
             @using (Html.PB_P().Begin())
             {
                 @:{{STEP_4_DESC}}
@@ -413,62 +550,69 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
             @(Html.CodeBlock(@"{{STEP_4_CODE}}", {{STEP_4_LANG}})
                 .SetTitle("{{STEP_4_CODE_TITLE}}")
                 .SetCopyButton())
-        }
 
-        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
-        {
-            @using (Html.BlockBuilder().AddClass("sticky-top").SetStyle("top", "130px").Begin())
+            @* ── Quick reference ── *@
+            @using (Html.BlockBuilder().AsInfoCallout().Begin())
             {
-                @using (Html.BlockBuilder().AddClass("border-0 shadow-sm rounded-4 overflow-hidden").Begin())
+                @using (Html.FlexBlockBuilder().Begin())
                 {
-                    @using (Html.BlockBuilder().AddClass("p-4").Begin())
+                    @using (Html.BlockBuilder().AsCalloutIcon().Begin())
                     {
-                        @Html.TitleBuilder().SetTitle("{{QUICKREF_TITLE}}", TitleLevel.Five).Render()
-                        @using (Html.BlockBuilder().AddClass("border-top py-2").Begin())
+                        @using (Html.PB_Span().AddClass("bi bi-collection-fill fs-2 text-info").Begin()) { }
+                    }
+                    @using (Html.BlockBuilder().Begin())
+                    {
+                        @Html.TitleBuilder().SetTitle("{{QUICKREF_TITLE}}", TitleLevel.Five).AsAlertHeading().Render()
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
                         {
-                            @using (Html.PB_Span().AddClass("font-monospace small").Begin())
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
                             {
                                 @:{{QUICKREF_ITEM_1}}
                             }
                         }
-                        @using (Html.BlockBuilder().AddClass("border-top py-2").Begin())
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
                         {
-                            @using (Html.PB_Span().AddClass("font-monospace small").Begin())
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
                             {
                                 @:{{QUICKREF_ITEM_2}}
                             }
                         }
-                        @using (Html.BlockBuilder().AddClass("border-top py-2").Begin())
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
                         {
-                            @using (Html.PB_Span().AddClass("font-monospace small").Begin())
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
                             {
                                 @:{{QUICKREF_ITEM_3}}
                             }
                         }
-                        @using (Html.BlockBuilder().AddClass("border-top py-2").Begin())
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
                         {
-                            @using (Html.PB_Span().AddClass("font-monospace small").Begin())
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
                             {
                                 @:{{QUICKREF_ITEM_4}}
                             }
                         }
-                        @using (Html.BlockBuilder().AddClass("border-top py-2").Begin())
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
                         {
-                            @using (Html.PB_Span().AddClass("font-monospace small").Begin())
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
                             {
                                 @:{{QUICKREF_ITEM_5}}
                             }
                         }
-                        @using (Html.BlockBuilder().AddClass("mt-3").Begin())
+                        @using (Html.BlockBuilder().AsTopMargin().Begin())
                         {
-                            @Html.Button(ActionItemFactory.AspRoute("{{CATALOG_CONTROLLER}}", "{{CATALOG_ACTION}}").SetTitle("{{CATALOG_LABEL}}").SetIcon(IconStruct.Bootstrap("{{CATALOG_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
+                            @Html.Button(ActionItemFactory.AspRoute("{{CATALOG_CONTROLLER}}", "{{CATALOG_ACTION}}").SetTitle("{{CATALOG_LABEL}}").SetIcon(IconStruct.Bootstrap("{{CATALOG_ICON}}")).SetVariant(VariantStyle.Secondary).SetOutlined()).Render()
                         }
                     }
                 }
-                @using (Html.BlockBuilder().AddClass("mt-4 p-4 bg-body-secondary rounded-4 shadow-sm").Begin())
+            }
+
+            @* ── Next Step ── *@
+            @using (Html.BlockBuilder().AsSidebarNote().Begin())
+            {
+                @using (Html.BlockBuilder().AsTextCenter().Begin())
                 {
-                    @Html.TitleBuilder().SetTitle("Next Step", TitleLevel.Five).Render()
-                    @using (Html.PB_P().AddClass("small text-muted").Begin())
+                    @Html.TitleBuilder().SetTitle("{{NEXT_STEP_TITLE}}", TitleLevel.Four).Render()
+                    @using (Html.PB_P().AsSmallMuted().Begin())
                     {
                         @:{{NEXT_STEP_DESC}}
                     }
@@ -493,14 +637,15 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
     Layout = "_Layout";
 }
 
-@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).Begin())
+@* ── Hero ── *@
+@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).BootstrapBackgroundEffect(VariantStyle.Normal).Begin())
 {
     @using (Html.FlexBlockBuilder().SetAlignItemsCenter().SetJustifyContentCenter().Begin())
     {
-        @using (Html.BlockBuilder().AddClass("text-center").Begin())
+        @using (Html.BlockBuilder().AsTextCenter().Begin())
         {
             @Html.TitleBuilder().SetTitle("Architecture — {{PACKAGE_NAME}}", TitleLevel.One).Render()
-            @using (Html.PB_P().AddClass("lead").Begin())
+            @using (Html.PB_P().AsLead().Begin())
             {
                 @:{{TAGLINE}}
             }
@@ -512,9 +657,10 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
 {
     @using (Html.RowBuilder().Begin())
     {
-        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col8, ResponsiveBreakpoint.Md).Begin())
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).Begin())
         {
-            @Html.TitleBuilder().SetTitle("1. {{ARCH_1_TITLE}}", TitleLevel.Two).AddClass("mb-4").Render()
+            @* ── Section 1 ── *@
+            @Html.TitleBuilder().SetTitle("1. {{ARCH_1_TITLE}}", TitleLevel.Two).AsSectionHeading().Render()
             @using (Html.PB_P().Begin())
             {
                 @:{{ARCH_1_BODY}}
@@ -523,7 +669,8 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
                 .SetTitle("{{ARCH_1_CODE_TITLE}}")
                 .SetCopyButton())
 
-            @Html.TitleBuilder().SetTitle("2. {{ARCH_2_TITLE}}", TitleLevel.Two).AddClass("mb-4 mt-5").Render()
+            @* ── Section 2 ── *@
+            @Html.TitleBuilder().SetTitle("2. {{ARCH_2_TITLE}}", TitleLevel.Two).AsSubSectionHeading().Render()
             @using (Html.PB_P().Begin())
             {
                 @:{{ARCH_2_BODY}}
@@ -532,7 +679,8 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
                 .SetTitle("{{ARCH_2_CODE_TITLE}}")
                 .SetCopyButton())
 
-            @Html.TitleBuilder().SetTitle("3. {{ARCH_3_TITLE}}", TitleLevel.Two).AddClass("mb-4 mt-5").Render()
+            @* ── Section 3 ── *@
+            @Html.TitleBuilder().SetTitle("3. {{ARCH_3_TITLE}}", TitleLevel.Two).AsSubSectionHeading().Render()
             @using (Html.PB_P().Begin())
             {
                 @:{{ARCH_3_BODY}}
@@ -540,62 +688,62 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
             @(Html.CodeBlock(@"{{ARCH_3_CODE}}", {{ARCH_3_LANG}})
                 .SetTitle("{{ARCH_3_CODE_TITLE}}")
                 .SetCopyButton())
-        }
 
-        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
-        {
-            @using (Html.BlockBuilder().AddClass("sticky-top").SetStyle("top", "130px").Begin())
+            @* ── Tech Stack ── *@
+            @using (Html.BlockBuilder().AsInfoCallout().Begin())
             {
-                @using (Html.BlockBuilder().AddClass("border-0 shadow-sm rounded-4 overflow-hidden").Begin())
+                @using (Html.FlexBlockBuilder().Begin())
                 {
-                    @using (Html.BlockBuilder().AddClass("p-4").Begin())
+                    @using (Html.BlockBuilder().AsCalloutIcon().Begin())
                     {
-                        @using (Html.BlockBuilder().AddClass("d-flex align-items-center gap-2 mb-3").Begin())
+                        @using (Html.PB_Span().AddClass("bi bi-gear-fill fs-2 text-info").Begin()) { }
+                    }
+                    @using (Html.BlockBuilder().Begin())
+                    {
+                        @Html.TitleBuilder().SetTitle("Tech Stack", TitleLevel.Five).AsAlertHeading().Render()
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
                         {
-                            @using (Html.PB_Span().AddClass("bi bi-gear-fill fs-4 text-primary").Begin()) { }
-                            @Html.TitleBuilder().SetTitle("Tech Stack", TitleLevel.Five).AddClass("mb-0").Render()
+                            @using (Html.PB_Span().AsBold().Begin())
+                            {
+                                @:{{TECH_KEY_1}}:
+                            }
+                            @: {{TECH_VAL_1}}
                         }
-                        @using (Html.BlockBuilder().AddClass("border-top pt-3").Begin())
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
                         {
-                            @using (Html.BlockBuilder().AddClass("mb-2 small").Begin())
+                            @using (Html.PB_Span().AsBold().Begin())
                             {
-                                @using (Html.PB_Span().AddClass("fw-bold").Begin())
-                                {
-                                    @:{{TECH_KEY_1}}:
-                                }
-                                @: {{TECH_VAL_1}}
+                                @:{{TECH_KEY_2}}:
                             }
-                            @using (Html.BlockBuilder().AddClass("mb-2 small").Begin())
+                            @: {{TECH_VAL_2}}
+                        }
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsBold().Begin())
                             {
-                                @using (Html.PB_Span().AddClass("fw-bold").Begin())
-                                {
-                                    @:{{TECH_KEY_2}}:
-                                }
-                                @: {{TECH_VAL_2}}
+                                @:{{TECH_KEY_3}}:
                             }
-                            @using (Html.BlockBuilder().AddClass("mb-2 small").Begin())
+                            @: {{TECH_VAL_3}}
+                        }
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsBold().Begin())
                             {
-                                @using (Html.PB_Span().AddClass("fw-bold").Begin())
-                                {
-                                    @:{{TECH_KEY_3}}:
-                                }
-                                @: {{TECH_VAL_3}}
+                                @:{{TECH_KEY_4}}:
                             }
-                            @using (Html.BlockBuilder().AddClass("small").Begin())
-                            {
-                                @using (Html.PB_Span().AddClass("fw-bold").Begin())
-                                {
-                                    @:{{TECH_KEY_4}}:
-                                }
-                                @: {{TECH_VAL_4}}
-                            }
+                            @: {{TECH_VAL_4}}
                         }
                     }
                 }
-                @using (Html.BlockBuilder().AddClass("mt-4 p-4 bg-body-secondary rounded-4 shadow-sm").Begin())
+            }
+
+            @* ── Next Step ── *@
+            @using (Html.BlockBuilder().AsSidebarNote().Begin())
+            {
+                @using (Html.BlockBuilder().AsTextCenter().Begin())
                 {
-                    @Html.TitleBuilder().SetTitle("Next Step", TitleLevel.Five).Render()
-                    @using (Html.PB_P().AddClass("small text-muted").Begin())
+                    @Html.TitleBuilder().SetTitle("{{NEXT_STEP_TITLE}}", TitleLevel.Four).Render()
+                    @using (Html.PB_P().AsSmallMuted().Begin())
                     {
                         @:{{NEXT_STEP_DESC}}
                     }
@@ -611,9 +759,8 @@ Couleurs des icônes piliers (position fixe) : `text-primary` / `text-success` /
 
 ## Squelette 4 — Rendering Pipeline
 
-Chaque étape du pipeline utilise un `BlockBuilder` avec `position-relative` et un cercle
-numéroté en `position-absolute`. La dernière étape utilise `bg-success` et l'icône `bi-check`
-à la place du numéro. Dupliquer le bloc d'étape autant que nécessaire.
+Les étapes numérotées utilisent `AsTimelineStep()` + `AsTimelineStepBadge()`.
+La dernière étape passe `"bg-success"` à `AsTimelineStepBadge()` et affiche une icône `bi-check` au lieu d'un chiffre.
 
 ```razor
 @using DMBBootstrapBuilder
@@ -624,14 +771,15 @@ numéroté en `position-absolute`. La dernière étape utilise `bg-success` et l
     Layout = "_Layout";
 }
 
-@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).Begin())
+@* ── Hero ── *@
+@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).BootstrapBackgroundEffect(VariantStyle.Normal).Begin())
 {
     @using (Html.FlexBlockBuilder().SetAlignItemsCenter().SetJustifyContentCenter().Begin())
     {
-        @using (Html.BlockBuilder().AddClass("text-center").Begin())
+        @using (Html.BlockBuilder().AsTextCenter().Begin())
         {
             @Html.TitleBuilder().SetTitle("Rendering Pipeline — {{PACKAGE_NAME}}", TitleLevel.One).Render()
-            @using (Html.PB_P().AddClass("lead").Begin())
+            @using (Html.PB_P().AsLead().Begin())
             {
                 @:{{TAGLINE}}
             }
@@ -643,16 +791,16 @@ numéroté en `position-absolute`. La dernière étape utilise `bg-success` et l
 {
     @using (Html.RowBuilder().Begin())
     {
-        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col8, ResponsiveBreakpoint.Md).Begin())
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).Begin())
         {
-            @* ── Étape numérotée (répéter pour chaque étape) ── *@
-            @using (Html.BlockBuilder().AddClass("position-relative ps-5 border-start border-2 border-primary mb-5").Begin())
+            @* ── Étape numérotée (répéter pour chaque étape intermédiaire) ── *@
+            @using (Html.BlockBuilder().AsTimelineStep().Begin())
             {
-                @using (Html.BlockBuilder().AddClass("position-absolute top-0 start-0 translate-middle-x bg-primary text-white rounded-circle d-flex align-items-center justify-content-center").SetStyle("width", "40px").SetStyle("height", "40px").SetStyle("left", "-1px").Begin())
+                @using (Html.BlockBuilder().AsTimelineStepBadge().Begin())
                 {
                     @:1
                 }
-                @Html.TitleBuilder().SetTitle("{{PIPE_1_TITLE}}", TitleLevel.Three).AddClass("h4").Render()
+                @Html.TitleBuilder().SetTitle("{{PIPE_1_TITLE}}", TitleLevel.Three).AsH4().Render()
                 @using (Html.PB_P().Begin())
                 {
                     @:{{PIPE_1_BODY}}
@@ -660,14 +808,14 @@ numéroté en `position-absolute`. La dernière étape utilise `bg-success` et l
                 @(Html.CodeBlock(@"{{PIPE_1_CODE}}", {{PIPE_1_LANG}}))
             }
 
-            @* ── Dernière étape (cercle vert + icône check) ── *@
-            @using (Html.BlockBuilder().AddClass("position-relative ps-5 border-start border-2 border-primary mb-5").Begin())
+            @* ── Dernière étape (badge vert + icône check) ── *@
+            @using (Html.BlockBuilder().AsTimelineStep().Begin())
             {
-                @using (Html.BlockBuilder().AddClass("position-absolute top-0 start-0 translate-middle-x bg-success text-white rounded-circle d-flex align-items-center justify-content-center").SetStyle("width", "40px").SetStyle("height", "40px").SetStyle("left", "-1px").Begin())
+                @using (Html.BlockBuilder().AsTimelineStepBadge("bg-success").Begin())
                 {
                     @using (Html.PB_Span().AddClass("bi bi-check").Begin()) { }
                 }
-                @Html.TitleBuilder().SetTitle("{{PIPE_LAST_TITLE}}", TitleLevel.Three).AddClass("h4").Render()
+                @Html.TitleBuilder().SetTitle("{{PIPE_LAST_TITLE}}", TitleLevel.Three).AsH4().Render()
                 @using (Html.PB_P().Begin())
                 {
                     @:{{PIPE_LAST_BODY}}
@@ -675,7 +823,8 @@ numéroté en `position-absolute`. La dernière étape utilise `bg-success` et l
                 @(Html.CodeBlock(@"{{PIPE_LAST_CODE}}", {{PIPE_LAST_LANG}}))
             }
 
-            @Html.TitleBuilder().SetTitle("{{CHAIN_TITLE}}", TitleLevel.Two).AddClass("mt-5 mb-4").Render()
+            @* ── Chaining ── *@
+            @Html.TitleBuilder().SetTitle("{{CHAIN_TITLE}}", TitleLevel.Two).AsSubSectionHeading().Render()
             @using (Html.PB_P().Begin())
             {
                 @:{{CHAIN_DESC}}
@@ -683,32 +832,38 @@ numéroté en `position-absolute`. La dernière étape utilise `bg-success` et l
             @(Html.CodeBlock(@"{{CHAIN_CODE}}", {{CHAIN_LANG}})
                 .SetTitle("{{CHAIN_CODE_TITLE}}")
                 .SetCopyButton())
-        }
 
-        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
-        {
-            @using (Html.BlockBuilder().AddClass("sticky-top").SetStyle("top", "130px").Begin())
+            @* ── Performance highlight ── *@
+            @using (Html.BlockBuilder().AsInfoCallout().Begin())
             {
-                @using (Html.BlockBuilder().AddClass("border-0 shadow-sm rounded-4 overflow-hidden").Begin())
+                @using (Html.FlexBlockBuilder().Begin())
                 {
-                    @using (Html.BlockBuilder().AddClass("p-4 text-center").Begin())
+                    @using (Html.BlockBuilder().AsCalloutIcon().Begin())
                     {
-                        @using (Html.PB_Span().AddClass("bi bi-lightning-charge-fill text-warning fs-1").Begin()) { }
-                        @Html.TitleBuilder().SetTitle("{{PERF_TITLE}}", TitleLevel.Five).AddClass("mt-3").Render()
-                        @using (Html.PB_P().AddClass("small text-muted").Begin())
+                        @using (Html.PB_Span().AddClass("bi bi-lightning-charge-fill fs-2 text-warning").Begin()) { }
+                    }
+                    @using (Html.BlockBuilder().Begin())
+                    {
+                        @Html.TitleBuilder().SetTitle("{{PERF_TITLE}}", TitleLevel.Five).AsAlertHeading().Render()
+                        @using (Html.PB_P().AsNoMargin().Begin())
                         {
                             @:{{PERF_DESC}}
                         }
                     }
                 }
-                @using (Html.BlockBuilder().AddClass("mt-4 p-4 bg-body-secondary rounded-4 shadow-sm").Begin())
+            }
+
+            @* ── Next Step ── *@
+            @using (Html.BlockBuilder().AsSidebarNote().Begin())
+            {
+                @using (Html.BlockBuilder().AsTextCenter().Begin())
                 {
-                    @Html.TitleBuilder().SetTitle("Next Step", TitleLevel.Five).Render()
-                    @using (Html.PB_P().AddClass("small text-muted").Begin())
+                    @Html.TitleBuilder().SetTitle("{{NEXT_STEP_TITLE}}", TitleLevel.Four).Render()
+                    @using (Html.PB_P().AsSmallMuted().Begin())
                     {
                         @:{{NEXT_STEP_DESC}}
                     }
-                    @Html.Button(ActionItemFactory.AspRoute("{{NEXT_STEP_CONTROLLER}}", "{{NEXT_STEP_ACTION}}").SetTitle("{{NEXT_STEP_LABEL}}").SetIcon(IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
+                    @Html.Button(ActionItemFactory.AspRoute("{{CONTROLLER}}", "{{NEXT_STEP_ACTION}}").SetTitle("{{NEXT_STEP_LABEL}}").SetIcon(IconStruct.Bootstrap("{{NEXT_STEP_ICON}}")).SetVariant(VariantStyle.Primary)).Render()
                 }
             }
         }
