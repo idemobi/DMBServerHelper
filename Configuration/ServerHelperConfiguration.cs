@@ -86,6 +86,86 @@ namespace DMBServerHelper
             #endif
         }
 
+        private static string ComposePath(params string?[] segments)
+        {
+            return string.Join("/", segments.Select(EncodeUriComponent));
+        }
+
+        private static string EncodeQueryString(string queryString)
+        {
+            if (string.IsNullOrEmpty(queryString))
+            {
+                return string.Empty;
+            }
+
+            List<string> queryParameters = new List<string>();
+            foreach (string queryParameter in queryString.Split('&'))
+            {
+                int separatorIndex = queryParameter.IndexOf('=');
+                if (separatorIndex < 0)
+                {
+                    queryParameters.Add(EncodeUriComponent(queryParameter));
+                    continue;
+                }
+
+                string key = queryParameter[..separatorIndex];
+                string value = queryParameter[(separatorIndex + 1)..];
+                queryParameters.Add($"{EncodeUriComponent(key)}={EncodeUriComponent(value)}");
+            }
+
+            return string.Join("&", queryParameters);
+        }
+
+        private static string EncodeRelativePath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return string.Empty;
+            }
+
+            string relativePath = path.TrimStart('/');
+            string fragment = string.Empty;
+            int fragmentIndex = relativePath.IndexOf('#');
+            if (fragmentIndex >= 0)
+            {
+                fragment = relativePath[(fragmentIndex + 1)..];
+                relativePath = relativePath[..fragmentIndex];
+            }
+
+            string queryString = string.Empty;
+            int queryIndex = relativePath.IndexOf('?');
+            if (queryIndex >= 0)
+            {
+                queryString = relativePath[(queryIndex + 1)..];
+                relativePath = relativePath[..queryIndex];
+            }
+
+            string encodedPath = string.Join("/", relativePath.Split('/').Select(EncodeUriComponent));
+            string encodedQueryString = EncodeQueryString(queryString);
+            string encodedFragment = EncodeUriComponent(fragment);
+
+            return encodedPath
+                   + (queryIndex >= 0 ? "?" + encodedQueryString : string.Empty)
+                   + (fragmentIndex >= 0 ? "#" + encodedFragment : string.Empty);
+        }
+
+        private static string EncodeUriComponent(string? value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                return Uri.EscapeDataString(Uri.UnescapeDataString(value));
+            }
+            catch (UriFormatException)
+            {
+                return Uri.EscapeDataString(value);
+            }
+        }
+
         #endregion
 
         #region Instance fields and properties
@@ -261,11 +341,11 @@ namespace DMBServerHelper
         ///     The MVC controller segment.
         /// </param>
         /// <returns>
-        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}/{actionName}</c>.
+        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}/{actionName}</c> with encoded path segments.
         /// </returns>
         public string ComposeUrl([AspMvcAction] string actionName, [AspMvcController] string controllerName)
         {
-            return DomainAnalyzed.HttpsWebsite + "/" + controllerName + "/" + actionName;
+            return DomainAnalyzed.HttpsWebsite + "/" + ComposePath(controllerName, actionName);
         }
 
         /// <summary>
@@ -281,11 +361,17 @@ namespace DMBServerHelper
         ///     Additional path segments appended after the action.
         /// </param>
         /// <returns>
-        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}/{actionName}/{parameters}</c>.
+        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}/{actionName}/{parameters}</c> with encoded path segments.
         /// </returns>
         public string ComposeUrl([AspMvcAction] string actionName, [AspMvcController] string controllerName, params string[] parameters)
         {
-            return DomainAnalyzed.HttpsWebsite + "/" + controllerName + "/" + actionName + "/" + string.Join("/", parameters);
+            string url = DomainAnalyzed.HttpsWebsite + "/" + ComposePath(controllerName, actionName) + "/";
+            if (parameters.Length > 0)
+            {
+                url += ComposePath(parameters);
+            }
+
+            return url;
         }
 
         /// <summary>
@@ -298,20 +384,20 @@ namespace DMBServerHelper
         ///     The MVC controller segment.
         /// </param>
         /// <param name="keysValues">
-        ///     Query string keys and values. Values are URL-encoded with <c>Uri.EscapeDataString</c>.
+        ///     Query string keys and values. Keys and values are URL-encoded with <c>Uri.EscapeDataString</c>.
         /// </param>
         /// <returns>
-        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}/{actionName}?key=value</c>.
+        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}/{actionName}?key=value</c> with encoded path and query segments.
         /// </returns>
         public string ComposeUrl([AspMvcAction] string actionName, [AspMvcController] string controllerName, Dictionary<string, string> keysValues)
         {
             List<string> parameters = new List<string>();
             foreach (KeyValuePair<string, string> key in keysValues)
             {
-                parameters.Add($"{key.Key}={Uri.EscapeDataString(key.Value)}");
+                parameters.Add($"{EncodeUriComponent(key.Key)}={EncodeUriComponent(key.Value)}");
             }
 
-            return DomainAnalyzed.HttpsWebsite + "/" + controllerName + "/" + actionName + "?" + string.Join("&", parameters);
+            return DomainAnalyzed.HttpsWebsite + "/" + ComposePath(controllerName, actionName) + "?" + string.Join("&", parameters);
         }
 
         /// <summary>
@@ -321,25 +407,25 @@ namespace DMBServerHelper
         ///     The MVC controller segment.
         /// </param>
         /// <returns>
-        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}</c>.
+        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}</c> with an encoded controller segment.
         /// </returns>
         public string ComposeUrl([AspMvcController] string controllerName)
         {
-            return DomainAnalyzed.HttpsWebsite + "/" + controllerName;
+            return DomainAnalyzed.HttpsWebsite + "/" + EncodeUriComponent(controllerName);
         }
 
         /// <summary>
         ///     Composes an HTTPS URL for an arbitrary application path.
         /// </summary>
         /// <param name="path">
-        ///     The path segment appended after the analyzed HTTPS website.
+        ///     The relative path appended after the analyzed HTTPS website.
         /// </param>
         /// <returns>
-        ///     A URL in the form <c>{HttpsWebsite}/{path}</c>.
+        ///     A URL in the form <c>{HttpsWebsite}/{path}</c> with encoded path segments and query values.
         /// </returns>
         public string ComposeUrlWithPath([PathReference] string path)
         {
-            return DomainAnalyzed.HttpsWebsite + "/" + path;
+            return DomainAnalyzed.HttpsWebsite + "/" + EncodeRelativePath(path);
         }
 
         /// <summary>
