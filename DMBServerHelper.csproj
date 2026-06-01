@@ -62,6 +62,7 @@
         <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.5.3" />
         <PackageReference Include="Azure.Identity" Version="1.21.0" />
         <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.8" />
+        <PackageReference Include="Nager.PublicSuffix" Version="3.8.0" />
         <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
     </ItemGroup>
     <ItemGroup Label="Files in package">

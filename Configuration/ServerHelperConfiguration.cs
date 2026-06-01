@@ -130,6 +130,20 @@ namespace DMBServerHelper
         public string LaunchToken { set; get; } = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
 
         /// <summary>
+        ///     Gets or sets a value indicating whether domain analysis may refresh the Public Suffix List online.
+        /// </summary>
+        /// <remarks>
+        ///     When enabled, <see cref="DomainComposite" /> uses Nager.PublicSuffix with its cached HTTP rule provider.
+        ///     If the refresh fails, domain analysis falls back to the built-in parser.
+        /// </remarks>
+        public bool PublicSuffixListOnlineRefreshEnabled { set; get; } = true;
+
+        /// <summary>
+        ///     Gets or sets the maximum number of seconds allowed for the online Public Suffix List refresh.
+        /// </summary>
+        public int PublicSuffixListRefreshTimeoutSeconds { set; get; } = 3;
+
+        /// <summary>
         ///     Stores the session cookie name used by web consumers.
         /// </summary>
         [NonSerialized] public string SessionCookieName = "NODNS";
@@ -193,7 +207,10 @@ namespace DMBServerHelper
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            Config.DomainAnalyzed = new DomainComposite(Config.DomainName);
+            Config.DomainAnalyzed = new DomainComposite(
+                Config.DomainName,
+                Config.PublicSuffixListOnlineRefreshEnabled,
+                TimeSpan.FromSeconds(Math.Max(1, Config.PublicSuffixListRefreshTimeoutSeconds)));
             if (string.IsNullOrEmpty(Config.DataProtectionBlobUrl) == false && Config.DataProtectionBlobUrl.StartsWith("https://"))
             {
                 appBuilder.Services.AddDataProtection()
