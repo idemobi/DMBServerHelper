@@ -19,7 +19,7 @@ When copying this file to another PageBuilder ecosystem project, update this sec
 ## Module intent
 
 - Provide reusable server-side primitives for PageBuilder ecosystem packages.
-- Keep configuration loading, URL composition, localization, cookie definitions, session definitions, validation adapters, and documentation assembly registration stable for consumers.
+- Keep configuration loading, URL composition, localization, cookie definitions, session definitions, and documentation assembly registration stable for consumers.
 - Avoid mixing visual component, form builder, page layout, or ASP.NET middleware responsibilities into this package.
 
 ## Key constraints

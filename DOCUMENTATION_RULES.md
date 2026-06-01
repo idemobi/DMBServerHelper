@@ -18,8 +18,8 @@ Documentation must be useful without private chat context. A reader should under
 When copying this file to another PageBuilder ecosystem project, update this section first.
 
 - Project name: `DMBServerHelper`
-- Primary API families: configuration helpers, server defaults, domain and URL helpers, localization composition, typed cookie definitions, typed session definitions, API documentation registration, validation attributes, and validation adapters.
-- Important types to reference when relevant: `GenericConfiguration<T>`, `ServerHelperConfiguration`, `IServerConfig`, `ICombinedStringLocalizer`, `CombinedStringLocalizer`, `WebLocalizer`, `WebLocalizedViewLocationExpander`, `CookieDefinition`, `CookieGlobal`, typed cookie definitions, `SessionDefinition`, `SessionGlobal`, typed session definitions, `DomainComposite`, `ApiDocumentationList`, `BoolMustBeTrueAttribute`, `BoolMustBeFalseAttribute`, and `CustomValidationAttributeAdapterProvider`.
+- Primary API families: configuration helpers, server defaults, domain and URL helpers, localization composition, typed cookie definitions, typed session definitions, and API documentation registration.
+- Important types to reference when relevant: `GenericConfiguration<T>`, `ServerHelperConfiguration`, `IServerConfig`, `ICombinedStringLocalizer`, `CombinedStringLocalizer`, `WebLocalizer`, `WebLocalizedViewLocationExpander`, `CookieDefinition`, `CookieGlobal`, typed cookie definitions, `SessionDefinition`, `SessionGlobal`, typed session definitions, `DomainComposite`, and `ApiDocumentationList`.
 - Publication host: `labs_idemobi_com`
 - Documentation generation strategy: DocumentationBuilder-first; AI prepares content, the developer executes generation.
 
@@ -40,7 +40,7 @@ When copying this file to another PageBuilder ecosystem project, update this sec
   - public enum values,
   - public extension methods.
 - Also write XML HeaderDoc for protected members when they are part of the inheritance contract or are expected to be overridden by derived configurations.
-- Internal and private members do not require XML HeaderDoc unless they explain complex configuration, security, localization, cookie, session, or validation behavior that would otherwise be difficult to maintain.
+- Internal and private members do not require XML HeaderDoc unless they explain complex configuration, security, localization, cookie, or session behavior that would otherwise be difficult to maintain.
 - XML documentation must use valid C# XML syntax.
 - Prefer these tags:
   - `<summary>`
@@ -61,13 +61,13 @@ XML documentation must explain the public contract, not repeat the member name.
 For classes and interfaces, document:
 
 - the role in server-side application composition,
-- the configuration, cookie, session, localization, validation, or utility responsibility,
+- the configuration, cookie, session, localization, or utility responsibility,
 - the relationship with important types such as `GenericConfiguration<T>`, `ServerHelperConfiguration`, `CookieDefinition`, `SessionDefinition`, `CombinedStringLocalizer`, or `ICombinedStringLocalizer`,
 - lifecycle expectations, including whether the type is used directly, by static registries, by MVC validation, or by application startup.
 
 For methods and constructors, document:
 
-- what the member registers, loads, resolves, serializes, parses, validates, or returns,
+- what the member registers, loads, resolves, serializes, parses, or returns,
 - every parameter and the expected format when relevant,
 - returned values and fallback behavior,
 - side effects such as adding configuration files, writing cookies, writing session state, registering localizers, or registering API documentation assemblies,
@@ -79,7 +79,7 @@ For properties, fields, and constants, document:
 - the meaning of the value,
 - the default value when meaningful,
 - whether consumers may set it directly,
-- how it affects configuration loading, URL generation, cookies, sessions, localization, validation, or documentation registration.
+- how it affects configuration loading, URL generation, cookies, sessions, localization, or documentation registration.
 
 For enums and enum values, document:
 
@@ -92,9 +92,8 @@ For enums and enum values, document:
 - Cookie APIs must document names, default values, security flags, SameSite behavior, duration units, auto-renewal, deletion, JavaScript generation, and raw HTML output.
 - Session APIs must document names, default values, deletion behavior, parsing fallback, nullable HTTP context handling, and serialization format.
 - Localization APIs must document lookup order, duplicate injection behavior, debug fallback behavior, and special sentinel values such as `__EMPTY__` and `__SPACE__`.
-- Validation APIs must document accepted values, localized error message resolution, and client validation metadata.
 - Domain APIs must document accepted input formats, localhost handling, subdomain handling, and generated HTTPS URL format.
-- Security-sensitive APIs must mention risks related to user-controlled values, cookies, sessions, validation messages, URLs, data protection, or generated JavaScript.
+- Security-sensitive APIs must mention risks related to user-controlled values, cookies, sessions, URLs, data protection, or generated JavaScript.
 
 ## Examples in XML documentation
 
@@ -103,7 +102,6 @@ Use `<example>` when it materially improves understanding of:
 - configuration startup,
 - cookie and session declaration,
 - localization resource injection,
-- validation attribute usage,
 - domain composition.
 
 Examples must be short, realistic, and compile-oriented.

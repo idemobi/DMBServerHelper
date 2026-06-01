@@ -4,7 +4,7 @@
 
 `DMBServerHelper` provides the shared server-side foundation for the PageBuilder ecosystem.
 
-It centralizes reusable infrastructure for configuration loading, URL/domain composition, localization aggregation, strongly typed cookies, strongly typed sessions, API documentation assembly registration, and custom validation adapters.
+It centralizes reusable infrastructure for configuration loading, URL/domain composition, localization aggregation, strongly typed cookies, strongly typed sessions, and API documentation assembly registration.
 
 ## Project-specific section
 
@@ -26,7 +26,6 @@ This package includes:
 - combined localization lookup infrastructure,
 - strongly typed cookie definitions,
 - strongly typed session definitions,
-- custom boolean validation attributes and MVC adapters,
 - API documentation assembly registration helpers.
 
 This package does not define visual components, form builders, page layout builders, or ASP.NET web middleware. Those responsibilities belong to related packages such as `DMBPageBuilder`, `DMBBootstrapBuilder`, `DMBFormBuilder`, and `DMBServerWebHelper`.
@@ -44,9 +43,6 @@ This package does not define visual components, form builders, page layout build
 - `SessionDefinition` and typed session definitions
 - `DomainComposite`
 - `ApiDocumentationList`
-- `BoolMustBeTrueAttribute`
-- `BoolMustBeFalseAttribute`
-- `CustomValidationAttributeAdapterProvider`
 
 ## Documentation strategy
 

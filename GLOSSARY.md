@@ -47,10 +47,6 @@ The `CombinedStringLocalizer` implementation that resolves localized strings fro
 
 The `WebLocalizer` static helper that exposes shared localizers for data annotation and internal package text.
 
-### Validation adapter
-
-An ASP.NET Core MVC adapter that connects a custom validation attribute to client validation metadata and localized error messages.
-
 ### Domain composite
 
 The `DomainComposite` parser that extracts domain, subdomain, port, localhost state, and canonical HTTPS website URL from a configured input.

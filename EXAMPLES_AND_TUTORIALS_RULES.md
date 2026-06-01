@@ -27,7 +27,7 @@ When copying this file to another PageBuilder ecosystem project, update this sec
 - Shared UI stack: `DMBBootstrapBuilder`, `DMBComponentBuilder`, `DMBFormBuilder`, and `DMBPageBuilder`
 - Default DocumentationViewer package id for this project: `DMBServerHelper`
 - Default DocumentationViewer namespace for this project: `DMBServerHelper`
-- Expected page emphasis: configuration, domain composition, localization, typed cookies, typed sessions, validation adapters, and API documentation registration.
+- Expected page emphasis: configuration, domain composition, localization, typed cookies, typed sessions, and API documentation registration.
 
 ## Publication target
 

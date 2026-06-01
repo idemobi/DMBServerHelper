@@ -29,13 +29,6 @@ When copying this file to another PageBuilder ecosystem project, update this sec
 - `TROUBLESHOOTING.md`: common issue guide.
 - `GLOSSARY.md`: common term definitions.
 
-## Attributes
-
-Folder: `Attributes`
-
-- `BoolMustBeTrueAttribute.cs`: validation attribute requiring a boolean value to be `true`.
-- `BoolMustBeFalseAttribute.cs`: validation attribute requiring a boolean value to be `false`.
-
 ## Configuration
 
 Folder: `Configuration`
@@ -98,14 +91,6 @@ Folder: `Sessions`
 Folder: `Tools`
 
 - `DomainComposite.cs`: domain, subdomain, port, localhost, and HTTPS URL composition helper.
-
-## Validators
-
-Folder: `Validators`
-
-- `BoolMustBeTrueAttributeAdapter.cs`: MVC adapter for `BoolMustBeTrueAttribute`.
-- `BoolMustBeFalseAttributeAdapter.cs`: MVC adapter for `BoolMustBeFalseAttribute`.
-- `CustomValidationAttributeAdapterProvider.cs`: adapter provider for custom validation attributes.
 
 ## Related projects
 

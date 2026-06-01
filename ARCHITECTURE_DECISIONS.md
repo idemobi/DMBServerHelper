@@ -43,10 +43,6 @@ Changing them requires documentation updates and compatibility review.
 
 Do not hide lookup order or fallback changes behind generic wording.
 
-### Keep validation adapters close to validation attributes
-
-Custom validation attributes and MVC adapters must stay behaviorally aligned so server-side validation, client metadata, and localized messages describe the same rule.
-
 ### Keep examples outside the package
 
 Example pages, tutorials, diagrams, and explanatory pages are published through `labs_idemobi_com` when requested.

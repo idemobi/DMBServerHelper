@@ -43,15 +43,6 @@ Check:
 - duplicate resources did not change lookup order,
 - debug fallback behavior is not being mistaken for a production translation.
 
-## Validation messages are not localized
-
-Check:
-
-- `CustomValidationAttributeAdapterProvider` is registered by the consuming web project,
-- `BoolMustBeTrueAttributeAdapter` or `BoolMustBeFalseAttributeAdapter` is selected,
-- data annotation localization resources contain the expected key,
-- the attribute `ErrorMessage` matches the resource key convention.
-
 ## Session helper returns unexpected default values
 
 Check:

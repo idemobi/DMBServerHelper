@@ -26,8 +26,7 @@ It provides:
 - API documentation assembly registration,
 - combined localization lookup,
 - strongly typed cookie definitions,
-- strongly typed session definitions,
-- custom validation attributes and MVC validation adapters.
+- strongly typed session definitions.
 
 ## What this project is not
 
@@ -63,5 +62,5 @@ Visual examples and tutorial pages belong in `labs_idemobi_com` when requested.
 
 - Use `DOCUMENTATION_RULES.md` for XML docs, README/reference docs, and DocumentationBuilder-ready documentation.
 - Use `EXAMPLES_AND_TUTORIALS_RULES.md` only for pages, examples, tutorials, and walkthroughs.
-- Use `DRAWIO_DIAGRAM_RULES.md` when diagrams clarify configuration loading, localization lookup, cookie definitions, session definitions, validation adapters, or API documentation registration.
+- Use `DRAWIO_DIAGRAM_RULES.md` when diagrams clarify configuration loading, localization lookup, cookie definitions, session definitions, or API documentation registration.
 - Keep all generated documentation in English unless the user explicitly requests another language for user-facing website content.
