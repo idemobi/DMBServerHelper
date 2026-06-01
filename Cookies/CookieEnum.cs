@@ -18,7 +18,7 @@ namespace DMBServerHelper
     ///     Represents a cookie definition for an enumeration type value.
     /// </summary>
     /// <typeparam name="T">The enumeration type</typeparam>
-    public class CookieEnum<T> : CookieDefinition where T : Enum
+    public class CookieEnum<T> : CookieDefinition where T : struct, Enum
     {
         #region Static methods
 

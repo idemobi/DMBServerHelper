@@ -17,7 +17,7 @@ namespace DMBServerHelper
     ///     Represents a session definition for an enum value.
     /// </summary>
     /// <typeparam name="T">The enum type.</typeparam>
-    public class SessionEnum<T> : SessionDefinition where T : Enum
+    public class SessionEnum<T> : SessionDefinition where T : struct, Enum
     {
         #region Static methods
 
