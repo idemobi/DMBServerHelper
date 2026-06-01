@@ -7,6 +7,7 @@
 
 #region
 
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Localization;
 
 #endregion
@@ -30,7 +31,7 @@ namespace DMBServerHelper
         ///     This dictionary is used to store and manage all localizer instances needed
         ///     by the application.
         /// </summary>
-        private static Dictionary<Type, ICombinedStringLocalizer> All = new Dictionary<Type, ICombinedStringLocalizer>();
+        private static readonly ConcurrentDictionary<Type, ICombinedStringLocalizer> All = new ConcurrentDictionary<Type, ICombinedStringLocalizer>();
 
         /// <summary>
         ///     Represents the type of the string localizer class to be used by <see cref="WebLocalizer" />.
@@ -168,14 +169,8 @@ namespace DMBServerHelper
         /// </remarks>
         public static ICombinedStringLocalizer GetLocalizer<T>() where T : class
         {
-            var type = typeof(T);
-            if (!All.TryGetValue(type, out var localizer))
-            {
-                localizer = Instance(ClassToUse);
-                All[type] = localizer;
-            }
-
-            return localizer;
+            Type type = typeof(T);
+            return All.GetOrAdd(type, _ => Instance(ClassToUse));
         }
 
         /// <summary>

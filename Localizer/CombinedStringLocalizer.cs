@@ -27,7 +27,7 @@ namespace DMBServerHelper
         ///     A static synchronization object used to ensure thread-safe access
         ///     to critical sections of the code within the <see cref="CombinedStringLocalizer" /> class.
         /// </summary>
-        private static readonly object _lock = new object();
+        private readonly object _lock = new object();
 
         #endregion
 
@@ -38,14 +38,14 @@ namespace DMBServerHelper
         ///     <see cref="IStringLocalizer" /> instances. This is used to manage and access
         ///     localization resources in the combined string localizer implementation.
         /// </summary>
-        private Dictionary<string, IStringLocalizer> _localizerDico = new Dictionary<string, IStringLocalizer>();
+        private readonly Dictionary<string, IStringLocalizer> _localizerDico = new Dictionary<string, IStringLocalizer>();
 
         /// <summary>
         ///     Represents a collection of <see cref="IStringLocalizer" /> instances utilized for resolving localized strings.
         ///     The <see cref="_localizers" /> field stores the list of <see cref="IStringLocalizer" /> objects that are used
         ///     in priority order when resolving localization resources.
         /// </summary>
-        private List<IStringLocalizer> _localizers = new List<IStringLocalizer>();
+        private readonly List<IStringLocalizer> _localizers = new List<IStringLocalizer>();
 
         #region From interface ICombinedStringLocalizer
 
@@ -63,7 +63,13 @@ namespace DMBServerHelper
                     return new LocalizedString(string.Empty, string.Empty, resourceNotFound: true);
                 }
 
-                foreach (IStringLocalizer localizer in _localizers)
+                IStringLocalizer[] localizers;
+                lock (_lock)
+                {
+                    localizers = _localizers.ToArray();
+                }
+
+                foreach (IStringLocalizer localizer in localizers)
                 {
                     LocalizedString result = localizer[name];
                     if (!result.ResourceNotFound)
@@ -113,7 +119,13 @@ namespace DMBServerHelper
                     return new LocalizedString("", "");
                 }
 
-                foreach (IStringLocalizer localizer in _localizers)
+                IStringLocalizer[] localizers;
+                lock (_lock)
+                {
+                    localizers = _localizers.ToArray();
+                }
+
+                foreach (IStringLocalizer localizer in localizers)
                 {
                     var result = localizer[name, arguments];
                     if (!result.ResourceNotFound)
@@ -169,8 +181,14 @@ namespace DMBServerHelper
         /// </returns>
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
         {
-            var allStrings = new Dictionary<string, LocalizedString>();
-            foreach (IStringLocalizer localizer in _localizers)
+            Dictionary<string, LocalizedString> allStrings = new Dictionary<string, LocalizedString>();
+            IStringLocalizer[] localizers;
+            lock (_lock)
+            {
+                localizers = _localizers.ToArray();
+            }
+
+            foreach (IStringLocalizer localizer in localizers)
             {
                 foreach (var localizedString in localizer.GetAllStrings(includeParentCultures))
                 {

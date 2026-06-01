@@ -24,6 +24,8 @@ namespace DMBServerHelper
     {
         #region Static fields and properties
 
+        private static readonly object Lock = new object();
+
         private static readonly List<Assembly> ApiAssemblies = new List<Assembly>();
 
         #endregion
@@ -38,9 +40,12 @@ namespace DMBServerHelper
         /// </param>
         public static void AddApiAssembly(Assembly assembly)
         {
-            if (!ApiAssemblies.Contains(assembly))
+            lock (Lock)
             {
-                ApiAssemblies.Add(assembly);
+                if (!ApiAssemblies.Contains(assembly))
+                {
+                    ApiAssemblies.Add(assembly);
+                }
             }
         }
 
@@ -63,7 +68,10 @@ namespace DMBServerHelper
         /// </returns>
         public static Assembly[] GetAssemblies()
         {
-            return ApiAssemblies.ToArray();
+            lock (Lock)
+            {
+                return ApiAssemblies.ToArray();
+            }
         }
 
         #endregion
