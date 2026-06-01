@@ -78,7 +78,7 @@ namespace DMBServerHelper
             Explication = description;
             Group = group;
             Duration = duration;
-            DefaultValue = defaultValue.Replace("'", "\'");
+            DefaultValue = defaultValue;
             LimitSite = limitSite;
             Secure = secure;
             AutoRenew = autoRenew;
@@ -126,7 +126,7 @@ namespace DMBServerHelper
                 value = string.Empty;
             }
 
-            return _GenerateOnClick(value.Replace("'", "\'"));
+            return _GenerateOnClick(value);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace DMBServerHelper
                 result = value;
             }
 
-            return result.Replace("\'", "'");
+            return result;
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace DMBServerHelper
                 value = string.Empty;
             }
 
-            _SetValue(httpContext, value.Replace("'", "\'"));
+            _SetValue(httpContext, value);
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace DMBServerHelper
                 value = string.Empty;
             }
 
-            _SetValue(httpContext, value.Replace("'", "\'"), seconds);
+            _SetValue(httpContext, value, seconds);
         }
 
         #endregion

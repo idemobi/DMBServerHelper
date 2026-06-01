@@ -143,11 +143,11 @@ namespace DMBServerHelper
         /// <returns>The value of the cookie as an enumeration.</returns>
         public T GetValue(HttpContext? httpContext)
         {
-            T result = (T)Enum.Parse(typeof(T), DefaultValue);
+            Enum.TryParse(DefaultValue, out T result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && Enum.TryParse(value, out T parsedValue))
             {
-                result = (T)Enum.Parse(typeof(T), value);
+                result = parsedValue;
             }
 
             return result;
@@ -160,15 +160,8 @@ namespace DMBServerHelper
         /// <returns>The raw HTML form for the enum cookie definition.</returns>
         public override string RawForm(HttpContext? httpContext)
         {
-            string resultJavascript = "document.cookie = '" + Name + "='+this.value+'; SameSite=" + LimitSite.ToString() + "; Path=/; expires=" + DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT";
-            if (Secure == true)
-            {
-                resultJavascript = resultJavascript + "; Secure";
-            }
-
-            resultJavascript = resultJavascript + "';";
-
-
+            string expires = DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT";
+            string resultJavascript = GenerateDocumentCookieScriptForValueExpression("this.value", expires);
             string result = "<!-- " + nameof(CookieEnum<T>) + " RawForm-->";
             if (ManualEditable)
             {

@@ -103,11 +103,11 @@ namespace DMBServerHelper
         /// <returns>The parsed enum value, or the configured default value when the session value is absent.</returns>
         public T GetValue(HttpContext? httpContext)
         {
-            T rReturn = (T)Enum.Parse(typeof(T), DefaultValue);
+            Enum.TryParse(DefaultValue, out T rReturn);
             string? tValue = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(tValue) == false)
+            if (string.IsNullOrEmpty(tValue) == false && Enum.TryParse(tValue, out T parsedValue))
             {
-                rReturn = (T)Enum.Parse(typeof(T), tValue);
+                rReturn = parsedValue;
             }
 
             return rReturn;

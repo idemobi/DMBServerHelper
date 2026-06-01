@@ -8,6 +8,7 @@
 #region
 
 using System.Globalization;
+using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 
@@ -23,6 +24,8 @@ namespace DMBServerHelper
         #region Static fields and properties
 
         private const int SecondsPerDay = 24 * 3600;
+
+        private static readonly JavaScriptEncoder ScriptEncoder = JavaScriptEncoder.Default;
 
         private static readonly Regex SpaceCleanerRgx = new Regex(@"\s+", RegexOptions.Compiled);
 
@@ -42,6 +45,17 @@ namespace DMBServerHelper
         public static string SpaceCleaner(string sString)
         {
             return SpaceCleanerRgx.Replace(sString, string.Empty);
+        }
+
+        private static string EncodeCookieValue(string? value)
+        {
+            return Uri.EscapeDataString(value ?? string.Empty);
+        }
+
+        private static string EncodeJavaScriptStringLiteral(string? value)
+        {
+            string encodedValue = ScriptEncoder.Encode(value ?? string.Empty).Replace("'", "\\x27", StringComparison.Ordinal);
+            return "'" + encodedValue + "'";
         }
 
         #endregion
@@ -135,7 +149,7 @@ namespace DMBServerHelper
                 value = string.Empty;
             }
 
-            string rReturn = Name + "=" + value + ";" +
+            string rReturn = EncodeCookieValue(Name) + "=" + EncodeCookieValue(value) + ";" +
                              " expires=" + DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT;" +
                              " path=/;" +
                              " samesite=" + LimitSite.ToString()
@@ -156,8 +170,48 @@ namespace DMBServerHelper
             }
 
             string rReturn = "var now = new Date(); var year = now.getFullYear(); var month = now.getMonth(); var day = now.getDate(); var next = new Date(year, month, day+ " + Duration +
-                             "); document.cookie = '" + Name + "=" + value + "; SameSite=" + LimitSite.ToString() + "; Path=/; expires=' + next.toUTCString() + '; Secure';";
+                             "); " + GenerateDocumentCookieScript(EncodeJavaScriptStringLiteral(value), "next.toUTCString()");
             return rReturn;
+        }
+
+        /// <summary>
+        ///     Generates JavaScript that writes this cookie using safe JavaScript string literals.
+        /// </summary>
+        /// <param name="valueExpression">The JavaScript expression that produces the raw cookie value.</param>
+        /// <param name="expiresExpression">The JavaScript expression that produces the cookie expiration date string.</param>
+        /// <returns>The generated JavaScript statement.</returns>
+        protected string GenerateDocumentCookieScript(string valueExpression, string expiresExpression)
+        {
+            string assignmentPrefix = EncodeCookieValue(Name) + "=";
+            string assignmentBeforeExpires = "; SameSite=" + LimitSite.ToString() + "; Path=/; expires=";
+            string assignmentAfterExpires = Secure ? "; Secure" : string.Empty;
+            return "document.cookie = " + EncodeJavaScriptStringLiteral(assignmentPrefix)
+                   + " + encodeURIComponent(" + valueExpression + ") + "
+                   + EncodeJavaScriptStringLiteral(assignmentBeforeExpires)
+                   + " + " + expiresExpression + " + "
+                   + EncodeJavaScriptStringLiteral(assignmentAfterExpires) + ";";
+        }
+
+        /// <summary>
+        ///     Generates JavaScript that writes this cookie with a literal value and expiration string.
+        /// </summary>
+        /// <param name="value">The raw cookie value.</param>
+        /// <param name="expires">The expiration date string.</param>
+        /// <returns>The generated JavaScript statement.</returns>
+        protected string GenerateDocumentCookieScriptForValue(string value, string expires)
+        {
+            return GenerateDocumentCookieScript(EncodeJavaScriptStringLiteral(value), EncodeJavaScriptStringLiteral(expires));
+        }
+
+        /// <summary>
+        ///     Generates JavaScript that writes this cookie with a dynamic value expression and literal expiration string.
+        /// </summary>
+        /// <param name="valueExpression">The JavaScript expression that produces the raw cookie value.</param>
+        /// <param name="expires">The expiration date string.</param>
+        /// <returns>The generated JavaScript statement.</returns>
+        protected string GenerateDocumentCookieScriptForValueExpression(string valueExpression, string expires)
+        {
+            return GenerateDocumentCookieScript(valueExpression, EncodeJavaScriptStringLiteral(expires));
         }
 
         /// <summary>
@@ -254,7 +308,7 @@ namespace DMBServerHelper
                 value = string.Empty;
             }
 
-            string rReturn = "document.cookie = '" + Name + "=" + value + "; SameSite=" + LimitSite.ToString() + "; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure';";
+            string rReturn = GenerateDocumentCookieScriptForValue(value, "Thu, 01 Jan 1970 00:00:00 GMT");
             return rReturn;
         }
 
@@ -327,7 +381,8 @@ namespace DMBServerHelper
         /// <returns>The JavaScript code to install the cookie.</returns>
         public string InstallOnClick()
         {
-            string result = "document.cookie = '" + Name + "=" + DefaultValue + "; SameSite=" + LimitSite.ToString() + "; Path=/; expires=" + DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT; Secure';";
+            string expires = DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT";
+            string result = GenerateDocumentCookieScriptForValue(DefaultValue, expires);
             return result;
         }
 
@@ -343,7 +398,8 @@ namespace DMBServerHelper
                 value = string.Empty;
             }
 
-            string result = "document.cookie = '" + Name + "=" + value + "; SameSite=" + LimitSite.ToString() + "; Path=/; expires=" + DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT; Secure';";
+            string expires = DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT";
+            string result = GenerateDocumentCookieScriptForValue(value, expires);
             return result;
         }
 
