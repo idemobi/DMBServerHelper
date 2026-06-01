@@ -105,14 +105,34 @@ namespace DMBServerHelper
         /// <returns>The value of the session variable.</returns>
         public T? GetValue(HttpContext? httpContext)
         {
-            T? result = default(T);
             string? value = _GetValue(httpContext);
-            if (value != null)
+            if (string.IsNullOrEmpty(value))
             {
-                result = JsonSerializer.Deserialize<T>(value.Replace("\'", "'"));
+                return TryDeserialize(DefaultValue);
             }
 
-            return result;
+            return TryDeserialize(value.Replace("\'", "'")) ?? TryDeserialize(DefaultValue);
+        }
+
+        private static T? TryDeserialize(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return default(T);
+            }
+
+            try
+            {
+                return JsonSerializer.Deserialize<T>(value);
+            }
+            catch (JsonException)
+            {
+                return default(T);
+            }
+            catch (NotSupportedException)
+            {
+                return default(T);
+            }
         }
 
         /// <summary>

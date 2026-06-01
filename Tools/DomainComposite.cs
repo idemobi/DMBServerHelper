@@ -40,8 +40,6 @@ namespace DMBServerHelper
         #region Static fields and properties
 
         private static DomainParser? PublicSuffixDomainParser;
-        private static bool PublicSuffixDomainParserBuildAttempted;
-
         private static readonly object PublicSuffixDomainParserLock = new object();
 
         private static readonly HashSet<string> CommonCompoundPublicSuffixes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -192,12 +190,11 @@ namespace DMBServerHelper
 
             lock (PublicSuffixDomainParserLock)
             {
-                if (PublicSuffixDomainParserBuildAttempted)
+                if (PublicSuffixDomainParser != null)
                 {
                     return PublicSuffixDomainParser;
                 }
 
-                PublicSuffixDomainParserBuildAttempted = true;
                 try
                 {
                     using HttpClient httpClient = new HttpClient
@@ -211,7 +208,7 @@ namespace DMBServerHelper
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine(exception);
+                    Console.WriteLine($"Public Suffix List refresh failed. Falling back to built-in domain parsing. {exception}");
                     PublicSuffixDomainParser = null;
                 }
 
@@ -252,7 +249,7 @@ namespace DMBServerHelper
             try
             {
                 var domainInfo = parser.Parse(host);
-                if (string.IsNullOrWhiteSpace(domainInfo.RegistrableDomain))
+                if (domainInfo == null || string.IsNullOrWhiteSpace(domainInfo.RegistrableDomain))
                 {
                     return false;
                 }
@@ -363,6 +360,11 @@ namespace DMBServerHelper
                 {
                     Uri uri = new Uri(input);
                     string host = uri.Host.ToLowerInvariant();
+                    if (host.StartsWith("[", StringComparison.Ordinal) && host.EndsWith("]", StringComparison.Ordinal))
+                    {
+                        host = host[1..^1];
+                    }
+
                     Port = TryReadExplicitPort(uri, out string explicitPort) ? explicitPort : string.Empty;
 
                     if (host == _LOCALHOST)

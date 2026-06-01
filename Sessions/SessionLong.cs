@@ -90,11 +90,11 @@ namespace DMBServerHelper
         /// <returns>The value of the session as a long.</returns>
         public long GetValue(HttpContext? httpContext)
         {
-            long result = long.Parse(DefaultValue);
+            long.TryParse(DefaultValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out long result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsedValue))
             {
-                long.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;

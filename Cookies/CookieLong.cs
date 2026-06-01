@@ -135,11 +135,11 @@ namespace DMBServerHelper
         /// </returns>
         public long GetValue(HttpContext? httpContext)
         {
-            long result = long.Parse(DefaultValue);
+            long.TryParse(DefaultValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out long result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsedValue))
             {
-                long.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;
@@ -152,6 +152,7 @@ namespace DMBServerHelper
         /// <returns>
         ///     The raw form of the cookie definition.
         /// </returns>
+        [Obsolete("RawForm is obsolete and kept only for backward compatibility. Use a dedicated FormBuilder or admin component instead.")]
         public override string RawForm(HttpContext? httpContext)
         {
             string result = "<!-- " + nameof(CookieLong) + " RawForm-->";

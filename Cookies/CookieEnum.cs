@@ -158,6 +158,7 @@ namespace DMBServerHelper
         /// </summary>
         /// <param name="httpContext">The HttpContext object.</param>
         /// <returns>The raw HTML form for the enum cookie definition.</returns>
+        [Obsolete("RawForm is obsolete and kept only for backward compatibility. Use a dedicated FormBuilder or admin component instead.")]
         public override string RawForm(HttpContext? httpContext)
         {
             string expires = DateTime.UtcNow.AddDays(Duration).ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture) + " GMT";

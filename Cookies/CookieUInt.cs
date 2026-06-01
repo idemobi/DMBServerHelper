@@ -132,11 +132,11 @@ namespace DMBServerHelper
         /// <returns>The parsed cookie value, or the configured default value when the cookie is absent or invalid.</returns>
         public uint GetValue(HttpContext? httpContext)
         {
-            uint result = uint.Parse(DefaultValue);
+            uint.TryParse(DefaultValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && uint.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint parsedValue))
             {
-                uint.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;
@@ -149,6 +149,7 @@ namespace DMBServerHelper
         /// <returns>
         ///     The raw form of the cookie definition.
         /// </returns>
+        [Obsolete("RawForm is obsolete and kept only for backward compatibility. Use a dedicated FormBuilder or admin component instead.")]
         public override string RawForm(HttpContext? httpContext)
         {
             string result = "<!-- " + nameof(CookieUInt) + " RawForm-->";

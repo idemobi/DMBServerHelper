@@ -92,11 +92,11 @@ namespace DMBServerHelper
         /// <returns>The boolean value of the session variable.</returns>
         public bool GetValue(HttpContext? httpContext)
         {
-            bool result = bool.Parse(DefaultValue);
+            bool.TryParse(DefaultValue, out bool result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && bool.TryParse(value, out bool parsedValue))
             {
-                bool.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;

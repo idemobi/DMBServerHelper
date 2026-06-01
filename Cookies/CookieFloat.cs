@@ -166,11 +166,11 @@ namespace DMBServerHelper
         /// </returns>
         public float GetValue(HttpContext? httpContext)
         {
-            float result = float.Parse(DefaultValue);
+            float.TryParse(DefaultValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsedValue))
             {
-                float.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;
@@ -181,6 +181,7 @@ namespace DMBServerHelper
         /// </summary>
         /// <param name="httpContext">The HTTP context.</param>
         /// <returns>The raw form of the cookie definition.</returns>
+        [Obsolete("RawForm is obsolete and kept only for backward compatibility. Use a dedicated FormBuilder or admin component instead.")]
         public override string RawForm(HttpContext? httpContext)
         {
             string result = "<!-- " + nameof(CookieFloat) + " RawForm-->";

@@ -93,11 +93,11 @@ namespace DMBServerHelper
         /// <returns>The value of the session definition.</returns>
         public short GetValue(HttpContext? httpContext)
         {
-            short result = short.Parse(DefaultValue);
+            short.TryParse(DefaultValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out short result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && short.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out short parsedValue))
             {
-                short.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;

@@ -359,8 +359,19 @@ namespace DMBServerHelper
                 string? value = _GetValue(httpContext);
                 if (value != null)
                 {
-                    string encodedValue = WebUtility.HtmlEncode(value);
-                    return "<span>" + Regex.Replace(encodedValue, ".{12}", "$0</span>&hairsp;<span>") + "</span>";
+                    if (value.Length == 0)
+                    {
+                        return "<span></span>";
+                    }
+
+                    List<string> spans = new List<string>();
+                    for (int index = 0; index < value.Length; index += 12)
+                    {
+                        string chunk = value.Substring(index, Math.Min(12, value.Length - index));
+                        spans.Add("<span>" + WebUtility.HtmlEncode(chunk) + "</span>");
+                    }
+
+                    return string.Join("&hairsp;", spans);
                 }
                 else
                 {
@@ -414,6 +425,7 @@ namespace DMBServerHelper
         /// </summary>
         /// <param name="httpContext">The HTTP context.</param>
         /// <returns>The raw form of the cookie definition.</returns>
+        [Obsolete("RawForm is obsolete and kept only for backward compatibility. Use a dedicated FormBuilder or admin component instead.")]
         public virtual string RawForm(HttpContext? httpContext)
         {
             string rReturn = "<!-- " + nameof(CookieDefinition) + " RawForm -->";

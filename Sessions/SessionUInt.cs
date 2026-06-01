@@ -96,11 +96,11 @@ namespace DMBServerHelper
         /// </returns>
         private uint GetValue(HttpContext? httpContext)
         {
-            uint result = uint.Parse(DefaultValue);
+            uint.TryParse(DefaultValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && uint.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint parsedValue))
             {
-                uint.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;

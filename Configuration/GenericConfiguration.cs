@@ -37,6 +37,8 @@ namespace DMBServerHelper
         /// </summary>
         public static T Config = new T();
 
+        private static readonly object LoadLock = new object();
+
         #endregion
 
         #region Static methods
@@ -130,26 +132,29 @@ namespace DMBServerHelper
         /// </remarks>
         public static void LoadCommonConfig(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot)
         {
-            if (Config.Loaded)
+            lock (LoadLock)
             {
-                return;
+                if (Config.Loaded)
+                {
+                    return;
+                }
+
+                if (Config.ApiDescription())
+                {
+                    ApiDocumentationList.AddApiAssembly(typeof(T).Assembly);
+                }
+
+                Config.BeforeConfiguration(appBuilder, configBuilder, configRoot);
+
+                if (Config.NeedsConfigFileOrAppSettings())
+                {
+                    AddConfigInConfigurationBuilder(configBuilder);
+                    LoadConfigWithConfigurationRoot(configRoot);
+                }
+
+                Config.AfterConfiguration(appBuilder, configBuilder, configRoot);
+                Config.Loaded = true;
             }
-
-            if (Config.ApiDescription())
-            {
-                ApiDocumentationList.AddApiAssembly(typeof(T).Assembly);
-            }
-
-            Config.BeforeConfiguration(appBuilder, configBuilder, configRoot);
-
-            if (Config.NeedsConfigFileOrAppSettings())
-            {
-                AddConfigInConfigurationBuilder(configBuilder);
-                LoadConfigWithConfigurationRoot(configRoot);
-            }
-
-            Config.AfterConfiguration(appBuilder, configBuilder, configRoot);
-            Config.Loaded = true;
         }
 
         /// <summary>

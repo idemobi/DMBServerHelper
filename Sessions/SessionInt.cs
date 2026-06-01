@@ -97,11 +97,11 @@ namespace DMBServerHelper
         /// <returns>The value of the session definition as an integer.</returns>
         public int GetValue(HttpContext? httpContext)
         {
-            int result = int.Parse(DefaultValue);
+            int.TryParse(DefaultValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out int result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedValue))
             {
-                int.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;

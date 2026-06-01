@@ -135,11 +135,11 @@ namespace DMBServerHelper
         /// </returns>
         public ushort GetValue(HttpContext? httpContext)
         {
-            ushort result = ushort.Parse(DefaultValue);
+            ushort.TryParse(DefaultValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out ushort result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && ushort.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ushort parsedValue))
             {
-                ushort.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;
@@ -150,6 +150,7 @@ namespace DMBServerHelper
         /// </summary>
         /// <param name="httpContext">The HTTP context.</param>
         /// <returns>The raw form of the cookie definition.</returns>
+        [Obsolete("RawForm is obsolete and kept only for backward compatibility. Use a dedicated FormBuilder or admin component instead.")]
         public override string RawForm(HttpContext? httpContext)
         {
             string result = "<!-- " + nameof(CookieUShort) + " RawForm-->";

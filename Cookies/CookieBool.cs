@@ -135,11 +135,11 @@ namespace DMBServerHelper
         /// </returns>
         public bool GetValue(HttpContext? httpContext)
         {
-            bool result = bool.Parse(DefaultValue);
+            bool.TryParse(DefaultValue, out bool result);
             string? value = _GetValue(httpContext);
-            if (string.IsNullOrEmpty(value) == false)
+            if (string.IsNullOrEmpty(value) == false && bool.TryParse(value, out bool parsedValue))
             {
-                bool.TryParse(value, out result);
+                result = parsedValue;
             }
 
             return result;
@@ -150,6 +150,7 @@ namespace DMBServerHelper
         /// </summary>
         /// <param name="httpContext">The HttpContext object representing the current HTTP request.</param>
         /// <returns>The raw HTML form for the cookie definition.</returns>
+        [Obsolete("RawForm is obsolete and kept only for backward compatibility. Use a dedicated FormBuilder or admin component instead.")]
         public override string RawForm(HttpContext? httpContext)
         {
             string rReturn = "<!-- " + nameof(CookieBool) + " RawForm-->";
