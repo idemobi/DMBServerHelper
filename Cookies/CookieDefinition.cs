@@ -22,6 +22,8 @@ namespace DMBServerHelper
     {
         #region Static fields and properties
 
+        private const int SecondsPerDay = 24 * 3600;
+
         private static readonly Regex SpaceCleanerRgx = new Regex(@"\s+", RegexOptions.Compiled);
 
         #endregion
@@ -62,9 +64,9 @@ namespace DMBServerHelper
         public bool Deletable = true;
 
         /// <summary>
-        ///     Represents the duration (in seconds) for which the cookie is valid.
+        ///     Represents the duration, in days, for which the cookie is valid.
         /// </summary>
-        public int Duration = 3600;
+        public int Duration = 365;
 
         /// <summary>
         ///     Represents the explanation of a cookie definition.
@@ -195,7 +197,7 @@ namespace DMBServerHelper
         /// <param name="value">The value to set for the cookie.</param>
         protected void _SetValue(HttpContext? httpContext, string value)
         {
-            _SetValue(httpContext, value, Duration * 25 * 3600);
+            _SetValue(httpContext, value, Duration * (double)SecondsPerDay);
         }
 
         /// <summary>

@@ -82,7 +82,7 @@ namespace DMBServerHelper
         /// <param name="defaultValue">The default floating-point value used when the cookie is absent or invalid.</param>
         /// <param name="deletable">A value indicating whether the cookie may be deleted by bulk deletion helpers.</param>
         /// <param name="manualEditable">A value indicating whether raw form rendering may expose a manual editor.</param>
-        /// <param name="duration">The duration value assigned to <see cref="CookieDefinition.Duration" />.</param>
+        /// <param name="duration">The cookie lifetime, in days, assigned to <see cref="CookieDefinition.Duration" />.</param>
         /// <param name="autoRenew">A value indicating whether reads should renew the cookie.</param>
         /// <param name="secure">A value indicating whether the cookie should be marked secure.</param>
         /// <param name="limitSite">The SameSite policy used when writing the cookie.</param>
