@@ -160,7 +160,7 @@ Documentation in this module must be authored with a DocumentationBuilder-first 
 
 If public configuration behavior, cookie behavior, session behavior, localization behavior, validation behavior, domain composition, or documentation registration behavior changes, update in the same change set:
 
-- local `README.md`,
+- local `Source/README.md`,
 - relevant XML docs,
 - impacted guidance/examples when the task includes pages.
 

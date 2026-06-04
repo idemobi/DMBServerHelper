@@ -1,0 +1,151 @@
+@using DMBBootstrapBuilder
+@using DMBComponentBuilder
+@using DMBEffectBuilder
+@using DMBPageBuilder
+@{
+    Layout = "_Layout";
+}
+
+@* ── Hero ── *@
+@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).BootstrapBackgroundEffect(VariantStyle.Normal).Begin())
+{
+    @using (Html.FlexBlockBuilder().SetAlignItemsCenter().SetJustifyContentCenter().Begin())
+    {
+        @using (Html.BlockBuilder().AsTextCenter().Begin())
+        {
+            @Html.TitleBuilder().SetTitle("Getting Started — DMBServerHelper", TitleLevel.One).Render()
+            @using (Html.PB_P().AsLead().Begin())
+            {
+                @:Initialize shared server services before higher-level modules.
+            }
+        }
+    }
+}
+
+@using (Html.ContainerBuilder().SetPadding(SpacingSide.Y, SpacingSize.Five).Begin())
+{
+    @using (Html.RowBuilder().Begin())
+    {
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).Begin())
+        {
+            @* ── Step 1 ── *@
+            @Html.TitleBuilder().SetTitle("1. Configure Services", TitleLevel.Two).AsSectionHeading().Render()
+            @using (Html.PB_P().Begin())
+            {
+                @:DMBServerHelper is usually registered early in the application startup sequence. It prepares common server configuration, resource localization and helper conventions used by the rest of the stack.
+            }
+            @(Html.CodeBlock("ServerHelperConfiguration.LoadCommonConfig(builder);\nServerHelperConfiguration.Config.CookiePrefix = \"BBT\";", CodeLanguage.CSharp)
+                .SetTitle("Program.cs")
+                .SetCopyButton())
+
+            @* ── Step 2 ── *@
+            @Html.TitleBuilder().SetTitle("2. Choose Cookie Prefix", TitleLevel.Two).AsSubSectionHeading().Render()
+            @using (Html.PB_P().Begin())
+            {
+                @:Choose the application cookie prefix so shared helpers generate predictable names.
+                @: Set
+                @using (Html.PB_Span().AsMonospace().Begin())
+                {
+                    @:Config.CookiePrefix
+                }
+                @: immediately after loading the common configuration.
+            }
+
+            @* ── Step 3 ── *@
+            @Html.TitleBuilder().SetTitle("3. Register Localization", TitleLevel.Two).AsSubSectionHeading().Render()
+            @using (Html.PB_P().Begin())
+            {
+                @:Register server-side localization resources before views and validation messages need them.
+                @: Use
+                @using (Html.PB_Span().AsMonospace().Begin())
+                {
+                    @:ServerHelperLocalization
+                }
+                @: to expose resource strings used internally by the package.
+            }
+
+            @* ── Step 4 ── *@
+            @Html.TitleBuilder().SetTitle("4. Define Cookie Keys", TitleLevel.Two).AsSubSectionHeading().Render()
+            @using (Html.PB_P().Begin())
+            {
+                @:Define cookie and session values through typed definitions instead of repeating string keys.
+                @: Use
+                @using (Html.PB_Span().AsMonospace().Begin())
+                {
+                    @:CookieDefinition
+                }
+                @: and
+                @using (Html.PB_Span().AsMonospace().Begin())
+                {
+                    @:SessionDefinition
+                }
+                @: to keep state access centralized.
+            }
+
+            @* ── Key API quick reference ── *@
+            @using (Html.BlockBuilder().AsInfoCallout().Begin())
+            {
+                @using (Html.FlexBlockBuilder().Begin())
+                {
+                    @using (Html.BlockBuilder().AsCalloutIcon().Begin())
+                    {
+                        @using (Html.PB_Span().AddClass("bi bi-collection-fill fs-2 text-info").Begin()) { }
+                    }
+                    @using (Html.BlockBuilder().Begin())
+                    {
+                        @Html.TitleBuilder().SetTitle("Key API", TitleLevel.Five).AsAlertHeading().Render()
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
+                            {
+                                @:ServerHelperConfiguration
+                            }
+                        }
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
+                            {
+                                @:.Config.CookiePrefix
+                            }
+                        }
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
+                            {
+                                @:ServerHelperLocalization
+                            }
+                        }
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
+                            {
+                                @:CookieDefinition
+                            }
+                        }
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsMonospaceSmall().Begin())
+                            {
+                                @:SessionDefinition
+                            }
+                        }
+                    }
+                }
+            }
+
+            @* ── Next Step ── *@
+            @using (Html.BlockBuilder().AsSidebarNote().Begin())
+            {
+                @using (Html.BlockBuilder().AsTextCenter().Begin())
+                {
+                    @Html.TitleBuilder().SetTitle("Understand the layer responsibilities", TitleLevel.Four).Render()
+                    @using (Html.PB_P().AsSmallMuted().Begin())
+                    {
+                        @:Learn how DMBServerHelper fits into the overall DMB stack and its extension points.
+                    }
+                    @Html.Button(ActionItemFactory.AspRoute("ServerHelper", "Architecture").SetTitle("Architecture").SetIcon(IconStruct.Bootstrap("bi-diagram-3")).SetVariant(VariantStyle.Primary)).Render()
+                }
+            }
+        }
+    }
+}

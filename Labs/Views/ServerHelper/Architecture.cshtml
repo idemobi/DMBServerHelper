@@ -1,0 +1,148 @@
+@using DMBBootstrapBuilder
+@using DMBComponentBuilder
+@using DMBEffectBuilder
+@using DMBPageBuilder
+@using DMBServerHelperLabs
+@{
+    Layout = "_Layout";
+}
+
+@* ── Hero ── *@
+@using (Html.SectionBuilder().SetHeight(125, UnitSize.px).BootstrapBackgroundEffect(VariantStyle.Normal).Begin())
+{
+    @using (Html.FlexBlockBuilder().SetAlignItemsCenter().SetJustifyContentCenter().Begin())
+    {
+        @using (Html.BlockBuilder().AsTextCenter().Begin())
+        {
+            @Html.TitleBuilder().SetTitle("Architecture — DMBServerHelper", TitleLevel.One).Render()
+            @using (Html.PB_P().AsLead().Begin())
+            {
+                @:A small shared layer for server configuration and conventions.
+            }
+        }
+    }
+}
+
+@using (Html.ContainerBuilder().SetPadding(SpacingSide.Y, SpacingSize.Five).Begin())
+{
+    @using (Html.RowBuilder().Begin())
+    {
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).Begin())
+        {
+            @* ── 1. Configuration layer ── *@
+            @Html.TitleBuilder().SetTitle("1. Configuration layer", TitleLevel.Two).AsSectionHeading().Render()
+            @using (Html.PB_P().Begin())
+            {
+                @:Configuration classes expose common package settings while keeping startup registration explicit.
+                @: The single entry point
+                @using (Html.PB_Span().AsMonospace().Begin())
+                {
+                    @:ServerHelperConfiguration.LoadCommonConfig
+                }
+                @: registers all required services in one call.
+            }
+            @(Html.CodeBlock("ServerHelperConfiguration.LoadCommonConfig(builder);\nServerHelperConfiguration.Config.CookiePrefix = \"BBT\";", CodeLanguage.CSharp)
+                .SetTitle("Configuration registration")
+                .SetCopyButton())
+
+            @* ── 2. Resource layer ── *@
+            @Html.TitleBuilder().SetTitle("2. Resource layer", TitleLevel.Two).AsSubSectionHeading().Render()
+            @using (Html.PB_P().Begin())
+            {
+                @:Resource classes and localizer helpers provide a consistent source for internal and validation text.
+                @using (Html.PB_Span().AsMonospace().Begin())
+                {
+                    @:ServerHelperLocalization
+                }
+                @: exposes the string resources consumed by the package and its dependants.
+            }
+
+            @* ── 3. Validation layer ── *@
+            @Html.TitleBuilder().SetTitle("3. Validation layer", TitleLevel.Two).AsSubSectionHeading().Render()
+            @using (Html.PB_P().Begin())
+            {
+                @:Custom validation attributes and adapters keep domain validation reusable between forms and models.
+                @: They build on top of the shared resource layer so error messages stay consistent.
+            }
+
+            @* ── Boundary ── *@
+            @Html.TitleBuilder().SetTitle("Boundary", TitleLevel.Two).AsSubSectionHeading().Render()
+            @using (Html.PB_P().Begin())
+            {
+                @:This package should not own page rendering or web middleware. Those responsibilities belong to
+                @using (Html.PB_Span().AsMonospace().Begin())
+                {
+                    @:DMBPageBuilder
+                }
+                @: and
+                @using (Html.PB_Span().AsMonospace().Begin())
+                {
+                    @:DMBServerWebHelper
+                }
+                @:, which depend on the server conventions defined here.
+            }
+
+            @* ── Tech Stack ── *@
+            @using (Html.BlockBuilder().AsInfoCallout().Begin())
+            {
+                @using (Html.FlexBlockBuilder().Begin())
+                {
+                    @using (Html.BlockBuilder().AsCalloutIcon().Begin())
+                    {
+                        @using (Html.PB_Span().AddClass("bi bi-gear-fill fs-2 text-info").Begin()) { }
+                    }
+                    @using (Html.BlockBuilder().Begin())
+                    {
+                        @Html.TitleBuilder().SetTitle("Tech Stack", TitleLevel.Five).AsAlertHeading().Render()
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsBold().Begin())
+                            {
+                                @:Backend:
+                            }
+                            @: .NET 10 / ASP.NET Core
+                        }
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsBold().Begin())
+                            {
+                                @:Role:
+                            }
+                            @: Server foundation
+                        }
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsBold().Begin())
+                            {
+                                @:Architecture:
+                            }
+                            @: Configuration / Helpers
+                        }
+                        @using (Html.BlockBuilder().AsSidebarRow().Begin())
+                        {
+                            @using (Html.PB_Span().AsBold().Begin())
+                            {
+                                @:Integration:
+                            }
+                            @: Foundation for the DMB stack
+                        }
+                    }
+                }
+            }
+
+            @* ── Next Step ── *@
+            @using (Html.BlockBuilder().AsSidebarNote().Begin())
+            {
+                @using (Html.BlockBuilder().AsTextCenter().Begin())
+                {
+                    @Html.TitleBuilder().SetTitle("Go back to the introduction", TitleLevel.Four).Render()
+                    @using (Html.PB_P().AsSmallMuted().Begin())
+                    {
+                        @:Review the complete overview of DMBServerHelper and its role in the stack.
+                    }
+                    @Html.Button(ActionItemFactory.AspRoute("ServerHelper", "Introduction").SetTitle("Introduction").SetIcon(IconStruct.Bootstrap("bi-house")).SetVariant(VariantStyle.Primary)).Render()
+                }
+            }
+        }
+    }
+}

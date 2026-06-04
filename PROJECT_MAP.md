@@ -15,8 +15,8 @@ When copying this file to another PageBuilder ecosystem project, update this sec
 
 ## Root files
 
-- `DMBServerHelper.csproj`: project file and package metadata.
-- `README.md`: package overview and documentation entry point.
+- `Source/DMBServerHelper.csproj`: project file and package metadata.
+- `Source/README.md`: package overview and documentation entry point.
 - `AGENTS.md`: local AI instructions.
 - `AI_CONTEXT.md`: project context for AI assistants.
 - `DOCUMENTATION_RULES.md`: XML and reference documentation rules.
@@ -31,14 +31,14 @@ When copying this file to another PageBuilder ecosystem project, update this sec
 
 ## Configuration
 
-Folder: `Configuration`
+Folder: `Source/Configuration`
 
 - `GenericConfiguration.cs`: generic configuration loading lifecycle and configuration file registration.
 - `ServerHelperConfiguration.cs`: core server defaults, domain analysis, supported languages, data protection setup, and URL composition helpers.
 
 ## Cookies
 
-Folder: `Cookies`
+Folder: `Source/Cookies`
 
 - `CookieDefinition.cs`: base metadata and read/write behavior for cookie definitions.
 - `CookieGlobal.cs`: global registry and deletion helper for cookie definitions.
@@ -48,14 +48,14 @@ Folder: `Cookies`
 
 ## Facades
 
-Folder: `Facades`
+Folder: `Source/Facades`
 
 - `IServerConfig.cs`: configuration lifecycle contract.
 - `ICombinedStringLocalizer.cs`: composed localization contract.
 
 ## Localizer
 
-Folder: `Localizer`
+Folder: `Source/Localizer`
 
 - `CombinedStringLocalizer.cs`: aggregate localizer implementation.
 - `WebLocalizer.cs`: shared localizer access point.
@@ -63,13 +63,13 @@ Folder: `Localizer`
 
 ## Models
 
-Folder: `Models`
+Folder: `Source/Models`
 
 - `ApiDocumentationList.cs`: API documentation assembly registry.
 
 ## Resources
 
-Folder: `Resources`
+Folder: `Source/Resources`
 
 - `DataAnnotationLocalization.Designer.cs`: generated data annotation localization accessors.
 - `InternalLocalization.Designer.cs`: generated internal localization accessors.
@@ -78,7 +78,7 @@ Do not edit generated designer files manually unless the generation workflow req
 
 ## Sessions
 
-Folder: `Sessions`
+Folder: `Source/Sessions`
 
 - `SessionDefinition.cs`: base metadata and read/write behavior for session definitions.
 - `SessionGlobal.cs`: global registry and deletion helper for session definitions.
@@ -88,9 +88,26 @@ Folder: `Sessions`
 
 ## Tools
 
-Folder: `Tools`
+Folder: `Source/Tools`
 
 - `DomainComposite.cs`: domain, subdomain, port, localhost, and HTTPS URL composition helper.
+
+## Unit Tests
+
+Folder: `UnitTests`
+
+- `DMBServerHelperUnitTest.csproj`: NUnit test project for `Source/DMBServerHelper.csproj`.
+- `Helpers/InMemorySession.cs`: in-memory session helper used by session tests.
+
+## Labs
+
+Folder: `Labs`
+
+- `DMBServerHelperLabs.csproj`: non-packable Razor demo project hosted by `labs_idemobi_com`.
+- `Controllers/ServerHelperController.cs`: documentation controller for the DMBServerHelper pages.
+- `Helpers/DMBServerHelperLabsViewExtensions.cs`: view extension methods required by the extracted labs pages.
+- `Views/_ViewImports.cshtml`: imports the labs view extension namespace for Razor views.
+- `Views/ServerHelper/*.cshtml`: presentation and example pages displayed by the labs website.
 
 ## Related projects
 

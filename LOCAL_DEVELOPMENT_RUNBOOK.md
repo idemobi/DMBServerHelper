@@ -17,7 +17,7 @@ When copying this file to another PageBuilder ecosystem project, update this sec
 
 Start by reading:
 
-- [README.md](README.md)
+- [Source/README.md](Source/README.md)
 - [PROJECT_MAP.md](PROJECT_MAP.md)
 - [DOCUMENTATION_RULES.md](DOCUMENTATION_RULES.md)
 - [DELIVERY_CHECKLIST.md](DELIVERY_CHECKLIST.md)

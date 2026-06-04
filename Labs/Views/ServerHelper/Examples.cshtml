@@ -1,0 +1,496 @@
+﻿@using DMBBootstrapBuilder
+@using DMBComponentBuilder
+@using DMBEffectBuilder
+@using DMBPageBuilder
+@using DMBServerHelper
+@using Microsoft.AspNetCore.Http
+@{
+    Layout = "_Layout";
+
+    CookieString themeCookie = new CookieString(
+        "Labs Example Theme",
+        "Theme preference",
+        "Stores the selected visual theme for the labs examples.",
+        CookieDefinitionGroup.Preference,
+        "light",
+        duration: 30,
+        secure: true,
+        limitSite: Microsoft.AspNetCore.Http.SameSiteMode.Lax);
+
+    CookieBool consentCookie = new CookieBool(
+        "Labs Example Consent",
+        "Example consent",
+        "Stores a sample consent value.",
+        CookieDefinitionGroup.Consent,
+        false,
+        duration: 365,
+        secure: true,
+        limitSite: Microsoft.AspNetCore.Http.SameSiteMode.Lax);
+
+    SessionString profileSession = new SessionString(
+        "Labs Example Profile",
+        "Profile",
+        "Stores a sample profile label.",
+        SessionDefinitionGroup.Preference,
+        "Ada Lovelace",
+        deletable: true);
+
+    SessionInt visitSession = new SessionInt(
+        "Labs Example Visit Count",
+        "Visit count",
+        "Counts visits to this documentation page within the current session.",
+        SessionDefinitionGroup.Navigation,
+        0,
+        deletable: true);
+
+    profileSession.SetValue(Context, "Ada Lovelace");
+    visitSession.IncrementValue(Context);
+
+    string encodedCookieData = themeCookie.GenerateCookieDataString("dark mode; beta:on");
+    string consentOnClick = consentCookie.GenerateOnClick(true);
+    string currentThemeValue = themeCookie.GetValue(Context);
+    string currentProfileValue = profileSession.GetValue(Context);
+    int visitCount = visitSession.GetValue(Context);
+
+    var domainExamples = new[]
+    {
+        "labs.idemobi.com",
+        "https://docs.example.co.uk:8443/path",
+        "https://127.0.0.1:7174",
+        "https://[::1]:7174",
+        "localhost:7174"
+    }
+        .Select(input => new
+        {
+            Input = input,
+            Composite = new DomainComposite(input, false, TimeSpan.FromSeconds(1))
+        })
+        .ToArray();
+
+    string requiredMessage = WebLocalizer.GetDataAnnotation("FormBuilder_Field_Required").Value;
+    string sampleMessage = WebLocalizer.GetInternal("LABS_SAMPLE_KEY").Value;
+    string missingMessage = WebLocalizer.GetInternal("LABS_MISSING_SAMPLE_KEY").Value;
+}
+
+@using (Html.SectionBuilder().SetHeight(150, UnitSize.px).BootstrapBackgroundEffect(VariantStyle.Normal).Begin())
+{
+    @using (Html.FlexBlockBuilder().SetAlignItemsCenter().SetJustifyContentCenter().Begin())
+    {
+        @using (Html.BlockBuilder().AsTextCenter().Begin())
+        {
+            @Html.TitleBuilder().SetTitle("Examples - DMBServerHelper", TitleLevel.One).Render()
+            @using (Html.PB_P().AsLead().Begin())
+            {
+                @:Typed cookies, session definitions, localization lookups, and domain composition.
+            }
+            @using (Html.FlexBlockBuilder().SetJustifyContentCenter().WithGap(Old_Gap.Gap2).Begin())
+            {
+                @Html.Button(ActionItemFactory.AspRoute("ServerHelper", "Introduction").SetTitle("Introduction").SetIcon(IconStruct.Bootstrap("bi-house")).SetVariant(VariantStyle.Secondary).SetOutlined()).Render()
+                @Html.Button(ActionItemFactory.AspRoute("ServerHelper", "Architecture").SetTitle("Architecture").SetIcon(IconStruct.Bootstrap("bi-diagram-3")).SetVariant(VariantStyle.Primary).SetOutlined()).Render()
+            }
+        }
+    }
+}
+
+@using (Html.BlockBuilder().AsSectionContentTop().Begin())
+{
+    @using (Html.RowBuilder().AsPillarGrid().Begin())
+    {
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
+        {
+            @using (Html.BlockBuilder().AsSidebarCard().Begin())
+            {
+                @using (Html.BlockBuilder().AsPaddedBlock().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi bi-cookie fs-2 text-primary d-block mb-2").Begin()) { }
+                    @using (Html.PB_Span().AsSemiBold().Begin())
+                    {
+                        @:Cookies
+                    }
+                    @using (Html.PB_P().AsSmallMuted().AsNoMargin().Begin())
+                    {
+                        @:Definitions hold storage metadata, lifetime, SameSite, Secure, and typed defaults.
+                    }
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
+        {
+            @using (Html.BlockBuilder().AsSidebarCard().Begin())
+            {
+                @using (Html.BlockBuilder().AsPaddedBlock().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi bi-database-check fs-2 text-success d-block mb-2").Begin()) { }
+                    @using (Html.PB_Span().AsSemiBold().Begin())
+                    {
+                        @:Sessions
+                    }
+                    @using (Html.PB_P().AsSmallMuted().AsNoMargin().Begin())
+                    {
+                        @:Session helpers expose typed values while keeping ASP.NET Core session access centralized.
+                    }
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Md).Begin())
+        {
+            @using (Html.BlockBuilder().AsSidebarCard().Begin())
+            {
+                @using (Html.BlockBuilder().AsPaddedBlock().Begin())
+                {
+                    @using (Html.PB_Span().AddClass("bi bi-globe2 fs-2 text-warning d-block mb-2").Begin()) { }
+                    @using (Html.PB_Span().AsSemiBold().Begin())
+                    {
+                        @:Domains
+                    }
+                    @using (Html.PB_P().AsSmallMuted().AsNoMargin().Begin())
+                    {
+                        @:DomainComposite parses hosts, ports, IPs, localhost, subdomains, and public suffixes.
+                    }
+                }
+            }
+        }
+    }
+}
+
+@using (Html.BlockBuilder().AsSectionContent().Begin())
+{
+    @Html.TitleBuilder().SetTitle("Cookie Definitions", TitleLevel.Two).AsSectionHeading().Render()
+    @using (Html.RowBuilder().SetGapY(Gap.G4).Begin())
+    {
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col6, ResponsiveBreakpoint.Lg).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Theme cookie", TitleLevel.Three).SetIconBootstrap("bi-cookie").Begin())
+            {
+                @using (Html.TableBuilder().SetSmall().Begin())
+                {
+                    @using (Html.TableBodyBuilder().Begin())
+                    {
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Name 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @themeCookie.Name } }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Group 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @themeCookie.Group }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Current value 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @currentThemeValue } }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Generated data 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @encodedCookieData } }
+                        }
+                    }
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col6, ResponsiveBreakpoint.Lg).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Consent cookie", TitleLevel.Three).SetIconBootstrap("bi-shield-check").Begin())
+            {
+                @using (Html.TableBuilder().SetSmall().Begin())
+                {
+                    @using (Html.TableBodyBuilder().Begin())
+                    {
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Name 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @consentCookie.Name } }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Group 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @consentCookie.Group }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Current value 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @consentCookie.GetValue(Context) } }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:JavaScript 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @consentOnClick } }
+                        }
+                    }
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Cookie code", TitleLevel.Three).SetIconBootstrap("bi-code-square").Begin())
+            {
+                @(Html.CodeBlock(@"CookieString themeCookie = new CookieString(
+    ""Labs Example Theme"",
+    ""Theme preference"",
+    ""Stores the selected visual theme."",
+    CookieDefinitionGroup.Preference,
+    ""light"",
+    duration: 30,
+    secure: true,
+    limitSite: Microsoft.AspNetCore.Http.SameSiteMode.Lax);
+
+string cookieData = themeCookie.GenerateCookieDataString(""dark mode; beta:on"");
+string currentValue = themeCookie.GetValue(HttpContext);", CodeLanguage.CSharp)
+                    .SetTitle("Cookie definition")
+                    .SetCopyButton()
+                    .SetCompact())
+            }
+        }
+    }
+}
+
+@using (Html.BlockBuilder().AsSectionContent().Begin())
+{
+    @Html.TitleBuilder().SetTitle("Session Definitions", TitleLevel.Two).AsSectionHeading().Render()
+    @using (Html.RowBuilder().SetGapY(Gap.G4).Begin())
+    {
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col6, ResponsiveBreakpoint.Lg).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Profile session", TitleLevel.Three).SetIconBootstrap("bi-person-badge").Begin())
+            {
+                @using (Html.TableBuilder().SetSmall().Begin())
+                {
+                    @using (Html.TableBodyBuilder().Begin())
+                    {
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Name 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @profileSession.Name } }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Group 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @profileSession.Group }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Value 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @currentProfileValue } }
+                        }
+                    }
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col6, ResponsiveBreakpoint.Lg).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Visit counter", TitleLevel.Three).SetIconBootstrap("bi-123").Begin())
+            {
+                @using (Html.TableBuilder().SetSmall().Begin())
+                {
+                    @using (Html.TableBodyBuilder().Begin())
+                    {
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Name 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @visitSession.Name } }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Group 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @visitSession.Group }
+                        }
+                        @using (Html.TableRowBuilder().Begin())
+                        {
+                            @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Value 
+                }
+                            @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @visitCount } }
+                        }
+                    }
+                }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Session code", TitleLevel.Three).SetIconBootstrap("bi-code-square").Begin())
+            {
+                @(Html.CodeBlock(@"SessionString profileSession = new SessionString(
+    ""Labs Example Profile"",
+    ""Profile"",
+    ""Stores a sample profile label."",
+    SessionDefinitionGroup.Preference,
+    ""anonymous"",
+    deletable: true);
+
+profileSession.SetValue(HttpContext, ""Ada Lovelace"");
+string profile = profileSession.GetValue(HttpContext);", CodeLanguage.CSharp)
+                    .SetTitle("Session definition")
+                    .SetCopyButton()
+                    .SetCompact())
+            }
+        }
+    }
+}
+
+@using (Html.BlockBuilder().AsSectionContent().Begin())
+{
+    @Html.TitleBuilder().SetTitle("Localization Lookup", TitleLevel.Two).AsSectionHeading().Render()
+    @using (Html.RowBuilder().SetGapY(Gap.G4).Begin())
+    {
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Lg).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Registered key", TitleLevel.Three).SetIconBootstrap("bi-translate").Begin())
+            {
+                @using (Html.PB_P().AsSmallMuted().AddClass("mb-2").Begin()) {
+                    @:Package data annotation localizer 
+                }
+                @using (Html.PB_Span().AsMonospace().AddClass("d-block text-break mb-3").Begin()) {
+                    @:FormBuilder_Field_Required 
+                }
+                @using (Html.BlockBuilder().Begin()) { @requiredMessage }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Lg).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Labs host key", TitleLevel.Three).SetIconBootstrap("bi-file-earmark-text").Begin())
+            {
+                @using (Html.PB_P().AsSmallMuted().AddClass("mb-2").Begin()) {
+                    @:Host internal localizer 
+                }
+                @using (Html.PB_Span().AsMonospace().AddClass("d-block text-break mb-3").Begin()) {
+                    @:LABS_SAMPLE_KEY 
+                }
+                @using (Html.BlockBuilder().Begin()) { @sampleMessage }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).SetCol(ColSize.Col4, ResponsiveBreakpoint.Lg).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Fallback key", TitleLevel.Three).SetIconBootstrap("bi-question-circle").Begin())
+            {
+                @using (Html.PB_P().AsSmallMuted().AddClass("mb-2").Begin()) {
+                    @:Internal localizer fallback 
+                }
+                @using (Html.PB_Span().AsMonospace().AddClass("d-block text-break mb-3").Begin()) {
+                    @:LABS_MISSING_SAMPLE_KEY 
+                }
+                @using (Html.BlockBuilder().Begin()) { @missingMessage }
+            }
+        }
+        @using (Html.ColBuilder().SetCol(ColSize.Col12).Begin())
+        {
+            @using (Html.CardBuilder().SetTitle("Localization code", TitleLevel.Three).SetIconBootstrap("bi-code-square").Begin())
+            {
+                @(Html.CodeBlock(@"var labsLocalizerFactory = new ResourceManagerStringLocalizerFactory(
+    Options.Create(new LocalizationOptions()),
+    NullLoggerFactory.Instance);
+
+WebLocalizer.InternalLocalizer.InjectResource(
+    nameof(LabsInternalLocalization),
+    labsLocalizerFactory.Create(typeof(LabsInternalLocalization)));
+
+LocalizedString sample = WebLocalizer.GetInternal(""LABS_SAMPLE_KEY"");
+LocalizedString message = WebLocalizer.GetDataAnnotation(""FormBuilder_Field_Required"");
+LocalizedString fallback = WebLocalizer.GetInternal(""LABS_MISSING_SAMPLE_KEY"");", CodeLanguage.CSharp)
+                    .SetTitle("Localization lookup")
+                    .SetCopyButton()
+                    .SetCompact())
+            }
+        }
+    }
+}
+
+@using (Html.BlockBuilder().AsSectionContent().Begin())
+{
+    @Html.TitleBuilder().SetTitle("DomainComposite", TitleLevel.Two).AsSectionHeading().Render()
+    @using (Html.PB_P().AsMuted().Begin())
+    {
+        @:The online Public Suffix List refresh is disabled here so the examples stay deterministic while rendering the documentation page.
+    }
+
+    @using (Html.CardBuilder().SetTitle("Domain parsing matrix", TitleLevel.Three).SetIconBootstrap("bi-globe2").Begin())
+    {
+        @using (Html.TableBuilder().SetSmall().SetResponsive(TableResponsiveBreakpoint.Always).Begin())
+        {
+            @using (Html.TableHeaderBuilder().Begin())
+            {
+                @using (Html.TableRowBuilder().Begin())
+                {
+                    @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Input 
+                }
+                    @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Domain 
+                }
+                    @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Subdomain 
+                }
+                    @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Port 
+                }
+                    @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:Localhost 
+                }
+                    @using (Html.TableCellBuilder(isHeader: true).Begin()) {
+                    @:HTTPS website 
+                }
+                }
+            }
+            @using (Html.TableBodyBuilder().Begin())
+            {
+                @foreach (var row in domainExamples)
+                {
+                    @using (Html.TableRowBuilder().Begin())
+                    {
+                        @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @row.Input } }
+                        @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @row.Composite.Domain } }
+                        @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @row.Composite.SubDomain } }
+                        @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @row.Composite.Port } }
+                        @using (Html.TableCellBuilder().Begin()) { @row.Composite.Localhost }
+                        @using (Html.TableCellBuilder().Begin()) { @using (Html.PB_Span().AsMonospace().Begin()) { @row.Composite.HttpsWebsite } }
+                    }
+                }
+            }
+        }
+    }
+
+    @using (Html.BlockBuilder().AsTopMargin().Begin())
+    {
+        @using (Html.CardBuilder().SetTitle("Domain code", TitleLevel.Three).SetIconBootstrap("bi-code-square").Begin())
+        {
+            @(Html.CodeBlock(@"DomainComposite composite = new DomainComposite(
+    ""https://docs.example.co.uk:8443/path"",
+    publicSuffixListOnlineRefreshEnabled: false,
+    publicSuffixListRefreshTimeout: TimeSpan.FromSeconds(1));
+
+string domain = composite.Domain;
+string subdomain = composite.SubDomain;
+string httpsWebsite = composite.HttpsWebsite;", CodeLanguage.CSharp)
+                .SetTitle("Domain parsing")
+                .SetCopyButton()
+                .SetCompact())
+        }
+    }
+}
