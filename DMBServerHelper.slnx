@@ -1,0 +1,25 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="NuGet" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Folder Name="/Source/">
+    <Project Path="Source/DMBServerHelper.csproj" />
+  </Folder>
+  <Folder Name="/Labs/">
+    <Project Path="Labs/DMBServerHelperLabs.csproj">
+      <BuildType Solution="NuGet|*" Project="Debug" />
+    </Project>
+  </Folder>
+  <Folder Name="/Website/">
+    <Project Path="Website/DMBServerHelperWebsite.csproj">
+      <BuildType Solution="NuGet|*" Project="Debug" />
+    </Project>
+  </Folder>
+  <Folder Name="/UnitTests/">
+    <Project Path="UnitTests/DMBServerHelperUnitTest.csproj">
+      <BuildType Solution="NuGet|*" Project="Debug" />
+    </Project>
+  </Folder>
+</Solution>
