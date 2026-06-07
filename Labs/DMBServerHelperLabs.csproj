@@ -17,9 +17,9 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Source\DMBServerHelper.csproj" />
-        <PackageReference Include="DMBPageBuilder" Version="0.13.0" />
-        <PackageReference Include="DMBBootstrapBuilder" Version="0.13.0" />
-        <PackageReference Include="DMBComponentBuilder" Version="0.13.0" />
-        <PackageReference Include="DMBEffectBuilder" Version="0.13.0" />
+        <PackageReference Include="DMBPageBuilder" Version="0.13.1" />
+        <PackageReference Include="DMBBootstrapBuilder" Version="0.13.1" />
+        <PackageReference Include="DMBComponentBuilder" Version="0.13.1" />
+        <PackageReference Include="DMBEffectBuilder" Version="0.13.1" />
     </ItemGroup>
 </Project>
