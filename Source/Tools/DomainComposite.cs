@@ -211,7 +211,7 @@ namespace DMBServerHelper
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine($"Public Suffix List refresh failed. Falling back to built-in domain parsing. {exception}");
+                    ServerHelperConfiguration.Logger.Error("Public Suffix List refresh failed. Falling back to built-in domain parsing.", exception);
                     PublicSuffixDomainParser = null;
                 }
 
@@ -263,7 +263,7 @@ namespace DMBServerHelper
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
+                ServerHelperConfiguration.Logger.Error("Public suffix host parsing failed. Falling back to built-in domain parsing.", exception);
                 return false;
             }
         }
@@ -441,7 +441,7 @@ namespace DMBServerHelper
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine(exception);
+                    ServerHelperConfiguration.Logger.Error("Domain analysis failed.", exception);
                 }
             }
         }

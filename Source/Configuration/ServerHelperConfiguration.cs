@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Primitives;
 
 #endregion
 
@@ -34,6 +35,24 @@ namespace DMBServerHelper
     [Serializable]
     public class ServerHelperConfiguration : GenericConfiguration<ServerHelperConfiguration>
     {
+        #region Static fields and properties
+
+        private static readonly List<ISecretRotationHandler> SecretRotationHandlers = new List<ISecretRotationHandler>();
+
+        private static readonly object SecretRotationHandlersLock = new object();
+
+        /// <summary>
+        ///     Gets the logger used by <see cref="DMBServerHelper" /> infrastructure diagnostics.
+        /// </summary>
+        /// <remarks>
+        ///     Host applications can replace this logger through <see cref="UseLogger(IServerHelperLogger)" />.
+        ///     Secret diagnostics use their own <see cref="ISecretLogger" /> surface for compatibility, but the
+        ///     default secret logger delegates warnings to this general logger.
+        /// </remarks>
+        public static IServerHelperLogger Logger { get; private set; } = new ConsoleServerHelperLogger();
+
+        #endregion
+
         #region Static methods
 
         #if NUGET
@@ -87,6 +106,18 @@ namespace DMBServerHelper
             #else
             return false;
             #endif
+        }
+
+        /// <summary>
+        ///     Sets the logger used by <see cref="DMBServerHelper" /> infrastructure diagnostics.
+        /// </summary>
+        /// <param name="logger">The logger that receives general framework diagnostics.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="logger" /> is <see langword="null" />.</exception>
+        public static void UseLogger(IServerHelperLogger logger)
+        {
+            ArgumentNullException.ThrowIfNull(logger);
+
+            Logger = logger;
         }
 
         private static string ComposePath(params string?[] segments)
@@ -213,6 +244,16 @@ namespace DMBServerHelper
         public string LaunchToken { set; get; } = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
 
         /// <summary>
+        ///     Gets or sets the centralized secret manager used by packages to declare and consume sensitive values.
+        /// </summary>
+        /// <remarks>
+        ///     DMBServerHelper owns the generic storage, validation, redaction, and diagnostic behavior.
+        ///     Feature packages such as DMBStripe, DMBPennylane, or DMBServerEmailHelper declare their own
+        ///     <see cref="SecretDefinition" /> values through this manager.
+        /// </remarks>
+        public SecretManager Secrets { get; set; } = new SecretManager();
+
+        /// <summary>
         ///     Gets or sets a value indicating whether domain analysis may refresh the Public Suffix List online.
         /// </summary>
         /// <remarks>
@@ -254,9 +295,169 @@ namespace DMBServerHelper
         {
             //if (LibrariesWorkflow.SetModuleInstalledByExpression(() => app.UseStaticFiles(), nameof(ServerHelperConfiguration)))
             {
-                Console.WriteLine($"The method 'UseStaticFiles' is installed by '{nameof(ServerHelperConfiguration)}'.");
+                Logger.Information($"The method 'UseStaticFiles' is installed by '{nameof(ServerHelperConfiguration)}'.");
                 app.UseStaticFiles();
             }
+        }
+
+        /// <summary>
+        ///     Validates all required secrets declared by loaded packages.
+        /// </summary>
+        /// <returns>
+        ///     A <see cref="SecretValidationResult" /> describing missing required secrets.
+        /// </returns>
+        /// <remarks>
+        ///     Call this method after all package <c>LoadCommonConfig</c> calls have completed so every package
+        ///     has had a chance to register its <see cref="SecretDefinition" /> values.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when <see cref="SecretManager.EffectiveFailFast" /> is enabled and at least one required secret is missing.
+        /// </exception>
+        public static SecretValidationResult ValidateRequiredSecrets()
+        {
+            return Config.Secrets.ValidateRequiredSecrets();
+        }
+
+        /// <summary>
+        ///     Registers a handler that can refresh long-lived components when resolved secrets change.
+        /// </summary>
+        /// <param name="handler">The rotation handler declared by a package module or host application.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="handler" /> is <see langword="null" />.</exception>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="handler" /> does not provide a stable name.</exception>
+        public static void RegisterSecretRotationHandler(ISecretRotationHandler handler)
+        {
+            ArgumentNullException.ThrowIfNull(handler);
+
+            if (string.IsNullOrWhiteSpace(handler.Name))
+            {
+                throw new ArgumentException("A secret rotation handler must provide a non-empty name.", nameof(handler));
+            }
+
+            lock (SecretRotationHandlersLock)
+            {
+                int existingIndex = SecretRotationHandlers.FindIndex(registeredHandler =>
+                    string.Equals(registeredHandler.Name, handler.Name, StringComparison.OrdinalIgnoreCase));
+                if (existingIndex >= 0)
+                {
+                    SecretRotationHandlers[existingIndex] = handler;
+                    return;
+                }
+
+                SecretRotationHandlers.Add(handler);
+            }
+        }
+
+        /// <summary>
+        ///     Rotates resolved secrets for all registered runtime handlers.
+        /// </summary>
+        /// <remarks>
+        ///     Call <see cref="ValidateRequiredSecrets()" /> before this method when the host configuration has
+        ///     already been refreshed. This method does not poll providers and does not know module-specific keys.
+        /// </remarks>
+        public static void RotateResolvedSecrets()
+        {
+            ISecretRotationHandler[] handlers;
+            lock (SecretRotationHandlersLock)
+            {
+                handlers = SecretRotationHandlers.ToArray();
+            }
+
+            foreach (ISecretRotationHandler handler in handlers)
+            {
+                handler.RotateResolvedSecrets(Config.Secrets);
+            }
+        }
+
+        /// <summary>
+        ///     Configures secret lookup from the active host builder, validates required secrets, then rotates handlers.
+        /// </summary>
+        /// <param name="appBuilder">The host application builder that provides the active configuration and environment name.</param>
+        /// <remarks>
+        ///     <para>
+        ///         This method is the standard explicit administration hook for hosts that want to rotate secrets
+        ///         without restarting the process. The host must first make sure its <see cref="IConfiguration" />
+        ///         providers expose the refreshed values, then call this method from an authenticated administrative
+        ///         command, maintenance endpoint, or equivalent trusted operation.
+        ///     </para>
+        ///     <para>
+        ///         This method does not poll secret stores and does not reload arbitrary package configuration.
+        ///         It refreshes the central <see cref="SecretManager" /> from the current host configuration,
+        ///         calls <see cref="ValidateRequiredSecrets(IHostApplicationBuilder)" />, and then asks registered
+        ///         <see cref="ISecretRotationHandler" /> instances to update runtime components that hold secrets.
+        ///     </para>
+        ///     <para>
+        ///         Hosts that use providers without reload support, such as environment variables, should rotate by
+        ///         restarting the process. Hosts that use reload-capable providers can either call this method
+        ///         explicitly or register <see cref="RegisterSecretReload(IHostApplicationBuilder)" />.
+        ///     </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="appBuilder" /> is <see langword="null" />.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when required secret validation fails.</exception>
+        public static void RotateResolvedSecrets(IHostApplicationBuilder appBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(appBuilder);
+
+            ValidateRequiredSecrets(appBuilder);
+            RotateResolvedSecrets();
+        }
+
+        /// <summary>
+        ///     Registers a configuration reload callback that validates secrets and rotates registered handlers.
+        /// </summary>
+        /// <param name="appBuilder">The host application builder whose configuration reload token is observed.</param>
+        /// <returns>An <see cref="IDisposable" /> registration that can be disposed to stop listening for reloads.</returns>
+        /// <remarks>
+        ///     <para>
+        ///         This method is the standard automatic host hook for reload-capable configuration providers.
+        ///         Register it once during application startup, after module configuration has registered the
+        ///         relevant <see cref="ISecretRotationHandler" /> instances.
+        ///     </para>
+        ///     <para>
+        ///         This method does not poll secret stores. It reacts only when the configured
+        ///         <see cref="IConfiguration" /> provider publishes a reload token. When the callback fires,
+        ///         <see cref="RotateResolvedSecrets(IHostApplicationBuilder)" /> validates all required secrets
+        ///         before rotating runtime components.
+        ///     </para>
+        ///     <para>
+        ///         Providers that do not publish reload tokens, including the usual environment variable provider,
+        ///         require either a process restart or an explicit administrative call to
+        ///         <see cref="RotateResolvedSecrets(IHostApplicationBuilder)" /> after the host has refreshed its
+        ///         configuration source.
+        ///     </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="appBuilder" /> is <see langword="null" />.</exception>
+        public static IDisposable RegisterSecretReload(IHostApplicationBuilder appBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(appBuilder);
+
+            return ChangeToken.OnChange(
+                () => appBuilder.Configuration.GetReloadToken(),
+                () => RotateResolvedSecrets(appBuilder));
+        }
+
+        /// <summary>
+        ///     Configures secret lookup from the active host builder, then validates all required secrets declared by loaded packages.
+        /// </summary>
+        /// <param name="appBuilder">
+        ///     The host application builder that provides the active configuration and environment name.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="SecretValidationResult" /> describing missing required secrets.
+        /// </returns>
+        /// <remarks>
+        ///     Call this method after all package <c>LoadCommonConfig</c> calls have completed so every package
+        ///     has had a chance to register its <see cref="SecretDefinition" /> values.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="appBuilder" /> is <see langword="null" />.</exception>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when <see cref="SecretManager.EffectiveFailFast" /> is enabled and at least one required secret is missing.
+        /// </exception>
+        public static SecretValidationResult ValidateRequiredSecrets(IHostApplicationBuilder appBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(appBuilder);
+
+            Config.Secrets.Configure(appBuilder.Configuration, appBuilder.Environment.EnvironmentName);
+            return ValidateRequiredSecrets();
         }
 
         /// <summary>
@@ -278,6 +479,8 @@ namespace DMBServerHelper
         /// </remarks>
         public override void AfterConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot)
         {
+            Config.Secrets.Configure(configRoot, appBuilder.Environment.EnvironmentName);
+
             SupportLanguages ??= new List<string>();
             #if DEBUG
             if (SupportLanguages.Contains("tlh", StringComparer.OrdinalIgnoreCase) == false)

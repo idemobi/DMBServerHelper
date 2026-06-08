@@ -63,7 +63,7 @@ namespace DMBServerHelper
             }
             catch (Exception tException)
             {
-                Console.WriteLine(tException);
+                ServerHelperConfiguration.Logger.Error($"Unable to add configuration file '{typeof(T).Name}.json'.", tException);
             }
 
             string env = GetEnvironmentVariable();
@@ -78,7 +78,7 @@ namespace DMBServerHelper
             }
             catch (Exception tException)
             {
-                Console.WriteLine(tException);
+                ServerHelperConfiguration.Logger.Error($"Unable to add configuration file '{typeof(T).Name}.{env}.json'.", tException);
             }
         }
 
@@ -177,7 +177,7 @@ namespace DMBServerHelper
             }
             else
             {
-                Console.WriteLine($"{typeof(T).Name} {nameof(LoadConfigWithConfigurationRoot)} ( {nameof(IConfigurationRoot)} …) => No configuration section");
+                ServerHelperConfiguration.Logger.Information($"{typeof(T).Name} {nameof(LoadConfigWithConfigurationRoot)} ( {nameof(IConfigurationRoot)} …) => No configuration section");
                 PrintExample();
             }
         }
@@ -212,7 +212,7 @@ namespace DMBServerHelper
 
             if (notFound)
             {
-                Console.WriteLine($"{typeof(T).Name} config not found in appsettings.{env}json or in {typeof(T).Name}.{env}json!");
+                ServerHelperConfiguration.Logger.Warning($"{typeof(T).Name} config not found in appsettings.{env}json or in {typeof(T).Name}.{env}json!");
             }
         }
 
