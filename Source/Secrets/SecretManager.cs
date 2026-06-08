@@ -59,12 +59,14 @@ namespace DMBServerHelper
         public bool EffectiveFailFast => FailFast || IsProtectedRuntimeEnvironment();
 
         /// <summary>
-        ///     Gets or sets a value indicating whether missing required secrets should throw during validation in local environments.
+        /// Gets or sets a value determining whether missing required secrets should halt the application startup
+        /// or configuration process immediately.
         /// </summary>
         /// <remarks>
-        ///     <see cref="SecretUsageEnvironment.PreProduction" /> and <see cref="SecretUsageEnvironment.Production" />
-        ///     always fail closed through <see cref="EffectiveFailFast" />.
-        /// </summary>
+        /// When enabled, the application will fail to start if any required secret is missing. This behavior is
+        /// enforced regardless of this property's value in <see cref="SecretUsageEnvironment.PreProduction" />
+        /// and <see cref="SecretUsageEnvironment.Production" />.
+        /// </remarks>
         public bool FailFast { get; set; }
 
         /// <summary>

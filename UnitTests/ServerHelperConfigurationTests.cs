@@ -268,7 +268,9 @@ internal sealed class ServerHelperConfigurationTests
         });
         ServerHelperConfiguration.Config.Secrets.Store = SecretStoreKind.EnvironmentVariables;
         ServerHelperConfiguration.Config.Secrets.LogMissingSecrets = false;
-        ServerHelperConfiguration.Config.Secrets.Require("DMB:Stripe:SecretKey", "DMBStripe", "Stripe API secret key");
+        string missingSecretKey = $"DMB:ServerHelper:UnitTests:Rotation:{Guid.NewGuid():N}";
+        string missingSecretEnvironmentVariable = missingSecretKey.Replace(":", "__");
+        ServerHelperConfiguration.Config.Secrets.Require(missingSecretKey, "DMBServerHelperUnitTests", "Rotation validation secret");
         CountingSecretRotationHandler handler = new CountingSecretRotationHandler(
             $"{nameof(RotateResolvedSecretsWithBuilderValidatesBeforeRotation)}-{Guid.NewGuid()}");
 
@@ -280,7 +282,7 @@ internal sealed class ServerHelperConfigurationTests
         Assert.Multiple(() =>
         {
             Assert.That(handler.CallCount, Is.EqualTo(0));
-            Assert.That(exception.Message, Does.Contain("DMB__Stripe__SecretKey=<secret-value>"));
+            Assert.That(exception.Message, Does.Contain($"{missingSecretEnvironmentVariable}=<secret-value>"));
         });
     }
 

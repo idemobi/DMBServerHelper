@@ -84,6 +84,21 @@ string webhookSecret = ServerHelperConfiguration.Config.Secrets.GetRequired("DMB
 
 `DMBServerHelper` does not know package-specific keys. It only knows how to read values from the active ASP.NET Core configuration pipeline, redact values for diagnostics, validate registered requirements, and explain how to configure a missing secret for the selected store.
 
+### Environment Variable Nomenclature
+
+DMB packages must use logical keys in the form `DMB:{Package}:{Section}:{Name}`. The environment
+variable name is always produced by replacing each `:` with `__`.
+
+```text
+DMB:Stripe:SecretKey -> DMB__Stripe__SecretKey
+DMB:Pennylane:ApiToken -> DMB__Pennylane__ApiToken
+DMB:ServerEmailHelper:NoReply:Smtp:Password -> DMB__ServerEmailHelper__NoReply__Smtp__Password
+```
+
+New package configuration keys should use the same `DMB:{Package}:...` namespace for both secrets and
+non-secret runtime settings. Avoid adding new package variables under implementation class names when a
+`DMB:{Package}:...` key exists or can be introduced.
+
 `SecretManager.RequiredSecrets` is exposed as a read-only collection. Package modules and host applications must register or replace required secrets through `SecretManager.Require(...)`.
 
 Secret diagnostics are routed through `ISecretLogger`. The default secret logger delegates warnings to `ServerHelperConfiguration.Logger`; host applications can still provide a secret-specific logger:
