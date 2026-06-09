@@ -5,8 +5,6 @@
 
 #endregion
 
-using System;
-
 namespace DMBServerHelper
 {
     /// <summary>
@@ -19,17 +17,7 @@ namespace DMBServerHelper
     /// </remarks>
     public interface IServerHelperLogger
     {
-        /// <summary>
-        ///     Writes an informational diagnostic.
-        /// </summary>
-        /// <param name="message">The diagnostic message to write.</param>
-        void Information(string message);
-
-        /// <summary>
-        ///     Writes a warning diagnostic.
-        /// </summary>
-        /// <param name="message">The diagnostic message to write.</param>
-        void Warning(string message);
+        #region Instance methods
 
         /// <summary>
         ///     Writes an error diagnostic.
@@ -43,5 +31,19 @@ namespace DMBServerHelper
         /// <param name="message">The diagnostic message to write.</param>
         /// <param name="exception">The exception associated with the diagnostic.</param>
         void Error(string message, Exception exception);
+
+        /// <summary>
+        ///     Writes an informational diagnostic.
+        /// </summary>
+        /// <param name="message">The diagnostic message to write.</param>
+        void Information(string message);
+
+        /// <summary>
+        ///     Writes a warning diagnostic.
+        /// </summary>
+        /// <param name="message">The diagnostic message to write.</param>
+        void Warning(string message);
+
+        #endregion
     }
 }

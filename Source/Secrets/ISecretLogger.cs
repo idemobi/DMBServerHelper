@@ -16,10 +16,14 @@ namespace DMBServerHelper
     /// </remarks>
     public interface ISecretLogger
     {
+        #region Instance methods
+
         /// <summary>
         ///     Writes a warning diagnostic.
         /// </summary>
         /// <param name="message">The diagnostic message to write.</param>
         void Warning(string message);
+
+        #endregion
     }
 }

@@ -7,7 +7,6 @@
 
 #region
 
-using System;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 
@@ -37,6 +36,27 @@ namespace DMBServerHelper
             }
 
             return result;
+        }
+
+        private static T? TryDeserialize(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return default(T);
+            }
+
+            try
+            {
+                return JsonSerializer.Deserialize<T>(value);
+            }
+            catch (JsonException)
+            {
+                return default(T);
+            }
+            catch (NotSupportedException)
+            {
+                return default(T);
+            }
         }
 
         #endregion
@@ -113,27 +133,6 @@ namespace DMBServerHelper
             }
 
             return TryDeserialize(value.Replace("\'", "'")) ?? TryDeserialize(DefaultValue);
-        }
-
-        private static T? TryDeserialize(string? value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return default(T);
-            }
-
-            try
-            {
-                return JsonSerializer.Deserialize<T>(value);
-            }
-            catch (JsonException)
-            {
-                return default(T);
-            }
-            catch (NotSupportedException)
-            {
-                return default(T);
-            }
         }
 
         /// <summary>

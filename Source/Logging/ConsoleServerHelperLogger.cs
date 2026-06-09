@@ -5,8 +5,6 @@
 
 #endregion
 
-using System;
-
 namespace DMBServerHelper
 {
     /// <summary>
@@ -19,6 +17,10 @@ namespace DMBServerHelper
     /// </remarks>
     public sealed class ConsoleServerHelperLogger : IServerHelperLogger
     {
+        #region Instance methods
+
+        #region From interface IServerHelperLogger
+
         /// <inheritdoc />
         public void Error(string message)
         {
@@ -44,5 +46,9 @@ namespace DMBServerHelper
         {
             Console.Error.WriteLine(message);
         }
+
+        #endregion
+
+        #endregion
     }
 }

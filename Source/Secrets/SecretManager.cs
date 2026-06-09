@@ -7,9 +7,6 @@
 
 #region
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +25,20 @@ namespace DMBServerHelper
     /// </remarks>
     public sealed class SecretManager
     {
+        #region Static methods
+
+        private static string BuildAzureKeyVaultSecretName(string key)
+        {
+            return key.Replace(":", "--");
+        }
+
+        private static string BuildEnvironmentVariableName(string key)
+        {
+            return key.Replace(":", "__");
+        }
+
+        #endregion
+
         #region Instance fields and properties
 
         [JsonIgnore] private IConfiguration? _configuration;
@@ -44,11 +55,6 @@ namespace DMBServerHelper
         public string AzureKeyVaultUri { get; set; } = string.Empty;
 
         /// <summary>
-        ///     Gets or sets the configured usage environment.
-        /// </summary>
-        public SecretUsageEnvironment Environment { get; set; } = SecretUsageEnvironment.Auto;
-
-        /// <summary>
         ///     Gets a value indicating whether missing required secrets must stop the application startup or configuration flow.
         /// </summary>
         /// <remarks>
@@ -59,13 +65,18 @@ namespace DMBServerHelper
         public bool EffectiveFailFast => FailFast || IsProtectedRuntimeEnvironment();
 
         /// <summary>
-        /// Gets or sets a value determining whether missing required secrets should halt the application startup
-        /// or configuration process immediately.
+        ///     Gets or sets the configured usage environment.
+        /// </summary>
+        public SecretUsageEnvironment Environment { get; set; } = SecretUsageEnvironment.Auto;
+
+        /// <summary>
+        ///     Gets or sets a value determining whether missing required secrets should halt the application startup
+        ///     or configuration process immediately.
         /// </summary>
         /// <remarks>
-        /// When enabled, the application will fail to start if any required secret is missing. This behavior is
-        /// enforced regardless of this property's value in <see cref="SecretUsageEnvironment.PreProduction" />
-        /// and <see cref="SecretUsageEnvironment.Production" />.
+        ///     When enabled, the application will fail to start if any required secret is missing. This behavior is
+        ///     enforced regardless of this property's value in <see cref="SecretUsageEnvironment.PreProduction" />
+        ///     and <see cref="SecretUsageEnvironment.Production" />.
         /// </remarks>
         public bool FailFast { get; set; }
 
@@ -95,6 +106,20 @@ namespace DMBServerHelper
         #endregion
 
         #region Instance methods
+
+        private string BuildAzureKeyVaultInstruction(string key)
+        {
+            string vault = string.IsNullOrWhiteSpace(AzureKeyVaultUri)
+                ? "the configured Azure Key Vault"
+                : AzureKeyVaultUri.Trim();
+
+            return $"""
+                    Create this Azure Key Vault secret in {vault}:
+                    {BuildAzureKeyVaultSecretName(key)}
+
+                    Grant the application identity permission to read secrets, then expose Azure Key Vault through the ASP.NET Core configuration pipeline.
+                    """;
+        }
 
         /// <summary>
         ///     Builds a human-readable diagnostic for a missing secret.
@@ -132,15 +157,66 @@ namespace DMBServerHelper
             return builder.ToString().TrimEnd();
         }
 
+        private string BuildStoreInstruction(string key, SecretStoreKind store, SecretUsageEnvironment environment)
+        {
+            if (environment == SecretUsageEnvironment.Unspecified)
+            {
+                string hostEnvironmentName = string.IsNullOrWhiteSpace(_hostEnvironmentName)
+                    ? "<empty>"
+                    : _hostEnvironmentName.Trim();
+                return $"""
+                        Configure ServerHelperConfiguration:Secrets:Environment explicitly before storing this secret.
+                        Host environment: {hostEnvironmentName}
+                        Accepted values: LocalUnitTests, LocalWebsite, PreProduction, Production.
+                        """;
+            }
+
+            return store switch
+            {
+                SecretStoreKind.UserSecrets => $"""
+                                                Store the value in the user secrets of the startup or test project:
+                                                dotnet user-secrets set "{key}" "<secret-value>"
+                                                """,
+                SecretStoreKind.EnvironmentVariables => $"""
+                                                         Set this environment variable before starting the application:
+                                                         {BuildEnvironmentVariableName(key)}=<secret-value>
+                                                         """,
+                SecretStoreKind.AzureKeyVault => BuildAzureKeyVaultInstruction(key),
+                SecretStoreKind.Configuration => $"""
+                                                  Add the value through a secure ASP.NET Core configuration provider:
+                                                  "{key}": "<secret-value>"
+                                                  Do not commit real secret values to source control.
+                                                  """,
+                SecretStoreKind.External => $"""
+                                             Register a host-specific secret provider that exposes this key through IConfiguration:
+                                             {key}
+                                             """,
+                _ => $"""
+                      Configure this secret in the resolved store for {environment}.
+                      Environment variable name: {BuildEnvironmentVariableName(key)}
+                      Azure Key Vault name: {BuildAzureKeyVaultSecretName(key)}
+                      """
+            };
+        }
+
         /// <summary>
         ///     Configures the manager with the active ASP.NET Core configuration pipeline.
         /// </summary>
         /// <param name="configuration">The configuration used to resolve secret values.</param>
-        /// <param name="hostEnvironmentName">The host environment name used when <see cref="Environment" /> is <see cref="SecretUsageEnvironment.Auto" />.</param>
+        /// <param name="hostEnvironmentName">
+        ///     The host environment name used when <see cref="Environment" /> is
+        ///     <see cref="SecretUsageEnvironment.Auto" />.
+        /// </param>
         public void Configure(IConfiguration configuration, string? hostEnvironmentName)
         {
             _configuration = configuration;
             _hostEnvironmentName = hostEnvironmentName ?? string.Empty;
+        }
+
+        private SecretDefinition? FindDefinition(string key)
+        {
+            return _requiredSecrets.FirstOrDefault(secret =>
+                string.Equals(secret.Key, key, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -189,6 +265,22 @@ namespace DMBServerHelper
             throw new InvalidOperationException(message);
         }
 
+        private bool IsProtectedRuntimeEnvironment()
+        {
+            SecretUsageEnvironment environment = ResolveUsageEnvironment();
+            return environment is SecretUsageEnvironment.PreProduction or SecretUsageEnvironment.Production;
+        }
+
+        /// <summary>
+        ///     Masks a secret value for logs, diagnostics, pages, and MCP responses.
+        /// </summary>
+        /// <param name="value">The secret value to mask.</param>
+        /// <returns>A redacted placeholder that never exposes the original value.</returns>
+        public string Redact(string? value)
+        {
+            return string.IsNullOrEmpty(value) ? string.Empty : "********";
+        }
+
         /// <summary>
         ///     Registers a required secret definition declared by a package module or host application.
         /// </summary>
@@ -235,149 +327,6 @@ namespace DMBServerHelper
                 Owner = owner,
                 DisplayName = displayName
             });
-        }
-
-        /// <summary>
-        ///     Masks a secret value for logs, diagnostics, pages, and MCP responses.
-        /// </summary>
-        /// <param name="value">The secret value to mask.</param>
-        /// <returns>A redacted placeholder that never exposes the original value.</returns>
-        public string Redact(string? value)
-        {
-            return string.IsNullOrEmpty(value) ? string.Empty : "********";
-        }
-
-        /// <summary>
-        ///     Sets the logger used for missing-secret diagnostics.
-        /// </summary>
-        /// <param name="logger">The logger that receives secret management warnings.</param>
-        /// <returns>The current <see cref="SecretManager" /> instance.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="logger" /> is <see langword="null" />.</exception>
-        public SecretManager UseLogger(ISecretLogger logger)
-        {
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _logger = logger;
-            return this;
-        }
-
-        /// <summary>
-        ///     Validates registered required secrets and writes store-specific setup diagnostics when values are missing.
-        /// </summary>
-        /// <returns>The validation result containing all missing required secrets.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when <see cref="EffectiveFailFast" /> is enabled and at least one required secret is missing.</exception>
-        public SecretValidationResult ValidateRequiredSecrets()
-        {
-            ThrowIfUsageEnvironmentIsUnspecified();
-
-            SecretValidationResult result = new SecretValidationResult();
-
-            foreach (SecretDefinition definition in _requiredSecrets
-                         .Where(definition => definition.Required)
-                         .Where(definition => string.IsNullOrWhiteSpace(definition.Key) == false))
-            {
-                if (Get(definition.Key) != null)
-                {
-                    continue;
-                }
-
-                string message = BuildMissingSecretMessage(definition);
-                result.Issues.Add(new SecretValidationIssue
-                {
-                    Definition = definition.Clone(),
-                    Message = message
-                });
-
-                if (LogMissingSecrets)
-                {
-                    _logger.Warning(message);
-                }
-            }
-
-            if (EffectiveFailFast && result.Success == false)
-            {
-                throw new InvalidOperationException(string.Join(System.Environment.NewLine + System.Environment.NewLine, result.Issues.Select(issue => issue.Message)));
-            }
-
-            return result;
-        }
-
-        private static string BuildAzureKeyVaultSecretName(string key)
-        {
-            return key.Replace(":", "--");
-        }
-
-        private static string BuildEnvironmentVariableName(string key)
-        {
-            return key.Replace(":", "__");
-        }
-
-        private SecretDefinition? FindDefinition(string key)
-        {
-            return _requiredSecrets.FirstOrDefault(secret =>
-                string.Equals(secret.Key, key, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private bool IsProtectedRuntimeEnvironment()
-        {
-            SecretUsageEnvironment environment = ResolveUsageEnvironment();
-            return environment is SecretUsageEnvironment.PreProduction or SecretUsageEnvironment.Production;
-        }
-
-        private string BuildStoreInstruction(string key, SecretStoreKind store, SecretUsageEnvironment environment)
-        {
-            if (environment == SecretUsageEnvironment.Unspecified)
-            {
-                string hostEnvironmentName = string.IsNullOrWhiteSpace(_hostEnvironmentName)
-                    ? "<empty>"
-                    : _hostEnvironmentName.Trim();
-                return $"""
-                        Configure ServerHelperConfiguration:Secrets:Environment explicitly before storing this secret.
-                        Host environment: {hostEnvironmentName}
-                        Accepted values: LocalUnitTests, LocalWebsite, PreProduction, Production.
-                        """;
-            }
-
-            return store switch
-            {
-                SecretStoreKind.UserSecrets => $"""
-                                                   Store the value in the user secrets of the startup or test project:
-                                                   dotnet user-secrets set "{key}" "<secret-value>"
-                                                   """,
-                SecretStoreKind.EnvironmentVariables => $"""
-                                                            Set this environment variable before starting the application:
-                                                            {BuildEnvironmentVariableName(key)}=<secret-value>
-                                                            """,
-                SecretStoreKind.AzureKeyVault => BuildAzureKeyVaultInstruction(key),
-                SecretStoreKind.Configuration => $"""
-                                                     Add the value through a secure ASP.NET Core configuration provider:
-                                                     "{key}": "<secret-value>"
-                                                     Do not commit real secret values to source control.
-                                                     """,
-                SecretStoreKind.External => $"""
-                                                Register a host-specific secret provider that exposes this key through IConfiguration:
-                                                {key}
-                                                """,
-                _ => $"""
-                     Configure this secret in the resolved store for {environment}.
-                     Environment variable name: {BuildEnvironmentVariableName(key)}
-                     Azure Key Vault name: {BuildAzureKeyVaultSecretName(key)}
-                     """
-            };
-        }
-
-        private string BuildAzureKeyVaultInstruction(string key)
-        {
-            string vault = string.IsNullOrWhiteSpace(AzureKeyVaultUri)
-                ? "the configured Azure Key Vault"
-                : AzureKeyVaultUri.Trim();
-
-            return $"""
-                    Create this Azure Key Vault secret in {vault}:
-                    {BuildAzureKeyVaultSecretName(key)}
-
-                    Grant the application identity permission to read secrets, then expose Azure Key Vault through the ASP.NET Core configuration pipeline.
-                    """;
         }
 
         private SecretStoreKind ResolveStoreKind()
@@ -459,6 +408,64 @@ namespace DMBServerHelper
                                                  Host environment: {hostEnvironmentName}
                                                  Configure ServerHelperConfiguration:Secrets:Environment with one of these values: LocalUnitTests, LocalWebsite, PreProduction, Production.
                                                  """);
+        }
+
+        /// <summary>
+        ///     Sets the logger used for missing-secret diagnostics.
+        /// </summary>
+        /// <param name="logger">The logger that receives secret management warnings.</param>
+        /// <returns>The current <see cref="SecretManager" /> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="logger" /> is <see langword="null" />.</exception>
+        public SecretManager UseLogger(ISecretLogger logger)
+        {
+            ArgumentNullException.ThrowIfNull(logger);
+
+            _logger = logger;
+            return this;
+        }
+
+        /// <summary>
+        ///     Validates registered required secrets and writes store-specific setup diagnostics when values are missing.
+        /// </summary>
+        /// <returns>The validation result containing all missing required secrets.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when <see cref="EffectiveFailFast" /> is enabled and at least one
+        ///     required secret is missing.
+        /// </exception>
+        public SecretValidationResult ValidateRequiredSecrets()
+        {
+            ThrowIfUsageEnvironmentIsUnspecified();
+
+            SecretValidationResult result = new SecretValidationResult();
+
+            foreach (SecretDefinition definition in _requiredSecrets
+                         .Where(definition => definition.Required)
+                         .Where(definition => string.IsNullOrWhiteSpace(definition.Key) == false))
+            {
+                if (Get(definition.Key) != null)
+                {
+                    continue;
+                }
+
+                string message = BuildMissingSecretMessage(definition);
+                result.Issues.Add(new SecretValidationIssue
+                {
+                    Definition = definition.Clone(),
+                    Message = message
+                });
+
+                if (LogMissingSecrets)
+                {
+                    _logger.Warning(message);
+                }
+            }
+
+            if (EffectiveFailFast && result.Success == false)
+            {
+                throw new InvalidOperationException(string.Join(System.Environment.NewLine + System.Environment.NewLine, result.Issues.Select(issue => issue.Message)));
+            }
+
+            return result;
         }
 
         #endregion

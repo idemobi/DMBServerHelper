@@ -7,9 +7,6 @@
 
 #region
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using DMBServerHelper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -51,6 +48,87 @@ internal sealed class ServerHelperConfigurationTests
         configuration.AfterConfiguration(hostBuilder, configurationBuilder, configurationRoot);
     }
 
+    private sealed class CountingSecretRotationHandler : ISecretRotationHandler
+    {
+        #region Instance fields and properties
+
+        public int CallCount { get; private set; }
+
+        public SecretManager? LastSecretManager { get; private set; }
+
+        #region From interface ISecretRotationHandler
+
+        public string Name { get; }
+
+        #endregion
+
+        #endregion
+
+        #region Instance constructors and destructors
+
+        public CountingSecretRotationHandler(string name)
+        {
+            Name = name;
+        }
+
+        #endregion
+
+        #region Instance methods
+
+        #region From interface ISecretRotationHandler
+
+        public void RotateResolvedSecrets(SecretManager secretManager)
+        {
+            CallCount++;
+            LastSecretManager = secretManager;
+        }
+
+        #endregion
+
+        #endregion
+    }
+
+    private sealed class CapturingServerHelperLogger : IServerHelperLogger
+    {
+        #region Instance fields and properties
+
+        public List<string> Errors { get; } = new List<string>();
+
+        public List<string> InformationMessages { get; } = new List<string>();
+
+        public List<string> Warnings { get; } = new List<string>();
+
+        #endregion
+
+        #region Instance methods
+
+        #region From interface IServerHelperLogger
+
+        public void Error(string message)
+        {
+            Errors.Add(message);
+        }
+
+        public void Error(string message, Exception exception)
+        {
+            Errors.Add($"{message} {exception.GetType().Name}");
+        }
+
+        public void Information(string message)
+        {
+            InformationMessages.Add(message);
+        }
+
+        public void Warning(string message)
+        {
+            Warnings.Add(message);
+        }
+
+        #endregion
+
+        #endregion
+    }
+
     [Test]
     public void AfterConfigurationNormalizesSupportedLanguagesAndAnalyzesDomain()
     {
@@ -87,16 +165,16 @@ internal sealed class ServerHelperConfigurationTests
     }
 
     [Test]
-    public void ComposeUrlWithPublicPortUsesAnalyzedHttpsWebsite()
+    public void ComposeUrlWithControllerOnlyEncodesControllerSegment()
     {
         ServerHelperConfiguration configuration = new ServerHelperConfiguration
         {
-            DomainName = "docs.example.com:8443"
+            DomainName = "example.com"
         };
 
         RunAfterConfiguration(configuration);
 
-        Assert.That(configuration.ComposeUrl("Index", "Home"), Is.EqualTo("https://docs.example.com:8443/Home/Index"));
+        Assert.That(configuration.ComposeUrl("Admin Area"), Is.EqualTo("https://www.example.com/Admin%20Area"));
     }
 
     [Test]
@@ -115,7 +193,7 @@ internal sealed class ServerHelperConfigurationTests
     }
 
     [Test]
-    public void ComposeUrlWithQueryValuesUrlEncodesKeysAndValues()
+    public void ComposeUrlWithPathUrlEncodesSegmentsAndPreservesQuery()
     {
         ServerHelperConfiguration configuration = new ServerHelperConfiguration
         {
@@ -124,12 +202,22 @@ internal sealed class ServerHelperConfigurationTests
 
         RunAfterConfiguration(configuration);
 
-        string url = configuration.ComposeUrl(
-            "Details",
-            "Products",
-            new Dictionary<string, string> { ["return url"] = "/a path/" });
+        string url = configuration.ComposeUrlWithPath("docs/a path/file name?return url=/a path/#top section");
 
-        Assert.That(url, Is.EqualTo("https://www.example.com/Products/Details?return%20url=%2Fa%20path%2F"));
+        Assert.That(url, Is.EqualTo("https://www.example.com/docs/a%20path/file%20name?return%20url=%2Fa%20path%2F#top%20section"));
+    }
+
+    [Test]
+    public void ComposeUrlWithPublicPortUsesAnalyzedHttpsWebsite()
+    {
+        ServerHelperConfiguration configuration = new ServerHelperConfiguration
+        {
+            DomainName = "docs.example.com:8443"
+        };
+
+        RunAfterConfiguration(configuration);
+
+        Assert.That(configuration.ComposeUrl("Index", "Home"), Is.EqualTo("https://docs.example.com:8443/Home/Index"));
     }
 
     [Test]
@@ -151,7 +239,7 @@ internal sealed class ServerHelperConfigurationTests
     }
 
     [Test]
-    public void ComposeUrlWithPathUrlEncodesSegmentsAndPreservesQuery()
+    public void ComposeUrlWithQueryValuesUrlEncodesKeysAndValues()
     {
         ServerHelperConfiguration configuration = new ServerHelperConfiguration
         {
@@ -160,83 +248,12 @@ internal sealed class ServerHelperConfigurationTests
 
         RunAfterConfiguration(configuration);
 
-        string url = configuration.ComposeUrlWithPath("docs/a path/file name?return url=/a path/#top section");
+        string url = configuration.ComposeUrl(
+            "Details",
+            "Products",
+            new Dictionary<string, string> { ["return url"] = "/a path/" });
 
-        Assert.That(url, Is.EqualTo("https://www.example.com/docs/a%20path/file%20name?return%20url=%2Fa%20path%2F#top%20section"));
-    }
-
-    [Test]
-    public void ComposeUrlWithControllerOnlyEncodesControllerSegment()
-    {
-        ServerHelperConfiguration configuration = new ServerHelperConfiguration
-        {
-            DomainName = "example.com"
-        };
-
-        RunAfterConfiguration(configuration);
-
-        Assert.That(configuration.ComposeUrl("Admin Area"), Is.EqualTo("https://www.example.com/Admin%20Area"));
-    }
-
-    [Test]
-    public void ValidateRequiredSecretsAggregatesAllRegisteredMissingSecrets()
-    {
-        ServerHelperConfiguration.Config.Secrets.Store = SecretStoreKind.EnvironmentVariables;
-        ServerHelperConfiguration.Config.Secrets.Environment = SecretUsageEnvironment.LocalWebsite;
-        ServerHelperConfiguration.Config.Secrets.FailFast = true;
-        ServerHelperConfiguration.Config.Secrets.LogMissingSecrets = false;
-        ServerHelperConfiguration.Config.Secrets.Configure(new ConfigurationBuilder().Build(), "Development");
-        ServerHelperConfiguration.Config.Secrets.Require("DMB:Stripe:SecretKey", "DMBStripe", "Stripe API secret key");
-        ServerHelperConfiguration.Config.Secrets.Require("DMB:Pennylane:ApiToken", "DMBPennylane", "Pennylane API token");
-
-        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
-            ServerHelperConfiguration.ValidateRequiredSecrets())!;
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(exception.Message, Does.Contain("DMB__Stripe__SecretKey=<secret-value>"));
-            Assert.That(exception.Message, Does.Contain("DMB__Pennylane__ApiToken=<secret-value>"));
-        });
-    }
-
-    [Test]
-    public void ValidateRequiredSecretsWithBuilderUsesBuilderEnvironment()
-    {
-        HostApplicationBuilder hostBuilder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
-        {
-            EnvironmentName = "Production"
-        });
-        ServerHelperConfiguration.Config.Secrets.Store = SecretStoreKind.EnvironmentVariables;
-        ServerHelperConfiguration.Config.Secrets.LogMissingSecrets = false;
-        ServerHelperConfiguration.Config.Secrets.Require("DMB:Stripe:WebhookSecret", "DMBStripe", "Stripe webhook signing secret");
-
-        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
-            ServerHelperConfiguration.ValidateRequiredSecrets(hostBuilder))!;
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(ServerHelperConfiguration.Config.Secrets.FailFast, Is.False);
-            Assert.That(ServerHelperConfiguration.Config.Secrets.EffectiveFailFast, Is.True);
-            Assert.That(exception.Message, Does.Contain("Environment: Production"));
-            Assert.That(exception.Message, Does.Contain("DMB__Stripe__WebhookSecret=<secret-value>"));
-        });
-    }
-
-    [Test]
-    public void UseLoggerReplacesServerHelperLogger()
-    {
-        CapturingServerHelperLogger logger = new CapturingServerHelperLogger();
-
-        ServerHelperConfiguration.UseLogger(logger);
-        ServerHelperConfiguration.Logger.Warning("custom warning");
-
-        Assert.That(logger.Warnings, Is.EqualTo(new[] { "custom warning" }));
-    }
-
-    [Test]
-    public void UseLoggerRejectsNullLogger()
-    {
-        Assert.Throws<ArgumentNullException>(() => ServerHelperConfiguration.UseLogger(null!));
+        Assert.That(url, Is.EqualTo("https://www.example.com/Products/Details?return%20url=%2Fa%20path%2F"));
     }
 
     [Test]
@@ -286,52 +303,64 @@ internal sealed class ServerHelperConfigurationTests
         });
     }
 
-    private sealed class CountingSecretRotationHandler : ISecretRotationHandler
+    [Test]
+    public void UseLoggerRejectsNullLogger()
     {
-        public CountingSecretRotationHandler(string name)
-        {
-            Name = name;
-        }
-
-        public int CallCount { get; private set; }
-
-        public SecretManager? LastSecretManager { get; private set; }
-
-        public string Name { get; }
-
-        public void RotateResolvedSecrets(SecretManager secretManager)
-        {
-            CallCount++;
-            LastSecretManager = secretManager;
-        }
+        Assert.Throws<ArgumentNullException>(() => ServerHelperConfiguration.UseLogger(null!));
     }
 
-    private sealed class CapturingServerHelperLogger : IServerHelperLogger
+    [Test]
+    public void UseLoggerReplacesServerHelperLogger()
     {
-        public List<string> Errors { get; } = new List<string>();
+        CapturingServerHelperLogger logger = new CapturingServerHelperLogger();
 
-        public List<string> InformationMessages { get; } = new List<string>();
+        ServerHelperConfiguration.UseLogger(logger);
+        ServerHelperConfiguration.Logger.Warning("custom warning");
 
-        public List<string> Warnings { get; } = new List<string>();
+        Assert.That(logger.Warnings, Is.EqualTo(new[] { "custom warning" }));
+    }
 
-        public void Error(string message)
+    [Test]
+    public void ValidateRequiredSecretsAggregatesAllRegisteredMissingSecrets()
+    {
+        ServerHelperConfiguration.Config.Secrets.Store = SecretStoreKind.EnvironmentVariables;
+        ServerHelperConfiguration.Config.Secrets.Environment = SecretUsageEnvironment.LocalWebsite;
+        ServerHelperConfiguration.Config.Secrets.FailFast = true;
+        ServerHelperConfiguration.Config.Secrets.LogMissingSecrets = false;
+        ServerHelperConfiguration.Config.Secrets.Configure(new ConfigurationBuilder().Build(), "Development");
+        ServerHelperConfiguration.Config.Secrets.Require("DMB:Stripe:SecretKey", "DMBStripe", "Stripe API secret key");
+        ServerHelperConfiguration.Config.Secrets.Require("DMB:Pennylane:ApiToken", "DMBPennylane", "Pennylane API token");
+
+        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            ServerHelperConfiguration.ValidateRequiredSecrets())!;
+
+        Assert.Multiple(() =>
         {
-            Errors.Add(message);
-        }
+            Assert.That(exception.Message, Does.Contain("DMB__Stripe__SecretKey=<secret-value>"));
+            Assert.That(exception.Message, Does.Contain("DMB__Pennylane__ApiToken=<secret-value>"));
+        });
+    }
 
-        public void Error(string message, Exception exception)
+    [Test]
+    public void ValidateRequiredSecretsWithBuilderUsesBuilderEnvironment()
+    {
+        HostApplicationBuilder hostBuilder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
         {
-            Errors.Add($"{message} {exception.GetType().Name}");
-        }
+            EnvironmentName = "Production"
+        });
+        ServerHelperConfiguration.Config.Secrets.Store = SecretStoreKind.EnvironmentVariables;
+        ServerHelperConfiguration.Config.Secrets.LogMissingSecrets = false;
+        ServerHelperConfiguration.Config.Secrets.Require("DMB:Stripe:WebhookSecret", "DMBStripe", "Stripe webhook signing secret");
 
-        public void Information(string message)
-        {
-            InformationMessages.Add(message);
-        }
+        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            ServerHelperConfiguration.ValidateRequiredSecrets(hostBuilder))!;
 
-        public void Warning(string message)
+        Assert.Multiple(() =>
         {
-            Warnings.Add(message);
-        }
+            Assert.That(ServerHelperConfiguration.Config.Secrets.FailFast, Is.False);
+            Assert.That(ServerHelperConfiguration.Config.Secrets.EffectiveFailFast, Is.True);
+            Assert.That(exception.Message, Does.Contain("Environment: Production"));
+            Assert.That(exception.Message, Does.Contain("DMB__Stripe__WebhookSecret=<secret-value>"));
+        });
     }
 }

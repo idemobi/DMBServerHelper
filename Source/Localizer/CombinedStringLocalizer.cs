@@ -7,7 +7,6 @@
 
 #region
 
-using System.Collections.Generic;
 using Microsoft.Extensions.Localization;
 
 #endregion
@@ -22,16 +21,6 @@ namespace DMBServerHelper
     /// </summary>
     public class CombinedStringLocalizer : ICombinedStringLocalizer
     {
-        #region Static fields and properties
-
-        /// <summary>
-        ///     A static synchronization object used to ensure thread-safe access
-        ///     to critical sections of the code within the <see cref="CombinedStringLocalizer" /> class.
-        /// </summary>
-        private readonly object _lock = new object();
-
-        #endregion
-
         #region Instance fields and properties
 
         /// <summary>
@@ -47,6 +36,12 @@ namespace DMBServerHelper
         ///     in priority order when resolving localization resources.
         /// </summary>
         private readonly List<IStringLocalizer> _localizers = new List<IStringLocalizer>();
+
+        /// <summary>
+        ///     A static synchronization object used to ensure thread-safe access
+        ///     to critical sections of the code within the <see cref="CombinedStringLocalizer" /> class.
+        /// </summary>
+        private readonly object _lock = new object();
 
         #region From interface ICombinedStringLocalizer
 

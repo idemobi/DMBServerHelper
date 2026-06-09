@@ -7,8 +7,6 @@
 
 #region
 
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 #endregion
@@ -26,9 +24,9 @@ namespace DMBServerHelper
     {
         #region Static fields and properties
 
-        private static readonly object Lock = new object();
-
         private static readonly List<Assembly> ApiAssemblies = new List<Assembly>();
+
+        private static readonly object Lock = new object();
 
         #endregion
 

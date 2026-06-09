@@ -7,7 +7,6 @@
 
 #region
 
-using System;
 using Microsoft.AspNetCore.Http;
 
 #endregion

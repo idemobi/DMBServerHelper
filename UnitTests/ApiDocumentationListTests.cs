@@ -7,9 +7,7 @@
 
 #region
 
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using DMBServerHelper;
 using NUnit.Framework;
 
@@ -21,12 +19,11 @@ namespace DMBserverHelperUnitTest;
 internal sealed class ApiDocumentationListTests
 {
     [Test]
-    public void AddApiAssemblyIgnoresDuplicateAssemblyReferences()
+    public void AddApiAssemblyHandlesConcurrentDuplicateRegistrations()
     {
         Assembly assembly = typeof(ApiDocumentationListTests).Assembly;
 
-        ApiDocumentationList.AddApiAssembly(assembly);
-        ApiDocumentationList.AddApiAssembly(assembly);
+        Parallel.For(0, 32, _ => ApiDocumentationList.AddApiAssembly(assembly));
 
         Assembly[] assemblies = ApiDocumentationList.GetAssemblies();
 
@@ -34,11 +31,12 @@ internal sealed class ApiDocumentationListTests
     }
 
     [Test]
-    public void AddApiAssemblyHandlesConcurrentDuplicateRegistrations()
+    public void AddApiAssemblyIgnoresDuplicateAssemblyReferences()
     {
         Assembly assembly = typeof(ApiDocumentationListTests).Assembly;
 
-        Parallel.For(0, 32, _ => ApiDocumentationList.AddApiAssembly(assembly));
+        ApiDocumentationList.AddApiAssembly(assembly);
+        ApiDocumentationList.AddApiAssembly(assembly);
 
         Assembly[] assemblies = ApiDocumentationList.GetAssemblies();
 

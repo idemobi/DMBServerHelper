@@ -18,6 +18,8 @@ namespace DMBServerHelper
     /// </remarks>
     public sealed class SecretDefinition
     {
+        #region Instance fields and properties
+
         /// <summary>
         ///     Gets or sets a human-readable description of the secret purpose.
         /// </summary>
@@ -48,6 +50,10 @@ namespace DMBServerHelper
         /// </summary>
         public bool Required { get; set; } = true;
 
+        #endregion
+
+        #region Instance methods
+
         /// <summary>
         ///     Creates a copy of the current secret definition.
         /// </summary>
@@ -64,5 +70,7 @@ namespace DMBServerHelper
                 Required = Required
             };
         }
+
+        #endregion
     }
 }

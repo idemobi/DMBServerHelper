@@ -7,9 +7,6 @@
 
 #region
 
-using System.Collections.Generic;
-using System.Linq;
-
 #endregion
 
 namespace DMBServerHelper
@@ -19,6 +16,8 @@ namespace DMBServerHelper
     /// </summary>
     public sealed class SecretValidationResult
     {
+        #region Instance fields and properties
+
         /// <summary>
         ///     Gets or sets the detected secret validation issues.
         /// </summary>
@@ -28,5 +27,7 @@ namespace DMBServerHelper
         ///     Gets a value indicating whether all required secrets were found.
         /// </summary>
         public bool Success => Issues.Any() == false;
+
+        #endregion
     }
 }

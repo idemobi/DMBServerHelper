@@ -7,9 +7,6 @@
 
 #region
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json.Serialization;
 using Azure.Identity;
 using JetBrains.Annotations;
@@ -436,7 +433,8 @@ namespace DMBServerHelper
         }
 
         /// <summary>
-        ///     Configures secret lookup from the active host builder, then validates all required secrets declared by loaded packages.
+        ///     Configures secret lookup from the active host builder, then validates all required secrets declared by loaded
+        ///     packages.
         /// </summary>
         /// <param name="appBuilder">
         ///     The host application builder that provides the active configuration and environment name.
@@ -593,7 +591,8 @@ namespace DMBServerHelper
         ///     Query string keys and values. Keys and values are URL-encoded with <c>Uri.EscapeDataString</c>.
         /// </param>
         /// <returns>
-        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}/{actionName}?key=value</c> with encoded path and query segments.
+        ///     A URL in the form <c>{HttpsWebsite}/{controllerName}/{actionName}?key=value</c> with encoded path and query
+        ///     segments.
         /// </returns>
         public string ComposeUrl([AspMvcAction] string actionName, [AspMvcController] string controllerName, Dictionary<string, string> keysValues)
         {

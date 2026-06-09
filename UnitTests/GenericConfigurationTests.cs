@@ -7,9 +7,6 @@
 
 #region
 
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using DMBServerHelper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -37,6 +34,57 @@ internal sealed class GenericConfigurationTests
     }
 
     #endregion
+
+    private sealed class ConcurrentLoadConfiguration : GenericConfiguration<ConcurrentLoadConfiguration>
+    {
+        #region Static fields and properties
+
+        public static int AfterCount;
+
+        public static int BeforeCount;
+
+        #endregion
+
+        #region Static methods
+
+        public static void Reset()
+        {
+            BeforeCount = 0;
+            AfterCount = 0;
+            Config = new ConcurrentLoadConfiguration();
+        }
+
+        #endregion
+
+        #region Instance methods
+
+        public override void AfterConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot)
+        {
+            Interlocked.Increment(ref AfterCount);
+        }
+
+        public override bool ApiDescription()
+        {
+            return false;
+        }
+
+        public override void BeforeConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot)
+        {
+            Interlocked.Increment(ref BeforeCount);
+            Thread.Sleep(25);
+        }
+
+        public override bool NeedsConfigFileOrAppSettings()
+        {
+            return false;
+        }
+
+        public override void RandomFake()
+        {
+        }
+
+        #endregion
+    }
 
     [Test]
     public void LoadCommonConfigRunsLifecycleOnlyOnceUnderConcurrency()
@@ -84,44 +132,5 @@ internal sealed class GenericConfigurationTests
             Assert.That(ConcurrentLoadConfiguration.BeforeCount, Is.EqualTo(1));
             Assert.That(ConcurrentLoadConfiguration.AfterCount, Is.EqualTo(1));
         });
-    }
-
-    private sealed class ConcurrentLoadConfiguration : GenericConfiguration<ConcurrentLoadConfiguration>
-    {
-        public static int AfterCount;
-
-        public static int BeforeCount;
-
-        public static void Reset()
-        {
-            BeforeCount = 0;
-            AfterCount = 0;
-            Config = new ConcurrentLoadConfiguration();
-        }
-
-        public override void AfterConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot)
-        {
-            Interlocked.Increment(ref AfterCount);
-        }
-
-        public override bool ApiDescription()
-        {
-            return false;
-        }
-
-        public override void BeforeConfiguration(IHostApplicationBuilder appBuilder, IConfigurationBuilder configBuilder, IConfigurationRoot configRoot)
-        {
-            Interlocked.Increment(ref BeforeCount);
-            Thread.Sleep(25);
-        }
-
-        public override bool NeedsConfigFileOrAppSettings()
-        {
-            return false;
-        }
-
-        public override void RandomFake()
-        {
-        }
     }
 }

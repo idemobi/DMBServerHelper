@@ -7,10 +7,7 @@
 
 #region
 
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using Nager.PublicSuffix;
 using Nager.PublicSuffix.RuleProviders;
 using Nager.PublicSuffix.RuleProviders.CacheProviders;
@@ -41,9 +38,6 @@ namespace DMBServerHelper
         #endregion
 
         #region Static fields and properties
-
-        private static DomainParser? PublicSuffixDomainParser;
-        private static readonly object PublicSuffixDomainParserLock = new object();
 
         private static readonly HashSet<string> CommonCompoundPublicSuffixes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -96,57 +90,8 @@ namespace DMBServerHelper
             "org"
         };
 
-        #endregion
-
-        #region Instance fields and properties
-
-        /// <summary>
-        ///     Gets or sets the domain name of a composite domain object.
-        ///     This represents the primary domain without subdomains or additional segments.
-        ///     Commonly used in conjunction with other properties such as <see cref="DomainComposite.Port" />
-        ///     or <see cref="DomainComposite.SubDomain" /> to construct a fully qualified domain.
-        /// </summary>
-        public string Domain { set; get; } = string.Empty;
-
-        /// <summary>
-        ///     Gets or sets the HTTPS website URL constructed based on the domain, port,
-        ///     subdomain, and localhost settings of the <see cref="DomainComposite" /> object.
-        ///     This property automatically adjusts its value to reflect the appropriate URL format:
-        ///     - For localhost environments indicated by <see cref="DomainComposite.Localhost" />,
-        ///     it uses "https://localhost" and includes the <see cref="DomainComposite.Port" />
-        ///     if specified.
-        ///     - For non-localhost environments, it includes "https://www." if there is no subdomain
-        ///     as indicated by <see cref="DomainComposite.SubDomain" />; otherwise, the subdomain
-        ///     is omitted.
-        /// </summary>
-        public string HttpsWebsite { set; get; } = string.Empty;
-
-        /// <summary>
-        ///     Gets or sets a value indicating whether the domain represents a localhost environment.
-        ///     If set to <c>true</c>, the domain is interpreted as a local development server
-        ///     and will primarily use default patterns for localhost handling. This property
-        ///     influences the construction of <see cref="DomainComposite.HttpsWebsite" />
-        ///     in combination with <see cref="DomainComposite.Port" /> and other properties.
-        /// </summary>
-        public bool Localhost { set; get; } = false;
-
-        /// <summary>
-        ///     Gets or sets the port number of the composite domain object.
-        ///     This represents the specific network port associated with the domain.
-        ///     The port is often used together with <see cref="DomainComposite.Domain" />
-        ///     and <see cref="DomainComposite.SubDomain" /> to define a fully qualified URL or network address.
-        /// </summary>
-        public string Port { set; get; } = string.Empty;
-
-        /// <summary>
-        ///     Gets or sets the subdomain of the composite domain object.
-        ///     This represents the segment of the address that precedes the primary domain
-        ///     and is used to identify subdivisions or specific sections within a domain.
-        ///     Commonly used in conjunction with other properties such as
-        ///     <see cref="DomainComposite.Domain" /> and <see cref="DomainComposite.Port" />
-        ///     to construct a fully qualified domain or URL.
-        /// </summary>
-        public string SubDomain { set; get; } = string.Empty;
+        private static DomainParser? PublicSuffixDomainParser;
+        private static readonly object PublicSuffixDomainParserLock = new object();
 
         #endregion
 
@@ -166,22 +111,6 @@ namespace DMBServerHelper
             return string.IsNullOrEmpty(port)
                 ? "https://" + hostSegment
                 : "https://" + hostSegment + ":" + port;
-        }
-
-        private static bool IsCompoundPublicSuffix(string[] parts)
-        {
-            if (parts.Length < 3)
-            {
-                return false;
-            }
-
-            string twoLabelSuffix = parts[^2] + "." + parts[^1];
-            if (CommonCompoundPublicSuffixes.Contains(twoLabelSuffix))
-            {
-                return true;
-            }
-
-            return parts[^1].Length == 2 && CommonCountrySecondLevelLabels.Contains(parts[^2]);
         }
 
         private static DomainParser? GetOrCreatePublicSuffixDomainParser(TimeSpan timeout)
@@ -217,6 +146,22 @@ namespace DMBServerHelper
 
                 return PublicSuffixDomainParser;
             }
+        }
+
+        private static bool IsCompoundPublicSuffix(string[] parts)
+        {
+            if (parts.Length < 3)
+            {
+                return false;
+            }
+
+            string twoLabelSuffix = parts[^2] + "." + parts[^1];
+            if (CommonCompoundPublicSuffixes.Contains(twoLabelSuffix))
+            {
+                return true;
+            }
+
+            return parts[^1].Length == 2 && CommonCountrySecondLevelLabels.Contains(parts[^2]);
         }
 
         private static string StripPresentationSubdomain(string subDomain)
@@ -312,6 +257,58 @@ namespace DMBServerHelper
             port = authority[(lastColonIndex + 1)..];
             return int.TryParse(port, out _);
         }
+
+        #endregion
+
+        #region Instance fields and properties
+
+        /// <summary>
+        ///     Gets or sets the domain name of a composite domain object.
+        ///     This represents the primary domain without subdomains or additional segments.
+        ///     Commonly used in conjunction with other properties such as <see cref="DomainComposite.Port" />
+        ///     or <see cref="DomainComposite.SubDomain" /> to construct a fully qualified domain.
+        /// </summary>
+        public string Domain { set; get; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets the HTTPS website URL constructed based on the domain, port,
+        ///     subdomain, and localhost settings of the <see cref="DomainComposite" /> object.
+        ///     This property automatically adjusts its value to reflect the appropriate URL format:
+        ///     - For localhost environments indicated by <see cref="DomainComposite.Localhost" />,
+        ///     it uses "https://localhost" and includes the <see cref="DomainComposite.Port" />
+        ///     if specified.
+        ///     - For non-localhost environments, it includes "https://www." if there is no subdomain
+        ///     as indicated by <see cref="DomainComposite.SubDomain" />; otherwise, the subdomain
+        ///     is omitted.
+        /// </summary>
+        public string HttpsWebsite { set; get; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether the domain represents a localhost environment.
+        ///     If set to <c>true</c>, the domain is interpreted as a local development server
+        ///     and will primarily use default patterns for localhost handling. This property
+        ///     influences the construction of <see cref="DomainComposite.HttpsWebsite" />
+        ///     in combination with <see cref="DomainComposite.Port" /> and other properties.
+        /// </summary>
+        public bool Localhost { set; get; } = false;
+
+        /// <summary>
+        ///     Gets or sets the port number of the composite domain object.
+        ///     This represents the specific network port associated with the domain.
+        ///     The port is often used together with <see cref="DomainComposite.Domain" />
+        ///     and <see cref="DomainComposite.SubDomain" /> to define a fully qualified URL or network address.
+        /// </summary>
+        public string Port { set; get; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets the subdomain of the composite domain object.
+        ///     This represents the segment of the address that precedes the primary domain
+        ///     and is used to identify subdivisions or specific sections within a domain.
+        ///     Commonly used in conjunction with other properties such as
+        ///     <see cref="DomainComposite.Domain" /> and <see cref="DomainComposite.Port" />
+        ///     to construct a fully qualified domain or URL.
+        /// </summary>
+        public string SubDomain { set; get; } = string.Empty;
 
         #endregion
 

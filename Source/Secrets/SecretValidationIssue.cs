@@ -12,6 +12,8 @@ namespace DMBServerHelper
     /// </summary>
     public sealed class SecretValidationIssue
     {
+        #region Instance fields and properties
+
         /// <summary>
         ///     Gets or sets the affected secret definition.
         /// </summary>
@@ -21,5 +23,7 @@ namespace DMBServerHelper
         ///     Gets or sets the diagnostic message explaining how to configure the secret.
         /// </summary>
         public string Message { get; set; } = string.Empty;
+
+        #endregion
     }
 }

@@ -7,7 +7,6 @@
 
 #region
 
-using System;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Localization;
 

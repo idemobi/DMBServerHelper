@@ -16,15 +16,23 @@ namespace DMBServerHelper
     /// </remarks>
     public interface ISecretRotationHandler
     {
+        #region Instance fields and properties
+
         /// <summary>
         ///     Gets the stable unique name of the handler.
         /// </summary>
         string Name { get; }
+
+        #endregion
+
+        #region Instance methods
 
         /// <summary>
         ///     Refreshes resolved secret values and recreates runtime components when needed.
         /// </summary>
         /// <param name="secretManager">The central secret manager configured with the current host configuration.</param>
         void RotateResolvedSecrets(SecretManager secretManager);
+
+        #endregion
     }
 }

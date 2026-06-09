@@ -7,7 +7,6 @@
 
 #region
 
-using System;
 using System.Globalization;
 using DMBServerHelper;
 using Microsoft.AspNetCore.Http;
@@ -21,12 +20,6 @@ namespace DMBserverHelperUnitTest;
 [TestFixture]
 internal sealed class CookieDefinitionTests
 {
-    private enum CookieDisplayMode
-    {
-        Compact,
-        Expanded
-    }
-
     #region Setup/Teardown
 
     [SetUp]
@@ -42,6 +35,12 @@ internal sealed class CookieDefinitionTests
     }
 
     #endregion
+
+    private enum CookieDisplayMode
+    {
+        Compact,
+        Expanded
+    }
 
     [TestCase(CookieDefinitionGroup.Functional)]
     [TestCase(CookieDefinitionGroup.Consent)]
@@ -79,19 +78,6 @@ internal sealed class CookieDefinitionTests
             Assert.That(CookieGlobal.KDictionary.ContainsKey("UserPreference"), Is.True);
             Assert.That(CookieString.GetCookieDefinition("UserPreference"), Is.SameAs(cookie));
         });
-    }
-
-    [Test]
-    public void GetValueWhenCookieIsMissingReturnsDefaultValue()
-    {
-        CookieInt cookie = new CookieInt(
-            "Counter",
-            "Counter",
-            "Counter cookie.",
-            CookieDefinitionGroup.Optional,
-            42);
-
-        Assert.That(cookie.GetValue(new DefaultHttpContext()), Is.EqualTo(42));
     }
 
     [Test]
@@ -134,55 +120,6 @@ internal sealed class CookieDefinitionTests
     }
 
     [Test]
-    public void TypedCookieGetValueWhenStoredValueIsInvalidReturnsDefaultValue()
-    {
-        DefaultHttpContext context = new DefaultHttpContext();
-        context.Request.Headers.Cookie = "Feature=not-a-bool; Counter=invalid; Unsigned=-1; ShortValue=invalid; UShortValue=-1; LongValue=invalid; Ratio=invalid";
-
-        CookieBool boolCookie = new CookieBool("Feature", "Feature", "Feature flag.", CookieDefinitionGroup.Optional, true);
-        CookieInt intCookie = new CookieInt("Counter", "Counter", "Counter cookie.", CookieDefinitionGroup.Optional, 42);
-        CookieUInt uintCookie = new CookieUInt("Unsigned", "Unsigned", "Unsigned cookie.", CookieDefinitionGroup.Optional, 12);
-        CookieShort shortCookie = new CookieShort("ShortValue", "Short value", "Short cookie.", CookieDefinitionGroup.Optional, 7);
-        CookieUShort ushortCookie = new CookieUShort("UShortValue", "UShort value", "Unsigned short cookie.", CookieDefinitionGroup.Optional, 9);
-        CookieLong longCookie = new CookieLong("LongValue", "Long value", "Long cookie.", CookieDefinitionGroup.Optional, 123456789L);
-        CookieFloat floatCookie = new CookieFloat("Ratio", "Ratio", "Ratio cookie.", CookieDefinitionGroup.Optional, 2.5F);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(boolCookie.GetValue(context), Is.True);
-            Assert.That(intCookie.GetValue(context), Is.EqualTo(42));
-            Assert.That(uintCookie.GetValue(context), Is.EqualTo(12U));
-            Assert.That(shortCookie.GetValue(context), Is.EqualTo((short)7));
-            Assert.That(ushortCookie.GetValue(context), Is.EqualTo((ushort)9));
-            Assert.That(longCookie.GetValue(context), Is.EqualTo(123456789L));
-            Assert.That(floatCookie.GetValue(context), Is.EqualTo(2.5F));
-        });
-    }
-
-    [Test]
-    public void TypedCookieGetValueWhenDefaultValueIsCorruptedDoesNotThrow()
-    {
-        CookieBool boolCookie = new CookieBool("Feature", "Feature", "Feature flag.", CookieDefinitionGroup.Optional, true) { DefaultValue = "invalid" };
-        CookieInt intCookie = new CookieInt("Counter", "Counter", "Counter cookie.", CookieDefinitionGroup.Optional, 42) { DefaultValue = "invalid" };
-        CookieUInt uintCookie = new CookieUInt("Unsigned", "Unsigned", "Unsigned cookie.", CookieDefinitionGroup.Optional, 12) { DefaultValue = "invalid" };
-        CookieShort shortCookie = new CookieShort("ShortValue", "Short value", "Short cookie.", CookieDefinitionGroup.Optional, 7) { DefaultValue = "invalid" };
-        CookieUShort ushortCookie = new CookieUShort("UShortValue", "UShort value", "Unsigned short cookie.", CookieDefinitionGroup.Optional, 9) { DefaultValue = "invalid" };
-        CookieLong longCookie = new CookieLong("LongValue", "Long value", "Long cookie.", CookieDefinitionGroup.Optional, 123456789L) { DefaultValue = "invalid" };
-        CookieFloat floatCookie = new CookieFloat("Ratio", "Ratio", "Ratio cookie.", CookieDefinitionGroup.Optional, 2.5F) { DefaultValue = "invalid" };
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(boolCookie.GetValue(new DefaultHttpContext()), Is.False);
-            Assert.That(intCookie.GetValue(new DefaultHttpContext()), Is.EqualTo(0));
-            Assert.That(uintCookie.GetValue(new DefaultHttpContext()), Is.EqualTo(0U));
-            Assert.That(shortCookie.GetValue(new DefaultHttpContext()), Is.EqualTo((short)0));
-            Assert.That(ushortCookie.GetValue(new DefaultHttpContext()), Is.EqualTo((ushort)0));
-            Assert.That(longCookie.GetValue(new DefaultHttpContext()), Is.EqualTo(0L));
-            Assert.That(floatCookie.GetValue(new DefaultHttpContext()), Is.EqualTo(0F));
-        });
-    }
-
-    [Test]
     public void GenerateCookieDataStringEncodesNameAndValueAndRespectsSecureFlag()
     {
         CookieString cookie = new CookieString(
@@ -203,6 +140,45 @@ internal sealed class CookieDefinitionTests
             Assert.That(cookieData, Does.Not.Contain("Secure"));
             Assert.That(cookieData, Does.Not.Contain("value with spaces;and:semicolon"));
         });
+    }
+
+    [Test]
+    public void GetValueAsStringForHtmlEncodesCookieValue()
+    {
+        DefaultHttpContext context = new DefaultHttpContext();
+        context.Request.Headers.Cookie = "UnsafeCookie=%3Cscript%3Ealert(1)%3C%2Fscript%3E";
+        CookieString cookie = new CookieString(
+            "UnsafeCookie",
+            "Unsafe cookie",
+            "Stores unsafe text.",
+            CookieDefinitionGroup.Optional,
+            "default");
+
+        string htmlValue = cookie.GetValueAsString(context, forHtml: true);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(htmlValue, Does.Not.Contain("<script>"));
+            Assert.That(htmlValue, Does.Not.Contain("</script>"));
+            Assert.That(htmlValue, Does.Contain("&lt;script&gt;"));
+            Assert.That(htmlValue, Does.Not.Contain("&l</span>"));
+            Assert.That(htmlValue, Does.Not.Contain("&g</span>"));
+            Assert.That(htmlValue, Does.StartWith("<span>"));
+            Assert.That(htmlValue, Does.EndWith("</span>"));
+        });
+    }
+
+    [Test]
+    public void GetValueWhenCookieIsMissingReturnsDefaultValue()
+    {
+        CookieInt cookie = new CookieInt(
+            "Counter",
+            "Counter",
+            "Counter cookie.",
+            CookieDefinitionGroup.Optional,
+            42);
+
+        Assert.That(cookie.GetValue(new DefaultHttpContext()), Is.EqualTo(42));
     }
 
     [Test]
@@ -234,56 +210,6 @@ internal sealed class CookieDefinitionTests
             Assert.That(generatedScript, Does.Not.Contain("<script>"));
             Assert.That(installScript, Does.Not.Contain("<script>"));
             Assert.That(deleteScript, Does.Not.Contain("<script>"));
-        });
-    }
-
-    [Test]
-    public void GetValueAsStringForHtmlEncodesCookieValue()
-    {
-        DefaultHttpContext context = new DefaultHttpContext();
-        context.Request.Headers.Cookie = "UnsafeCookie=%3Cscript%3Ealert(1)%3C%2Fscript%3E";
-        CookieString cookie = new CookieString(
-            "UnsafeCookie",
-            "Unsafe cookie",
-            "Stores unsafe text.",
-            CookieDefinitionGroup.Optional,
-            "default");
-
-        string htmlValue = cookie.GetValueAsString(context, forHtml: true);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(htmlValue, Does.Not.Contain("<script>"));
-            Assert.That(htmlValue, Does.Not.Contain("</script>"));
-            Assert.That(htmlValue, Does.Contain("&lt;script&gt;"));
-            Assert.That(htmlValue, Does.Not.Contain("&l</span>"));
-            Assert.That(htmlValue, Does.Not.Contain("&g</span>"));
-            Assert.That(htmlValue, Does.StartWith("<span>"));
-            Assert.That(htmlValue, Does.EndWith("</span>"));
-        });
-    }
-
-    [Test]
-    public void SetValueWritesResponseCookieWithConfiguredOptions()
-    {
-        DefaultHttpContext context = new DefaultHttpContext();
-        CookieBool cookie = new CookieBool(
-            "Feature",
-            "Feature",
-            "Feature flag.",
-            CookieDefinitionGroup.Optional,
-            false,
-            secure: true,
-            limitSite: SameSiteMode.Strict);
-
-        cookie.SetValue(context, true, seconds: 60);
-
-        string setCookieHeader = context.Response.Headers.SetCookie.ToString();
-        Assert.Multiple(() =>
-        {
-            Assert.That(setCookieHeader, Does.Contain("Feature=True"));
-            Assert.That(setCookieHeader, Does.Contain("samesite=strict").IgnoreCase);
-            Assert.That(setCookieHeader, Does.Contain("secure").IgnoreCase);
         });
     }
 
@@ -334,6 +260,79 @@ internal sealed class CookieDefinitionTests
             Assert.That(setCookie.Expires, Is.Not.Null);
             Assert.That(expiration, Is.GreaterThanOrEqualTo(minimumExpiration));
             Assert.That(expiration, Is.LessThanOrEqualTo(maximumExpiration));
+        });
+    }
+
+    [Test]
+    public void SetValueWritesResponseCookieWithConfiguredOptions()
+    {
+        DefaultHttpContext context = new DefaultHttpContext();
+        CookieBool cookie = new CookieBool(
+            "Feature",
+            "Feature",
+            "Feature flag.",
+            CookieDefinitionGroup.Optional,
+            false,
+            secure: true,
+            limitSite: SameSiteMode.Strict);
+
+        cookie.SetValue(context, true, seconds: 60);
+
+        string setCookieHeader = context.Response.Headers.SetCookie.ToString();
+        Assert.Multiple(() =>
+        {
+            Assert.That(setCookieHeader, Does.Contain("Feature=True"));
+            Assert.That(setCookieHeader, Does.Contain("samesite=strict").IgnoreCase);
+            Assert.That(setCookieHeader, Does.Contain("secure").IgnoreCase);
+        });
+    }
+
+    [Test]
+    public void TypedCookieGetValueWhenDefaultValueIsCorruptedDoesNotThrow()
+    {
+        CookieBool boolCookie = new CookieBool("Feature", "Feature", "Feature flag.", CookieDefinitionGroup.Optional, true) { DefaultValue = "invalid" };
+        CookieInt intCookie = new CookieInt("Counter", "Counter", "Counter cookie.", CookieDefinitionGroup.Optional, 42) { DefaultValue = "invalid" };
+        CookieUInt uintCookie = new CookieUInt("Unsigned", "Unsigned", "Unsigned cookie.", CookieDefinitionGroup.Optional, 12) { DefaultValue = "invalid" };
+        CookieShort shortCookie = new CookieShort("ShortValue", "Short value", "Short cookie.", CookieDefinitionGroup.Optional, 7) { DefaultValue = "invalid" };
+        CookieUShort ushortCookie = new CookieUShort("UShortValue", "UShort value", "Unsigned short cookie.", CookieDefinitionGroup.Optional, 9) { DefaultValue = "invalid" };
+        CookieLong longCookie = new CookieLong("LongValue", "Long value", "Long cookie.", CookieDefinitionGroup.Optional, 123456789L) { DefaultValue = "invalid" };
+        CookieFloat floatCookie = new CookieFloat("Ratio", "Ratio", "Ratio cookie.", CookieDefinitionGroup.Optional, 2.5F) { DefaultValue = "invalid" };
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(boolCookie.GetValue(new DefaultHttpContext()), Is.False);
+            Assert.That(intCookie.GetValue(new DefaultHttpContext()), Is.EqualTo(0));
+            Assert.That(uintCookie.GetValue(new DefaultHttpContext()), Is.EqualTo(0U));
+            Assert.That(shortCookie.GetValue(new DefaultHttpContext()), Is.EqualTo((short)0));
+            Assert.That(ushortCookie.GetValue(new DefaultHttpContext()), Is.EqualTo((ushort)0));
+            Assert.That(longCookie.GetValue(new DefaultHttpContext()), Is.EqualTo(0L));
+            Assert.That(floatCookie.GetValue(new DefaultHttpContext()), Is.EqualTo(0F));
+        });
+    }
+
+    [Test]
+    public void TypedCookieGetValueWhenStoredValueIsInvalidReturnsDefaultValue()
+    {
+        DefaultHttpContext context = new DefaultHttpContext();
+        context.Request.Headers.Cookie = "Feature=not-a-bool; Counter=invalid; Unsigned=-1; ShortValue=invalid; UShortValue=-1; LongValue=invalid; Ratio=invalid";
+
+        CookieBool boolCookie = new CookieBool("Feature", "Feature", "Feature flag.", CookieDefinitionGroup.Optional, true);
+        CookieInt intCookie = new CookieInt("Counter", "Counter", "Counter cookie.", CookieDefinitionGroup.Optional, 42);
+        CookieUInt uintCookie = new CookieUInt("Unsigned", "Unsigned", "Unsigned cookie.", CookieDefinitionGroup.Optional, 12);
+        CookieShort shortCookie = new CookieShort("ShortValue", "Short value", "Short cookie.", CookieDefinitionGroup.Optional, 7);
+        CookieUShort ushortCookie = new CookieUShort("UShortValue", "UShort value", "Unsigned short cookie.", CookieDefinitionGroup.Optional, 9);
+        CookieLong longCookie = new CookieLong("LongValue", "Long value", "Long cookie.", CookieDefinitionGroup.Optional, 123456789L);
+        CookieFloat floatCookie = new CookieFloat("Ratio", "Ratio", "Ratio cookie.", CookieDefinitionGroup.Optional, 2.5F);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(boolCookie.GetValue(context), Is.True);
+            Assert.That(intCookie.GetValue(context), Is.EqualTo(42));
+            Assert.That(uintCookie.GetValue(context), Is.EqualTo(12U));
+            Assert.That(shortCookie.GetValue(context), Is.EqualTo((short)7));
+            Assert.That(ushortCookie.GetValue(context), Is.EqualTo((ushort)9));
+            Assert.That(longCookie.GetValue(context), Is.EqualTo(123456789L));
+            Assert.That(floatCookie.GetValue(context), Is.EqualTo(2.5F));
         });
     }
 }

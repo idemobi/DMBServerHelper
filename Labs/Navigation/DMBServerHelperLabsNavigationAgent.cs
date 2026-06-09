@@ -7,7 +7,6 @@
 
 #region
 
-using System;
 using DMBBootstrapBuilder;
 using DMBPageBuilder;
 
@@ -35,7 +34,7 @@ public static class DMBServerHelperLabsNavigationAgent
     /// <param name="icon">The Bootstrap Icons CSS class used by the action.</param>
     /// <param name="currentController">The current MVC controller name used to mark the action active.</param>
     /// <param name="currentAction">The current MVC action name used to mark the action active.</param>
-    /// <returns>The configured <see cref="AspRouteActionItem"/>.</returns>
+    /// <returns>The configured <see cref="AspRouteActionItem" />.</returns>
     public static AspRouteActionItem CreateAction(
         string action,
         string title,
@@ -57,7 +56,7 @@ public static class DMBServerHelperLabsNavigationAgent
     /// <summary>
     ///     Creates the DMBServerHelper navbar menu group.
     /// </summary>
-    /// <returns>The configured <see cref="GroupActionItem"/> containing DMBServerHelper labs page links.</returns>
+    /// <returns>The configured <see cref="GroupActionItem" /> containing DMBServerHelper labs page links.</returns>
     public static GroupActionItem CreateMenuGroup()
     {
         return ActionItemFactory.Group("DMBServerHelper", IconStruct.Bootstrap("bi-server"))
@@ -70,31 +69,13 @@ public static class DMBServerHelperLabsNavigationAgent
     }
 
     /// <summary>
-    ///     Creates the DMBServerHelper sidebar section.
-    /// </summary>
-    /// <param name="currentController">The current MVC controller name used to mark the active item.</param>
-    /// <param name="currentAction">The current MVC action name used to mark the active item.</param>
-    /// <returns>The configured <see cref="SideBarSectionComponent"/>.</returns>
-    public static SideBarSectionComponent CreateSidebarSection(string? currentController, string? currentAction)
-    {
-        return new SideBarSectionComponent("DMBServerHelper")
-            .Add(ActionItemFactory.Group("General", IconStruct.Bootstrap("bi-info-circle"))
-                .AddItems(
-                    CreateAction("Introduction", "Introduction", "bi-info-circle", currentController, currentAction),
-                    CreateAction("GettingStarted", "Getting Started", "bi-play-circle", currentController, currentAction),
-                    CreateAction("Architecture", "Architecture", "bi-diagram-3", currentController, currentAction),
-                    CreateAction("Examples", "Examples", "bi-code-square", currentController, currentAction)
-                ));
-    }
-
-    /// <summary>
     ///     Creates the DMBServerHelper sidebar component.
     /// </summary>
     /// <param name="currentController">The current MVC controller name used to mark the active item.</param>
     /// <param name="currentAction">The current MVC action name used to mark the active item.</param>
     /// <param name="sidebarId">The HTML identifier applied to the sidebar component.</param>
     /// <param name="localStorageKey">The browser local-storage key used for sidebar state.</param>
-    /// <returns>The configured <see cref="SideBarComponent"/>.</returns>
+    /// <returns>The configured <see cref="SideBarComponent" />.</returns>
     public static SideBarComponent CreateSidebar(
         string? currentController,
         string? currentAction,
@@ -114,10 +95,28 @@ public static class DMBServerHelperLabsNavigationAgent
     }
 
     /// <summary>
+    ///     Creates the DMBServerHelper sidebar section.
+    /// </summary>
+    /// <param name="currentController">The current MVC controller name used to mark the active item.</param>
+    /// <param name="currentAction">The current MVC action name used to mark the active item.</param>
+    /// <returns>The configured <see cref="SideBarSectionComponent" />.</returns>
+    public static SideBarSectionComponent CreateSidebarSection(string? currentController, string? currentAction)
+    {
+        return new SideBarSectionComponent("DMBServerHelper")
+            .Add(ActionItemFactory.Group("General", IconStruct.Bootstrap("bi-info-circle"))
+                .AddItems(
+                    CreateAction("Introduction", "Introduction", "bi-info-circle", currentController, currentAction),
+                    CreateAction("GettingStarted", "Getting Started", "bi-play-circle", currentController, currentAction),
+                    CreateAction("Architecture", "Architecture", "bi-diagram-3", currentController, currentAction),
+                    CreateAction("Examples", "Examples", "bi-code-square", currentController, currentAction)
+                ));
+    }
+
+    /// <summary>
     ///     Resolves the Bootstrap icon for a DMBServerHelper labs action.
     /// </summary>
     /// <param name="actionName">The MVC action name to resolve.</param>
-    /// <returns>The icon value represented as an <see cref="IconStruct"/>.</returns>
+    /// <returns>The icon value represented as an <see cref="IconStruct" />.</returns>
     public static IconStruct ResolveActionIcon(string? actionName)
     {
         return actionName switch

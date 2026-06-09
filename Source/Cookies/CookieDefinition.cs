@@ -7,8 +7,6 @@
 
 #region
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Text.Encodings.Web;
@@ -24,9 +22,13 @@ namespace DMBServerHelper
     /// </summary>
     public abstract class CookieDefinition
     {
-        #region Static fields and properties
+        #region Constants
 
         private const int SecondsPerDay = 24 * 3600;
+
+        #endregion
+
+        #region Static fields and properties
 
         private static readonly JavaScriptEncoder ScriptEncoder = JavaScriptEncoder.Default;
 
@@ -35,6 +37,17 @@ namespace DMBServerHelper
         #endregion
 
         #region Static methods
+
+        private static string EncodeCookieValue(string? value)
+        {
+            return Uri.EscapeDataString(value ?? string.Empty);
+        }
+
+        private static string EncodeJavaScriptStringLiteral(string? value)
+        {
+            string encodedValue = ScriptEncoder.Encode(value ?? string.Empty).Replace("'", "\\x27", StringComparison.Ordinal);
+            return "'" + encodedValue + "'";
+        }
 
         /// <summary>
         ///     Removes all whitespace characters from a cookie definition name.
@@ -48,17 +61,6 @@ namespace DMBServerHelper
         public static string SpaceCleaner(string sString)
         {
             return SpaceCleanerRgx.Replace(sString, string.Empty);
-        }
-
-        private static string EncodeCookieValue(string? value)
-        {
-            return Uri.EscapeDataString(value ?? string.Empty);
-        }
-
-        private static string EncodeJavaScriptStringLiteral(string? value)
-        {
-            string encodedValue = ScriptEncoder.Encode(value ?? string.Empty).Replace("'", "\\x27", StringComparison.Ordinal);
-            return "'" + encodedValue + "'";
         }
 
         #endregion
@@ -179,46 +181,6 @@ namespace DMBServerHelper
             string rReturn = "var now = new Date(); var year = now.getFullYear(); var month = now.getMonth(); var day = now.getDate(); var next = new Date(year, month, day+ " + Duration +
                              "); " + GenerateDocumentCookieScript(EncodeJavaScriptStringLiteral(value), "next.toUTCString()");
             return rReturn;
-        }
-
-        /// <summary>
-        ///     Generates JavaScript that writes this cookie using safe JavaScript string literals.
-        /// </summary>
-        /// <param name="valueExpression">The JavaScript expression that produces the raw cookie value.</param>
-        /// <param name="expiresExpression">The JavaScript expression that produces the cookie expiration date string.</param>
-        /// <returns>The generated JavaScript statement.</returns>
-        protected string GenerateDocumentCookieScript(string valueExpression, string expiresExpression)
-        {
-            string assignmentPrefix = EncodeCookieValue(Name) + "=";
-            string assignmentBeforeExpires = "; SameSite=" + LimitSite.ToString() + "; Path=/; expires=";
-            string assignmentAfterExpires = Secure ? "; Secure" : string.Empty;
-            return "document.cookie = " + EncodeJavaScriptStringLiteral(assignmentPrefix)
-                   + " + encodeURIComponent(" + valueExpression + ") + "
-                   + EncodeJavaScriptStringLiteral(assignmentBeforeExpires)
-                   + " + " + expiresExpression + " + "
-                   + EncodeJavaScriptStringLiteral(assignmentAfterExpires) + ";";
-        }
-
-        /// <summary>
-        ///     Generates JavaScript that writes this cookie with a literal value and expiration string.
-        /// </summary>
-        /// <param name="value">The raw cookie value.</param>
-        /// <param name="expires">The expiration date string.</param>
-        /// <returns>The generated JavaScript statement.</returns>
-        protected string GenerateDocumentCookieScriptForValue(string value, string expires)
-        {
-            return GenerateDocumentCookieScript(EncodeJavaScriptStringLiteral(value), EncodeJavaScriptStringLiteral(expires));
-        }
-
-        /// <summary>
-        ///     Generates JavaScript that writes this cookie with a dynamic value expression and literal expiration string.
-        /// </summary>
-        /// <param name="valueExpression">The JavaScript expression that produces the raw cookie value.</param>
-        /// <param name="expires">The expiration date string.</param>
-        /// <returns>The generated JavaScript statement.</returns>
-        protected string GenerateDocumentCookieScriptForValueExpression(string valueExpression, string expires)
-        {
-            return GenerateDocumentCookieScript(valueExpression, EncodeJavaScriptStringLiteral(expires));
         }
 
         /// <summary>
@@ -346,6 +308,46 @@ namespace DMBServerHelper
         public string GenerateCookieJavascriptDefaultValue()
         {
             return _GenerateOnClick(DefaultValue);
+        }
+
+        /// <summary>
+        ///     Generates JavaScript that writes this cookie using safe JavaScript string literals.
+        /// </summary>
+        /// <param name="valueExpression">The JavaScript expression that produces the raw cookie value.</param>
+        /// <param name="expiresExpression">The JavaScript expression that produces the cookie expiration date string.</param>
+        /// <returns>The generated JavaScript statement.</returns>
+        protected string GenerateDocumentCookieScript(string valueExpression, string expiresExpression)
+        {
+            string assignmentPrefix = EncodeCookieValue(Name) + "=";
+            string assignmentBeforeExpires = "; SameSite=" + LimitSite.ToString() + "; Path=/; expires=";
+            string assignmentAfterExpires = Secure ? "; Secure" : string.Empty;
+            return "document.cookie = " + EncodeJavaScriptStringLiteral(assignmentPrefix)
+                                        + " + encodeURIComponent(" + valueExpression + ") + "
+                                        + EncodeJavaScriptStringLiteral(assignmentBeforeExpires)
+                                        + " + " + expiresExpression + " + "
+                                        + EncodeJavaScriptStringLiteral(assignmentAfterExpires) + ";";
+        }
+
+        /// <summary>
+        ///     Generates JavaScript that writes this cookie with a literal value and expiration string.
+        /// </summary>
+        /// <param name="value">The raw cookie value.</param>
+        /// <param name="expires">The expiration date string.</param>
+        /// <returns>The generated JavaScript statement.</returns>
+        protected string GenerateDocumentCookieScriptForValue(string value, string expires)
+        {
+            return GenerateDocumentCookieScript(EncodeJavaScriptStringLiteral(value), EncodeJavaScriptStringLiteral(expires));
+        }
+
+        /// <summary>
+        ///     Generates JavaScript that writes this cookie with a dynamic value expression and literal expiration string.
+        /// </summary>
+        /// <param name="valueExpression">The JavaScript expression that produces the raw cookie value.</param>
+        /// <param name="expires">The expiration date string.</param>
+        /// <returns>The generated JavaScript statement.</returns>
+        protected string GenerateDocumentCookieScriptForValueExpression(string valueExpression, string expires)
+        {
+            return GenerateDocumentCookieScript(valueExpression, EncodeJavaScriptStringLiteral(expires));
         }
 
         /// <summary>
