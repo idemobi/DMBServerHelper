@@ -28,8 +28,8 @@
         <Configurations>Debug;Release;NuGet</Configurations>
         <Platforms>AnyCPU</Platforms>
         <BuildDate>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildDate>
-        <Version>0.20.0</Version>
-        <FileVersion>0.20.0.0</FileVersion>
+        <Version>0.21.0</Version>
+        <FileVersion>0.21.0.0</FileVersion>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
         <Company>idéMobi</Company>
         <Authors>Jean-François CONTART, Quentin BOULOGNE, Camille GOLLIOT</Authors>
@@ -61,7 +61,7 @@
     <ItemGroup Label="Import package">
         <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.5.3" />
         <PackageReference Include="Azure.Identity" Version="1.21.0" />
-        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.8" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.9" />
         <PackageReference Include="Nager.PublicSuffix" Version="3.8.0" />
         <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
     </ItemGroup>
