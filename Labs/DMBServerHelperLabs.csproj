@@ -14,12 +14,22 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Source\DMBServerHelper.csproj" />
-        <PackageReference Include="DMBPageBuilder" Version="0.22.0" />
-        <PackageReference Include="DMBBootstrapBuilder" Version="0.22.0" />
-        <PackageReference Include="DMBComponentBuilder" Version="0.22.0" />
-        <PackageReference Include="DMBEffectBuilder" Version="0.22.0" />
-    </ItemGroup>
+    <Choose>
+        <When Condition=" '$(Configuration)' == 'Release' ">
+            <ItemGroup Label="Case Release">
+                <PackageReference Include="DMBPageBuilder" Version="0.23.0" />
+                <PackageReference Include="DMBBootstrapBuilder" Version="0.23.0" />
+                <PackageReference Include="DMBComponentBuilder" Version="0.23.0" />
+                <PackageReference Include="DMBEffectBuilder" Version="0.23.0" />
+            </ItemGroup>
+        </When>
+        <Otherwise>
+            <ItemGroup Label="Case Debug">
+                <ProjectReference Include="..\..\DMBPageBuilder\Source\DMBPageBuilder.csproj" />
+                <ProjectReference Include="..\..\DMBBootstrapBuilder\Source\DMBBootstrapBuilder.csproj" />
+                <ProjectReference Include="..\..\DMBComponentBuilder\Source\DMBComponentBuilder.csproj" />
+                <ProjectReference Include="..\..\DMBEffectBuilder\Source\DMBEffectBuilder.csproj" />
+            </ItemGroup>
+        </Otherwise>
+    </Choose>
 </Project>

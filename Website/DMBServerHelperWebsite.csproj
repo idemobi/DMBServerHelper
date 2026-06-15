@@ -18,11 +18,26 @@
     <ItemGroup>
         <ProjectReference Include="..\Labs\DMBServerHelperLabs.csproj" />
         <ProjectReference Include="..\Source\DMBServerHelper.csproj" />
-        <PackageReference Include="DMBServerWebHelper" Version="0.22.0" />
-        <PackageReference Include="DMBPageBuilder" Version="0.22.0" />
-        <PackageReference Include="DMBBootstrapBuilder" Version="0.22.0" />
-        <PackageReference Include="DMBComponentBuilder" Version="0.22.0" />
-        <PackageReference Include="DMBEffectBuilder" Version="0.22.0" />
     </ItemGroup>
 
+    <Choose>
+        <When Condition=" '$(Configuration)' == 'Release' ">
+            <ItemGroup Label="Case Release">
+                <PackageReference Include="DMBServerWebHelper" Version="0.23.0" />
+                <PackageReference Include="DMBPageBuilder" Version="0.23.0" />
+                <PackageReference Include="DMBBootstrapBuilder" Version="0.23.0" />
+                <PackageReference Include="DMBComponentBuilder" Version="0.23.0" />
+                <PackageReference Include="DMBEffectBuilder" Version="0.23.0" />
+            </ItemGroup>
+        </When>
+        <Otherwise>
+            <ItemGroup Label="Case Debug">
+                <ProjectReference Include="..\..\DMBServerWebHelper\Source\DMBServerWebHelper.csproj" />
+                <ProjectReference Include="..\..\DMBPageBuilder\Source\DMBPageBuilder.csproj" />
+                <ProjectReference Include="..\..\DMBBootstrapBuilder\Source\DMBBootstrapBuilder.csproj" />
+                <ProjectReference Include="..\..\DMBComponentBuilder\Source\DMBComponentBuilder.csproj" />
+                <ProjectReference Include="..\..\DMBEffectBuilder\Source\DMBEffectBuilder.csproj" />
+            </ItemGroup>
+        </Otherwise>
+    </Choose>
 </Project>
