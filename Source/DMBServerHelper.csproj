@@ -28,8 +28,8 @@
         <Configurations>Debug;Release;NuGet</Configurations>
         <Platforms>AnyCPU</Platforms>
         <BuildDate>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildDate>
-        <Version>0.24.0</Version>
-        <FileVersion>0.24.0.0</FileVersion>
+        <Version>0.25.0</Version>
+        <FileVersion>0.25.0.0</FileVersion>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
         <Company>idéMobi</Company>
         <Authors>Jean-François CONTART, Quentin BOULOGNE, Camille GOLLIOT</Authors>
