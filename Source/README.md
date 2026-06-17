@@ -139,7 +139,7 @@ After all package configuration calls have completed, validate all registered se
 
 ```csharp
 ServerHelperConfiguration.LoadCommonConfig(builder);
-DMBServerEmailHelperConfiguration.LoadCommonConfig(builder);
+ServerEmailHelperConfiguration.LoadCommonConfig(builder);
 DMBStripeConfiguration.LoadCommonConfig(builder);
 DMBPennylaneConfiguration.LoadCommonConfig(builder);
 
