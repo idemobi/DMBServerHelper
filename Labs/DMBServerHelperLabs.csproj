@@ -17,10 +17,10 @@
     <Choose>
         <When Condition=" '$(Configuration)' == 'Release' ">
             <ItemGroup Label="Case Release">
-                <PackageReference Include="DMBPageBuilder" Version="0.27.0" />
-                <PackageReference Include="DMBBootstrapBuilder" Version="0.27.0" />
-                <PackageReference Include="DMBComponentBuilder" Version="0.27.0" />
-                <PackageReference Include="DMBEffectBuilder" Version="0.27.0" />
+                <PackageReference Include="DMBPageBuilder" Version="0.28.0" />
+                <PackageReference Include="DMBBootstrapBuilder" Version="0.28.0" />
+                <PackageReference Include="DMBComponentBuilder" Version="0.28.0" />
+                <PackageReference Include="DMBEffectBuilder" Version="0.28.0" />
             </ItemGroup>
         </When>
         <Otherwise>
