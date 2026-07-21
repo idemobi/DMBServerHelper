@@ -48,6 +48,8 @@ When copying this file to another PageBuilder ecosystem project, update this sec
 
 ## Local rule sources
 
+- Use [AI_CONTEXT.md](AI_CONTEXT.md) for the project summary, safe-change strategy, and launch-token context.
+- Use [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md) for durable server-helper architecture decisions.
 - Use [DOCUMENTATION_RULES.md](DOCUMENTATION_RULES.md) for XML HeaderDoc, README/reference documentation, and DocumentationBuilder-ready documentation.
 - Use [EXAMPLES_AND_TUTORIALS_RULES.md](EXAMPLES_AND_TUTORIALS_RULES.md) only when creating or updating example, demo, information, instruction, concept, or tutorial pages.
 - Use [DRAWIO_DIAGRAM_RULES.md](DRAWIO_DIAGRAM_RULES.md) when adding editable Draw.io diagrams to information, instruction, concept, architecture, configuration, localization, cookie, session, example, or tutorial pages.

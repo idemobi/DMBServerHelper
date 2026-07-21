@@ -98,6 +98,14 @@ internal sealed class SecretManagerTests
         #endregion
     }
 
+    private enum SampleSecretEnvironment
+    {
+        Development = 0,
+        PlayTest = 1,
+        Preproduction = 2,
+        Production = 3
+    }
+
     [Test]
     public void AutoStoreUsesAzureKeyVaultWhenProductionHasVaultUri()
     {
@@ -156,10 +164,13 @@ internal sealed class SecretManagerTests
         manager.Configure(configuration, "Development");
         manager.Require("DMB:Stripe:WebhookSecret", "DMBStripe", "Stripe webhook signing secret");
 
-        Assert.Throws<InvalidOperationException>(() => manager.GetRequired("DMB:Stripe:WebhookSecret"));
+        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            manager.GetRequired("DMB:Stripe:WebhookSecret"))!;
 
         Assert.Multiple(() =>
         {
+            Assert.That(exception.Message, Does.Contain("Missing secret: DMB:Stripe:WebhookSecret"));
+            Assert.That(exception.Message, Does.Not.Contain("DMB__Stripe__WebhookSecret=<secret-value>"));
             Assert.That(logger.Warnings, Has.Count.EqualTo(1));
             Assert.That(logger.Warnings[0], Does.Contain("DMB__Stripe__WebhookSecret=<secret-value>"));
         });
@@ -244,10 +255,13 @@ internal sealed class SecretManagerTests
         manager.Configure(configuration, "Development");
         manager.Require("DMB:Stripe:WebhookSecret", "DMBStripe", "Stripe webhook signing secret");
 
-        Assert.Throws<InvalidOperationException>(() => manager.GetRequired("DMB:Stripe:WebhookSecret"));
+        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            manager.GetRequired("DMB:Stripe:WebhookSecret"))!;
 
         Assert.Multiple(() =>
         {
+            Assert.That(exception.Message, Does.Contain("Missing secret: DMB:Stripe:WebhookSecret"));
+            Assert.That(exception.Message, Does.Not.Contain("DMB__Stripe__WebhookSecret=<secret-value>"));
             Assert.That(logger.Warnings, Has.Count.EqualTo(1));
             Assert.That(logger.Warnings[0], Does.Contain("DMB__Stripe__WebhookSecret=<secret-value>"));
         });
@@ -268,6 +282,74 @@ internal sealed class SecretManagerTests
         string value = manager.GetRequired("DMB:Stripe:SecretKey");
 
         Assert.That(value, Is.EqualTo("resolved-api-value"));
+    }
+
+    [Test]
+    public void GetRequiredEnumReportsAcceptedValuesWhenValueIsInvalid()
+    {
+        IConfigurationRoot configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["DMB:Sample:Environment"] = "Mars"
+            })
+            .Build();
+        SecretManager manager = new SecretManager
+        {
+            Store = SecretStoreKind.EnvironmentVariables,
+            Environment = SecretUsageEnvironment.LocalWebsite,
+            LogMissingSecrets = false
+        };
+        manager.Configure(configuration, "Development");
+        manager.Require(new SecretDefinition
+        {
+            Key = "DMB:Sample:Environment",
+            Owner = "DMBServerHelperUnitTests",
+            DisplayName = "Sample environment"
+        });
+
+        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            manager.GetRequiredEnum<SampleSecretEnvironment>("DMB:Sample:Environment"))!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(exception.Message, Does.Contain("Invalid secret: DMB:Sample:Environment"));
+            Assert.That(exception.Message, Does.Contain("Expected type: SampleSecretEnvironment enum"));
+            Assert.That(exception.Message, Does.Contain("Format: Use the textual enum name."));
+            Assert.That(exception.Message, Does.Contain("- Development (0)"));
+            Assert.That(exception.Message, Does.Contain("- Preproduction (2)"));
+            Assert.That(exception.Message, Does.Contain("Configured value: hidden"));
+            Assert.That(exception.Message, Does.Not.Contain("Mars"));
+        });
+    }
+
+    [Test]
+    public void GetRequiredInt64ReportsExpectedTypeWhenValueIsInvalid()
+    {
+        IConfigurationRoot configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["DMB:Sample:Project"] = "not-a-number"
+            })
+            .Build();
+        SecretManager manager = new SecretManager
+        {
+            Store = SecretStoreKind.EnvironmentVariables,
+            Environment = SecretUsageEnvironment.LocalWebsite,
+            LogMissingSecrets = false
+        };
+        manager.Configure(configuration, "Development");
+
+        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            manager.GetRequiredInt64("DMB:Sample:Project"))!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(exception.Message, Does.Contain("Invalid secret: DMB:Sample:Project"));
+            Assert.That(exception.Message, Does.Contain("Expected type: Int64 whole number"));
+            Assert.That(exception.Message, Does.Contain("Format: Use digits only"));
+            Assert.That(exception.Message, Does.Contain("Configured value: hidden"));
+            Assert.That(exception.Message, Does.Not.Contain("not-a-number"));
+        });
     }
 
     [Test]
@@ -332,6 +414,61 @@ internal sealed class SecretManagerTests
     }
 
     [Test]
+    public void MissingEnvironmentVariableDiagnosticExplainsLocalAndAzureSetup()
+    {
+        SecretManager manager = new SecretManager
+        {
+            Store = SecretStoreKind.EnvironmentVariables,
+            Environment = SecretUsageEnvironment.LocalWebsite
+        };
+
+        string message = manager.BuildMissingSecretMessage(new SecretDefinition
+        {
+            Key = "GDF:WebRuntime:Project:MissingDiagnosticTestOnly",
+            Owner = "GDFWebRuntime",
+            DisplayName = "GDF runtime project reference"
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(message, Does.Contain("GDF__WebRuntime__Project__MissingDiagnosticTestOnly=<secret-value>"));
+            Assert.That(message, Does.Contain("Current process:"));
+            Assert.That(message, Does.Contain("Persistent local setup:"));
+            Assert.That(message, Does.Contain("macOS zsh:"));
+            Assert.That(message, Does.Contain("macOS GUI applications launched from Finder, Dock, or an IDE:"));
+            Assert.That(message, Does.Contain("launchctl setenv GDF__WebRuntime__Project__MissingDiagnosticTestOnly \"<secret-value>\""));
+            Assert.That(message, Does.Contain("Fully quit and restart the application and/or the IDE that launches it"));
+            Assert.That(message, Does.Contain("Linux bash:"));
+            Assert.That(message, Does.Contain("Windows PowerShell user profile:"));
+            Assert.That(message, Does.Contain("Azure App Service application setting:"));
+            Assert.That(message, Does.Contain("Azure Portal:"));
+            Assert.That(message, Does.Not.Contain("Runtime visibility:"));
+            Assert.That(message, Does.Not.Contain("launchctl getenv GDF__WebRuntime__Project__MissingDiagnosticTestOnly"));
+            Assert.That(message, Does.Not.Contain("printenv GDF__WebRuntime__Project__MissingDiagnosticTestOnly"));
+
+            if (OperatingSystem.IsWindows())
+            {
+                Assert.That(message, Does.Contain("$env:GDF__WebRuntime__Project__MissingDiagnosticTestOnly=\"<secret-value>\""));
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                Assert.That(message, Does.Contain("macOS terminal:"));
+                Assert.That(message, Does.Contain("export GDF__WebRuntime__Project__MissingDiagnosticTestOnly=\"<secret-value>\""));
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                Assert.That(message, Does.Contain("Linux terminal:"));
+                Assert.That(message, Does.Contain("export GDF__WebRuntime__Project__MissingDiagnosticTestOnly=\"<secret-value>\""));
+            }
+            else
+            {
+                Assert.That(message, Does.Contain("POSIX terminal:"));
+                Assert.That(message, Does.Contain("export GDF__WebRuntime__Project__MissingDiagnosticTestOnly=\"<secret-value>\""));
+            }
+        });
+    }
+
+    [Test]
     public void MissingSecretDiagnosticAsksForExplicitEnvironmentWhenHostEnvironmentNameIsEmpty()
     {
         SecretManager manager = new SecretManager
@@ -353,6 +490,45 @@ internal sealed class SecretManagerTests
             Assert.That(message, Does.Contain("Secret store: Unspecified"));
             Assert.That(message, Does.Contain("ServerHelperConfiguration:Secrets:Environment"));
             Assert.That(message, Does.Contain("Host environment: <empty>"));
+        });
+    }
+
+    [Test]
+    public void MissingSecretDiagnosticIncludesExpectedTypeAndAcceptedValues()
+    {
+        SecretManager manager = new SecretManager
+        {
+            Store = SecretStoreKind.EnvironmentVariables,
+            Environment = SecretUsageEnvironment.LocalWebsite
+        };
+
+        string message = manager.BuildMissingSecretMessage(new SecretDefinition
+        {
+            Key = "DMB:Sample:Environment",
+            Owner = "DMBServerHelperUnitTests",
+            DisplayName = "Sample environment",
+            ValueType = "SampleSecretEnvironment enum",
+            FormatHint = "Use the textual enum name.",
+            ExampleValue = "Preproduction",
+            AcceptedValues = new List<string>
+            {
+                "Development (0)",
+                "PlayTest (1)",
+                "Preproduction (2)",
+                "Production (3)"
+            }
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(message, Does.Contain("Expected type: SampleSecretEnvironment enum"));
+            Assert.That(message, Does.Contain("Format: Use the textual enum name."));
+            Assert.That(message, Does.Contain("Example value: Preproduction"));
+            Assert.That(message, Does.Contain("Accepted values:"));
+            Assert.That(message, Does.Contain("- Development (0)"));
+            Assert.That(message, Does.Contain("- PlayTest (1)"));
+            Assert.That(message, Does.Contain("- Preproduction (2)"));
+            Assert.That(message, Does.Contain("- Production (3)"));
         });
     }
 
@@ -506,6 +682,33 @@ internal sealed class SecretManagerTests
             Assert.That(manager.EffectiveFailFast, Is.False);
             Assert.That(result.Success, Is.False);
             Assert.That(result.Issues, Has.Count.EqualTo(1));
+        });
+    }
+
+    [Test]
+    public void ValidateRequiredSecretsThrowsConciseExceptionWhenMissingSecretsAreLogged()
+    {
+        IConfigurationRoot configuration = new ConfigurationBuilder().Build();
+        CapturingSecretLogger logger = new CapturingSecretLogger();
+        SecretManager manager = new SecretManager
+        {
+            Store = SecretStoreKind.EnvironmentVariables,
+            FailFast = true,
+            LogMissingSecrets = true
+        };
+        manager.UseLogger(logger);
+        manager.Configure(configuration, "Development");
+        manager.Require("DMB:Stripe:WebhookSecret", "DMBStripe", "Stripe webhook signing secret");
+
+        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            manager.ValidateRequiredSecrets())!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(exception.Message, Does.Contain("Missing required secrets: DMB:Stripe:WebhookSecret"));
+            Assert.That(exception.Message, Does.Not.Contain("DMB__Stripe__WebhookSecret=<secret-value>"));
+            Assert.That(logger.Warnings, Has.Count.EqualTo(1));
+            Assert.That(logger.Warnings[0], Does.Contain("DMB__Stripe__WebhookSecret=<secret-value>"));
         });
     }
 

@@ -1,0 +1,17 @@
+{
+  "title": "Treat cookie and session definitions as public contracts",
+  "description": "Rule for changes that touch CookieDefinition, SessionDefinition, or typed helpers.",
+  "scenarioName": "Cookies and sessions",
+  "projectStyles": [
+    "website",
+    "saas",
+    "game"
+  ],
+  "tags": [
+    "cookies",
+    "sessions",
+    "security"
+  ],
+  "sortOrder": 40,
+  "contextText": "Cookie and session names, default values, groups, duration, security flags, serialization formats, and parsing behavior are externally observable.\nPrefer additive changes and keep global cookie/session registries deterministic.\nReview compatibility before changing existing definitions, deletion behavior, SameSite policy, Secure policy, or serialization formats.\nTreat cookies, sessions, data protection, validation messages, and user-provided URL values as security-sensitive areas."
+}

@@ -1,0 +1,17 @@
+{
+  "title": "Use DMB package key nomenclature",
+  "description": "Rule for appsettings keys, user secrets, and environment variable names.",
+  "scenarioName": "Configuration and secrets",
+  "projectStyles": [
+    "website",
+    "saas",
+    "game"
+  ],
+  "tags": [
+    "configuration",
+    "secrets",
+    "environment-variables"
+  ],
+  "sortOrder": 20,
+  "contextText": "DMB package configuration keys must use the logical form DMB:{Package}:{Section}:{Name}.\nEnvironment variables must replace each ':' with '__', for example DMB:Stripe:SecretKey becomes DMB__Stripe__SecretKey.\nKeep secret keys and non-secret runtime settings in the same DMB:{Package}:... namespace when they belong to the same feature.\nDo not introduce new package variables under implementation class names when a DMB:{Package}:... key exists or can be introduced."
+}

@@ -21,6 +21,16 @@ namespace DMBServerHelper
         #region Instance fields and properties
 
         /// <summary>
+        ///     Gets or sets the accepted display values for this secret when the value belongs to a constrained set.
+        /// </summary>
+        /// <remarks>
+        ///     Typical examples are enum names such as <c>Development</c>, <c>Preproduction</c>, or
+        ///     <c>Production</c>. The values are used only for diagnostics and setup guidance; they are never used
+        ///     as secret values.
+        /// </remarks>
+        public List<string> AcceptedValues { get; set; } = new List<string>();
+
+        /// <summary>
         ///     Gets or sets a human-readable description of the secret purpose.
         /// </summary>
         public string Description { get; set; } = string.Empty;
@@ -34,6 +44,20 @@ namespace DMBServerHelper
         ///     Gets or sets an optional documentation URL explaining how to create the secret.
         /// </summary>
         public string DocumentationUrl { get; set; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets an optional example placeholder showing the expected value shape.
+        /// </summary>
+        /// <remarks>
+        ///     Do not put real secret values here. Use safe examples such as <c>Preproduction</c>,
+        ///     <c>123456789</c>, or <c>range:account</c>.
+        /// </remarks>
+        public string ExampleValue { get; set; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets an optional format hint explaining how to write the value.
+        /// </summary>
+        public string FormatHint { get; set; } = string.Empty;
 
         /// <summary>
         ///     Gets or sets the logical ASP.NET Core configuration key, for example <c>DMB:Stripe:WebhookSecret</c>.
@@ -50,6 +74,11 @@ namespace DMBServerHelper
         /// </summary>
         public bool Required { get; set; } = true;
 
+        /// <summary>
+        ///     Gets or sets the expected value type shown in missing or invalid secret diagnostics.
+        /// </summary>
+        public string ValueType { get; set; } = string.Empty;
+
         #endregion
 
         #region Instance methods
@@ -62,12 +91,16 @@ namespace DMBServerHelper
         {
             return new SecretDefinition
             {
+                AcceptedValues = AcceptedValues?.ToList() ?? new List<string>(),
                 Description = Description,
                 DisplayName = DisplayName,
                 DocumentationUrl = DocumentationUrl,
+                ExampleValue = ExampleValue,
+                FormatHint = FormatHint,
                 Key = Key,
                 Owner = Owner,
-                Required = Required
+                Required = Required,
+                ValueType = ValueType
             };
         }
 

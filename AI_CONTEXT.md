@@ -45,6 +45,9 @@ Visual examples and tutorial pages belong in `labs_idemobi_com` when requested.
 
 - `GenericConfiguration<T>` coordinates configuration loading for typed server configuration objects.
 - `ServerHelperConfiguration` provides shared server defaults such as domain analysis, supported languages, and data protection persistence.
+- `ServerHelperConfiguration.AddLaunchToken` and `ServerHelperConfiguration.LaunchToken` provide the shared launch-token
+  values consumed by PageBuilder for local web asset cache busting. Do not add manual asset query-string versioning in
+  consuming packages; follow the DMBPageBuilder web asset policy.
 - `CookieDefinition` and typed cookie classes define strongly typed cookie metadata, read/write behavior, and raw form rendering hooks.
 - `SessionDefinition` and typed session classes define strongly typed session metadata and read/write behavior.
 - `CombinedStringLocalizer` aggregates multiple `IStringLocalizer` sources with deterministic lookup order.

@@ -1,0 +1,17 @@
+{
+  "title": "Keep localization composition explicit",
+  "description": "Rule for WebLocalizer and CombinedStringLocalizer usage.",
+  "scenarioName": "Localization",
+  "projectStyles": [
+    "website",
+    "saas",
+    "game"
+  ],
+  "tags": [
+    "localization",
+    "resources",
+    "lookup-order"
+  ],
+  "sortOrder": 50,
+  "contextText": "Use WebLocalizer and CombinedStringLocalizer for shared localization lookup.\nKeep localizer registration order, fallback behavior, and debug behavior explicit and deterministic.\nDo not hide localization lookup-order changes behind generic wording; document downstream impact when lookup behavior changes.\nFollow the local localization nomenclature before adding new keys."
+}

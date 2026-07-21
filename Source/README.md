@@ -49,6 +49,9 @@ This package does not define visual components, form builders, page layout build
 - `DomainComposite`
 - `ApiDocumentationList`
 
+`ServerHelperConfiguration` also exposes the launch-token settings consumed by PageBuilder for local web asset
+cache-busting. Packages should rely on PageBuilder asset rendering instead of adding manual asset version query strings.
+
 ## Logging
 
 `DMBServerHelper` routes its infrastructure diagnostics through `ServerHelperConfiguration.Logger`.
@@ -60,6 +63,8 @@ ServerHelperConfiguration.UseLogger(myServerHelperLogger);
 ```
 
 The default console logger writes informational messages to standard output and warnings/errors to standard error. Exception diagnostics stay concise by default and do not dump stack traces.
+In interactive terminals, the default console logger colors warning diagnostics line by line so missing-secret blocks
+remain scannable. Redirected output stays plain text and does not receive terminal color control characters.
 
 ## Secret management
 
@@ -72,7 +77,8 @@ ServerHelperConfiguration.Config.Secrets.Require(new SecretDefinition
 {
     Key = "DMB:Stripe:WebhookSecret",
     Owner = "DMBStripe",
-    DisplayName = "Stripe webhook signing secret"
+    DisplayName = "Stripe webhook signing secret",
+    ValueType = "string"
 });
 ```
 
@@ -80,6 +86,8 @@ Then they consume values through the same manager:
 
 ```csharp
 string webhookSecret = ServerHelperConfiguration.Config.Secrets.GetRequired("DMB:Stripe:WebhookSecret");
+ProjectEnvironment environment = ServerHelperConfiguration.Config.Secrets.GetRequiredEnum<ProjectEnvironment>("GDF:WebRuntime:Project:Environment");
+long projectReference = ServerHelperConfiguration.Config.Secrets.GetRequiredInt64("GDF:WebRuntime:Project");
 ```
 
 `DMBServerHelper` does not know package-specific keys. It only knows how to read values from the active ASP.NET Core configuration pipeline, redact values for diagnostics, validate registered requirements, and explain how to configure a missing secret for the selected store.
@@ -150,6 +158,25 @@ This final validation reports every registered missing secret in one pass. In `P
 
 The manager never logs secret values. Missing-secret diagnostics show setup instructions such as the environment variable name `DMB__Stripe__WebhookSecret` or the Azure Key Vault name `DMB--Stripe--WebhookSecret`.
 
+Secret definitions can include non-sensitive value expectations: `ValueType`, `FormatHint`, `ExampleValue`, and
+`AcceptedValues`. Missing and invalid diagnostics show those expectations without printing the configured secret value.
+Use the typed getters (`GetRequiredEnum<TEnum>`, `GetRequiredInt16`, `GetRequiredInt32`, `GetRequiredInt64`,
+`GetRequiredFloat`, `GetRequiredDouble`, and `GetRequiredDecimal`) when a secret is not a free-form string. For custom
+formats, use `CreateInvalidSecretException(...)` after reading the raw value.
+
+When the selected store is `EnvironmentVariables`, missing-secret diagnostics include the immediate current-process
+command for the detected local operating system, persistent local setup examples for macOS, Linux, and Windows, and
+Azure App Service configuration guidance through Azure CLI and the Azure Portal. Azure App Service settings use the
+same double-underscore environment variable names as local process configuration. macOS diagnostics also include a
+`launchctl setenv` command for applications launched from Finder, Dock, or a GUI IDE instead of the same terminal
+session. After setting the variable, fully quit and restart the application and/or the IDE that launches it before
+starting the application again.
+
+When `LogMissingSecrets` is enabled and a missing secret throws, the complete setup diagnostic is written once through
+the secret logger. The thrown exception then uses a concise summary so unhandled exception output does not repeat the
+same instruction block. When `LogMissingSecrets` is disabled, the exception message still contains the complete setup
+diagnostic.
+
 ## Secret rotation
 
 `DMBServerHelper` supports secret rotation without timer or polling. Packages that keep long-lived clients register an `ISecretRotationHandler` with `ServerHelperConfiguration.RegisterSecretRotationHandler(...)`.
@@ -186,6 +213,10 @@ Use the local rule files:
 - [DELIVERY_CHECKLIST.md](DELIVERY_CHECKLIST.md)
 
 Documentation pages, examples, tutorials, and diagrams are published through `labs_idemobi_com` when applicable.
+
+Module-specific AI context option rules live in `AIContextOptions/*.json`. DocumentationBuilder reads those files
+during documentation generation and stores them as group-scoped, versioned records for
+`Documentation/ContextOptions`.
 
 ## Development constraints
 

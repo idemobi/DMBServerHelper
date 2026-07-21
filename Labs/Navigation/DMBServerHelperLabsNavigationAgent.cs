@@ -109,6 +109,28 @@ public static class DMBServerHelperLabsNavigationAgent
                     CreateAction("GettingStarted", "Getting Started", "bi-play-circle", currentController, currentAction),
                     CreateAction("Architecture", "Architecture", "bi-diagram-3", currentController, currentAction),
                     CreateAction("Examples", "Examples", "bi-code-square", currentController, currentAction)
+                ))
+            .Add(ActionItemFactory.Group("AI context", IconStruct.Bootstrap("bi-robot"))
+                .AddItems(
+                    ActionItemFactory.AspRoute("Documentation", "ContextOptions")
+                        .AddRouteValue("groupName", "NuGet")
+                        .AddRouteValue("version", "0.26.0")
+                        .AddRouteValue("packageId", "DMBServerHelper")
+                        .AddRouteValue("namespaceName", "DMBServerHelper")
+                        .SetTitle("Context options")
+                        .SetIcon(IconStruct.Bootstrap("bi-clipboard-check"))
+                        .SetActive(
+                            string.Equals(currentController, "Documentation", StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(currentAction, "ContextOptions", StringComparison.OrdinalIgnoreCase)),
+                    ActionItemFactory.AspRoute("DocumentationContextPack", "Index")
+                        .AddRouteValue("groupName", "NuGet")
+                        .AddRouteValue("packageId", "DMBServerHelper")
+                        .AddRouteValue("namespaceName", "DMBServerHelper")
+                        .SetTitle("Context pack")
+                        .SetIcon(IconStruct.Bootstrap("bi-file-zip"))
+                        .SetActive(
+                            string.Equals(currentController, "DocumentationContextPack", StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(currentAction, "Index", StringComparison.OrdinalIgnoreCase))
                 ));
     }
 

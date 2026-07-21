@@ -1,0 +1,17 @@
+{
+  "title": "Use DMBServerHelper URL/domain helpers",
+  "description": "Rule for code that composes host names, domains, or public URLs.",
+  "scenarioName": "Domain and URL composition",
+  "projectStyles": [
+    "website",
+    "saas",
+    "game"
+  ],
+  "tags": [
+    "domain",
+    "url",
+    "security"
+  ],
+  "sortOrder": 60,
+  "contextText": "Use DMBServerHelper domain and URL composition helpers when host, domain, localhost, subdomain, or HTTPS URL behavior is involved.\nDocument accepted input formats, localhost handling, subdomain handling, and generated HTTPS URL format for domain APIs.\nTreat user-controlled URL values as security-sensitive input and keep fallback behavior explicit."
+}

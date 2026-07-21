@@ -1,0 +1,17 @@
+{
+  "title": "Use the central configuration lifecycle",
+  "description": "Rule for package and host startup code that uses DMBServerHelper configuration primitives.",
+  "scenarioName": "Configuration lifecycle",
+  "projectStyles": [
+    "website",
+    "saas",
+    "game"
+  ],
+  "tags": [
+    "configuration",
+    "startup",
+    "generic-configuration"
+  ],
+  "sortOrder": 10,
+  "contextText": "Use GenericConfiguration<T> and package-level configuration classes for DMB package startup.\nLoad ServerHelperConfiguration before package configuration that depends on server defaults, secrets, localization, URL composition, cookies, or sessions.\nKeep configuration loading deterministic and document when new behavior runs: before file loading, during file loading, after file loading, or during application middleware registration."
+}

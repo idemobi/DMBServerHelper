@@ -7,6 +7,7 @@
 
 #region
 
+using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,59 @@ namespace DMBServerHelper
         private static string BuildEnvironmentVariableName(string key)
         {
             return key.Replace(":", "__");
+        }
+
+        private static string BuildLoggedMissingSecretExceptionMessage(SecretDefinition definition)
+        {
+            return $"Missing secret: {definition.Key}. The full setup diagnostic was already written to the secret logger.";
+        }
+
+        private static string BuildLoggedInvalidSecretExceptionMessage(SecretDefinition definition)
+        {
+            return $"Invalid secret: {definition.Key}. The full format diagnostic was already written to the secret logger.";
+        }
+
+        private static string BuildCurrentProcessEnvironmentVariableCommand(string environmentVariableName)
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                return $"""
+                        Windows PowerShell:
+                        $env:{environmentVariableName}="<secret-value>"
+                        """;
+            }
+
+            if (OperatingSystem.IsMacOS())
+            {
+                return $"""
+                        macOS terminal:
+                        export {environmentVariableName}="<secret-value>"
+                        """;
+            }
+
+            if (OperatingSystem.IsLinux())
+            {
+                return $"""
+                        Linux terminal:
+                        export {environmentVariableName}="<secret-value>"
+                        """;
+            }
+
+            return $"""
+                    POSIX terminal:
+                    export {environmentVariableName}="<secret-value>"
+                    """;
+        }
+
+        private static List<string> BuildEnumAcceptedValues<TEnum>() where TEnum : struct, Enum
+        {
+            List<string> values = new List<string>();
+            foreach (TEnum value in Enum.GetValues<TEnum>())
+            {
+                values.Add($"{value} ({Convert.ToInt64(value, CultureInfo.InvariantCulture)})");
+            }
+
+            return values;
         }
 
         #endregion
@@ -121,6 +175,130 @@ namespace DMBServerHelper
                     """;
         }
 
+        private static string BuildEnvironmentVariableInstruction(string key)
+        {
+            string environmentVariableName = BuildEnvironmentVariableName(key);
+
+            return $"""
+                    Set this environment variable before starting the application:
+                    {environmentVariableName}=<secret-value>
+
+                    Current process:
+                    {BuildCurrentProcessEnvironmentVariableCommand(environmentVariableName)}
+
+                    Persistent local setup:
+                    macOS zsh:
+                    echo 'export {environmentVariableName}="<secret-value>"' >> ~/.zshrc
+
+                    macOS GUI applications launched from Finder, Dock, or an IDE:
+                    launchctl setenv {environmentVariableName} "<secret-value>"
+                    Fully quit and restart the application and/or the IDE that launches it, such as Rider, Visual Studio Code, Visual Studio, or Terminal.app, before starting the application again.
+
+                    Linux bash:
+                    echo 'export {environmentVariableName}="<secret-value>"' >> ~/.bashrc
+
+                    Windows PowerShell user profile:
+                    [Environment]::SetEnvironmentVariable("{environmentVariableName}", "<secret-value>", "User")
+
+                    Azure App Service application setting:
+                    az webapp config appsettings set --resource-group <resource-group> --name <app-name> --settings {environmentVariableName}="<secret-value>"
+
+                    Azure Portal:
+                    App Service > Settings > Environment variables > App settings > Add.
+                    Name: {environmentVariableName}
+                    Value: <secret-value>
+                    Save, then restart the application.
+                    """;
+        }
+
+        private static void AppendValueExpectations(StringBuilder builder, SecretDefinition definition)
+        {
+            if (string.IsNullOrWhiteSpace(definition.ValueType) == false)
+            {
+                builder.AppendLine($"Expected type: {definition.ValueType.Trim()}");
+            }
+
+            if (string.IsNullOrWhiteSpace(definition.FormatHint) == false)
+            {
+                builder.AppendLine($"Format: {definition.FormatHint.Trim()}");
+            }
+
+            if (string.IsNullOrWhiteSpace(definition.ExampleValue) == false)
+            {
+                builder.AppendLine($"Example value: {definition.ExampleValue.Trim()}");
+            }
+
+            List<string>? acceptedValues = definition.AcceptedValues;
+            if (acceptedValues != null && acceptedValues.Count > 0)
+            {
+                builder.AppendLine("Accepted values:");
+                foreach (string acceptedValue in acceptedValues.Where(value => string.IsNullOrWhiteSpace(value) == false))
+                {
+                    builder.AppendLine($"- {acceptedValue.Trim()}");
+                }
+            }
+        }
+
+        private SecretDefinition BuildDefinitionForType(string key, string expectedValueType, IEnumerable<string>? acceptedValues, string formatHint)
+        {
+            SecretDefinition definition = FindDefinition(key) ?? new SecretDefinition
+            {
+                Key = key,
+                DisplayName = key,
+                Owner = "Unregistered consumer"
+            };
+
+            SecretDefinition copy = definition.Clone();
+            if (string.IsNullOrWhiteSpace(copy.ValueType))
+            {
+                copy.ValueType = expectedValueType;
+            }
+
+            if (string.IsNullOrWhiteSpace(copy.FormatHint))
+            {
+                copy.FormatHint = formatHint;
+            }
+
+            if ((copy.AcceptedValues == null || copy.AcceptedValues.Count == 0) && acceptedValues != null)
+            {
+                copy.AcceptedValues = acceptedValues
+                    .Where(value => string.IsNullOrWhiteSpace(value) == false)
+                    .Select(value => value.Trim())
+                    .ToList();
+            }
+
+            return copy;
+        }
+
+        private string BuildInvalidSecretMessage(SecretDefinition definition)
+        {
+            SecretStoreKind store = ResolveStoreKind();
+            SecretUsageEnvironment environment = ResolveUsageEnvironment();
+            string owner = string.IsNullOrWhiteSpace(definition.Owner) ? "Unspecified" : definition.Owner.Trim();
+            string displayName = string.IsNullOrWhiteSpace(definition.DisplayName) ? definition.Key : definition.DisplayName.Trim();
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine($"Invalid secret: {definition.Key}");
+            builder.AppendLine($"Requested by: {owner}");
+            builder.AppendLine($"Display name: {displayName}");
+            builder.AppendLine($"Environment: {environment}");
+            builder.AppendLine($"Secret store: {store}");
+            AppendValueExpectations(builder, definition);
+            builder.AppendLine("Configured value: hidden");
+            builder.AppendLine("Secret diagnostics never print configured secret values.");
+
+            builder.AppendLine();
+            builder.AppendLine(BuildStoreInstruction(definition.Key, store, environment));
+
+            if (string.IsNullOrWhiteSpace(definition.DocumentationUrl) == false)
+            {
+                builder.AppendLine();
+                builder.AppendLine($"Documentation: {definition.DocumentationUrl.Trim()}");
+            }
+
+            return builder.ToString().TrimEnd();
+        }
+
         /// <summary>
         ///     Builds a human-readable diagnostic for a missing secret.
         /// </summary>
@@ -144,6 +322,8 @@ namespace DMBServerHelper
             {
                 builder.AppendLine($"Description: {definition.Description.Trim()}");
             }
+
+            AppendValueExpectations(builder, definition);
 
             builder.AppendLine();
             builder.AppendLine(BuildStoreInstruction(definition.Key, store, environment));
@@ -177,10 +357,7 @@ namespace DMBServerHelper
                                                 Store the value in the user secrets of the startup or test project:
                                                 dotnet user-secrets set "{key}" "<secret-value>"
                                                 """,
-                SecretStoreKind.EnvironmentVariables => $"""
-                                                         Set this environment variable before starting the application:
-                                                         {BuildEnvironmentVariableName(key)}=<secret-value>
-                                                         """,
+                SecretStoreKind.EnvironmentVariables => BuildEnvironmentVariableInstruction(key),
                 SecretStoreKind.AzureKeyVault => BuildAzureKeyVaultInstruction(key),
                 SecretStoreKind.Configuration => $"""
                                                   Add the value through a secure ASP.NET Core configuration provider:
@@ -236,11 +413,15 @@ namespace DMBServerHelper
         }
 
         /// <summary>
-        ///     Gets a required secret value or throws with a setup message when the value is missing.
+        ///     Gets a required secret value or throws when the value is missing.
         /// </summary>
         /// <param name="key">The logical secret key.</param>
         /// <returns>The resolved secret value.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the secret value is missing.</exception>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when the secret value is missing. The exception contains the complete setup diagnostic only
+        ///     when missing-secret logging is disabled; otherwise, the complete diagnostic is written through the
+        ///     configured secret logger and the exception message stays concise.
+        /// </exception>
         public string GetRequired(string key)
         {
             string? value = Get(key);
@@ -260,9 +441,162 @@ namespace DMBServerHelper
             if (LogMissingSecrets)
             {
                 _logger.Warning(message);
+                throw new InvalidOperationException(BuildLoggedMissingSecretExceptionMessage(definition));
             }
 
             throw new InvalidOperationException(message);
+        }
+
+        /// <summary>
+        ///     Gets a required secret value parsed as a defined enum value.
+        /// </summary>
+        /// <typeparam name="TEnum">The enum type expected by the consumer.</typeparam>
+        /// <param name="key">The logical secret key.</param>
+        /// <returns>The parsed enum value.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when the secret is missing or when the configured value is not a defined enum value.
+        /// </exception>
+        public TEnum GetRequiredEnum<TEnum>(string key) where TEnum : struct, Enum
+        {
+            string value = GetRequired(key).Trim();
+            if (Enum.TryParse(value, true, out TEnum enumValue) && Enum.IsDefined<TEnum>(enumValue))
+            {
+                return enumValue;
+            }
+
+            throw CreateInvalidSecretException(
+                key,
+                $"{typeof(TEnum).Name} enum",
+                "Use the textual enum name. Numeric enum values are accepted only when they match a defined value.",
+                BuildEnumAcceptedValues<TEnum>());
+        }
+
+        /// <summary>
+        ///     Creates a secret-format exception with a diagnostic explaining the expected type and format.
+        /// </summary>
+        /// <param name="key">The logical secret key.</param>
+        /// <param name="expectedValueType">The expected value type shown in diagnostics.</param>
+        /// <param name="formatHint">A short explanation of the expected value format.</param>
+        /// <param name="acceptedValues">Optional accepted values shown when the value belongs to a constrained set.</param>
+        /// <returns>An <see cref="InvalidOperationException" /> ready to throw.</returns>
+        /// <remarks>
+        ///     The configured value is never printed. When <see cref="LogMissingSecrets" /> is enabled, the full
+        ///     diagnostic is written through the secret logger and the returned exception contains only a concise
+        ///     summary to avoid duplicate unhandled-exception output.
+        /// </remarks>
+        public InvalidOperationException CreateInvalidSecretException(string key, string expectedValueType, string formatHint, IEnumerable<string>? acceptedValues = null)
+        {
+            SecretDefinition definition = BuildDefinitionForType(key, expectedValueType, acceptedValues, formatHint);
+            string message = BuildInvalidSecretMessage(definition);
+            if (LogMissingSecrets)
+            {
+                _logger.Warning(message);
+                return new InvalidOperationException(BuildLoggedInvalidSecretExceptionMessage(definition));
+            }
+
+            return new InvalidOperationException(message);
+        }
+
+        /// <summary>
+        ///     Gets a required secret value parsed as a 16-bit signed whole number.
+        /// </summary>
+        /// <param name="key">The logical secret key.</param>
+        /// <returns>The parsed <see cref="short" /> value.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the secret is missing or has an invalid number format.</exception>
+        public short GetRequiredInt16(string key)
+        {
+            string value = GetRequired(key).Trim();
+            if (short.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out short parsedValue))
+            {
+                return parsedValue;
+            }
+
+            throw CreateInvalidSecretException(key, "Int16 whole number", "Use digits only, for example 12.");
+        }
+
+        /// <summary>
+        ///     Gets a required secret value parsed as a 32-bit signed whole number.
+        /// </summary>
+        /// <param name="key">The logical secret key.</param>
+        /// <returns>The parsed <see cref="int" /> value.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the secret is missing or has an invalid number format.</exception>
+        public int GetRequiredInt32(string key)
+        {
+            string value = GetRequired(key).Trim();
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedValue))
+            {
+                return parsedValue;
+            }
+
+            throw CreateInvalidSecretException(key, "Int32 whole number", "Use digits only, for example 123456.");
+        }
+
+        /// <summary>
+        ///     Gets a required secret value parsed as a 64-bit signed whole number.
+        /// </summary>
+        /// <param name="key">The logical secret key.</param>
+        /// <returns>The parsed <see cref="long" /> value.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the secret is missing or has an invalid number format.</exception>
+        public long GetRequiredInt64(string key)
+        {
+            string value = GetRequired(key).Trim();
+            if (long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsedValue))
+            {
+                return parsedValue;
+            }
+
+            throw CreateInvalidSecretException(key, "Int64 whole number", "Use digits only, for example 68456707772.");
+        }
+
+        /// <summary>
+        ///     Gets a required secret value parsed as a single-precision floating-point number.
+        /// </summary>
+        /// <param name="key">The logical secret key.</param>
+        /// <returns>The parsed <see cref="float" /> value.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the secret is missing or has an invalid number format.</exception>
+        public float GetRequiredFloat(string key)
+        {
+            string value = GetRequired(key).Trim();
+            if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsedValue))
+            {
+                return parsedValue;
+            }
+
+            throw CreateInvalidSecretException(key, "Single floating-point number", "Use invariant culture with . as decimal separator, for example 12.5.");
+        }
+
+        /// <summary>
+        ///     Gets a required secret value parsed as a double-precision floating-point number.
+        /// </summary>
+        /// <param name="key">The logical secret key.</param>
+        /// <returns>The parsed <see cref="double" /> value.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the secret is missing or has an invalid number format.</exception>
+        public double GetRequiredDouble(string key)
+        {
+            string value = GetRequired(key).Trim();
+            if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double parsedValue))
+            {
+                return parsedValue;
+            }
+
+            throw CreateInvalidSecretException(key, "Double floating-point number", "Use invariant culture with . as decimal separator, for example 12.5.");
+        }
+
+        /// <summary>
+        ///     Gets a required secret value parsed as a decimal number.
+        /// </summary>
+        /// <param name="key">The logical secret key.</param>
+        /// <returns>The parsed <see cref="decimal" /> value.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the secret is missing or has an invalid number format.</exception>
+        public decimal GetRequiredDecimal(string key)
+        {
+            string value = GetRequired(key).Trim();
+            if (decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal parsedValue))
+            {
+                return parsedValue;
+            }
+
+            throw CreateInvalidSecretException(key, "Decimal number", "Use invariant culture with . as decimal separator, for example 12.5.");
         }
 
         private bool IsProtectedRuntimeEnvironment()
@@ -462,6 +796,12 @@ namespace DMBServerHelper
 
             if (EffectiveFailFast && result.Success == false)
             {
+                if (LogMissingSecrets)
+                {
+                    IEnumerable<string> missingSecretKeys = result.Issues.Select(issue => issue.Definition.Key);
+                    throw new InvalidOperationException($"Missing required secrets: {string.Join(", ", missingSecretKeys)}. The full setup diagnostics were already written to the secret logger.");
+                }
+
                 throw new InvalidOperationException(string.Join(System.Environment.NewLine + System.Environment.NewLine, result.Issues.Select(issue => issue.Message)));
             }
 
